@@ -1,5 +1,4 @@
-package com.example.mobileappsproject.ui.screens
-
+package eam.edu.unieventos.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button

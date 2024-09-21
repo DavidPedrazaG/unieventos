@@ -1,4 +1,4 @@
-package com.example.mobileappsproject.ui.navigation
+package eam.edu.unieventos.ui.navigation
 
 import kotlinx.serialization.Serializable
 

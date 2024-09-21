@@ -1,4 +1,4 @@
-package com.example.mobileappsproject.ui.screens
+package eam.edu.unieventos.ui.screens
 
 import android.content.Context
 import androidx.compose.foundation.Image
