@@ -1,5 +1,4 @@
-package com.example.mobileappsproject.ui.screens
-
+package eam.edu.unieventos.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

@@ -1,13 +1,14 @@
-package com.example.mobileappsproject.ui.navigation
+package eam.edu.unieventos.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.mobileappsproject.ui.screens.LoginScreen
-import com.example.mobileappsproject.ui.screens.RecoveryScreen
-import com.example.mobileappsproject.ui.screens.RegisterScreen
-import com.example.mobileappsproject.ui.screens.ValidationScreen
+import eam.edu.unieventos.ui.navigation.RouteScreen
+import eam.edu.unieventos.ui.screens.LoginScreen
+import eam.edu.unieventos.ui.screens.RecoveryScreen
+import eam.edu.unieventos.ui.screens.RegisterScreen
+import eam.edu.unieventos.ui.screens.ValidationScreen
 
 @Composable
 fun Navigation(){
