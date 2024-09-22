@@ -155,7 +155,7 @@ fun EventItem(eventName: String) {
             }
 
             // Botón de ver detalles
-            Button(onClick = { onNavegateToEvent()}) {
+            Button(onClick = {}) {
                 Text(text = "VER DETALLES")
             }
         }
