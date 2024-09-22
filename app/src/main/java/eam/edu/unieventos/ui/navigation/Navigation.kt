@@ -5,6 +5,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import eam.edu.unieventos.ui.navigation.RouteScreen
+import eam.edu.unieventos.ui.screens.EventDetailScreen
+import eam.edu.unieventos.ui.screens.HomeScreen
 import eam.edu.unieventos.ui.screens.LoginScreen
 import eam.edu.unieventos.ui.screens.RecoveryScreen
 import eam.edu.unieventos.ui.screens.RegisterScreen
@@ -36,6 +38,9 @@ fun Navigation(){
                 },
                 onNavigateToValidate = {
                     navController.navigate(RouteScreen.Validation)
+                },
+                onNavegateToHome = {
+                    navController.navigate((RouteScreen.Home))
                 }
             )
         }
@@ -48,6 +53,24 @@ fun Navigation(){
         }
         composable<RouteScreen.Validation> {
             ValidationScreen()
+        }
+        composable<RouteScreen.Event> { 
+            EventDetailScreen(
+                eventName = "Evento",
+                eventDate = "23/09/204",
+                eventTime = "16:00",
+                eventDescription = "Gran Evento",
+                onBackClick = { /*TODO*/ }) {
+                
+            }
+        }
+
+        composable<RouteScreen.Home>{
+            HomeScreen(
+                onNavegateToEvent = {
+                    navController.navigate((RouteScreen.Event))
+                }
+            )
         }
     }
 }

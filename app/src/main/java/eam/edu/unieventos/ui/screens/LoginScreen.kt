@@ -20,7 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import com.example.mobileappsproject.R
+import eam.edu.unieventos.R
 
 
 
@@ -29,7 +29,8 @@ fun LoginScreen(
     //En los parametros de la función debemos llamar a la función que creamos como una lambda
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
-    onNavigateToValidate: () -> Unit
+    onNavigateToValidate: () -> Unit,
+    onNavegateToHome: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -40,7 +41,8 @@ fun LoginScreen(
             context = context,
             onNavigateToRegister = onNavigateToRegister,
             onNavigateToRecovery = onNavigateToRecovery,
-            onNavigateToValidate = onNavigateToValidate
+            onNavigateToValidate = onNavigateToValidate,
+            onNavegateToHome = onNavegateToHome
         )
 
     }
@@ -53,7 +55,8 @@ fun LoginForm(
     context: Context,
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
-    onNavigateToValidate: () -> Unit
+    onNavigateToValidate: () -> Unit,
+    onNavegateToHome: () -> Unit
 ){
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
@@ -101,7 +104,10 @@ fun LoginForm(
                         if (email == "Pedro" && password == "12345") {
                             //En el lugar donde deseemos que se llame esta funcion,simplemente la llamamos
                             onNavigateToValidate()
-                        } else {
+                        } else if(email == "admin" && password == "admin"){
+                            onNavegateToHome()
+                        }
+                        else {
                             loginError = true
                         }
                     },

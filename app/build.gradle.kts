@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.mobileappsproject"
+    namespace = "eam.edu.unieventos"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.mobileappsproject"
+        applicationId = "eam.edu.unieventos"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
