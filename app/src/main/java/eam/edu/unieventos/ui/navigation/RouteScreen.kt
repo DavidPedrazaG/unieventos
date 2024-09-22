@@ -17,4 +17,10 @@ sealed class RouteScreen {
 
     @Serializable
     data object Validation: RouteScreen()
+
+    @Serializable
+    data object Home: RouteScreen()
+
+    @Serializable
+    data object Event: RouteScreen()
 }
