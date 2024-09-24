@@ -9,9 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import eam.edu.unieventos.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,7 +32,7 @@ fun ManageLocation() {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Título
-        Text(text = "Localidades", style = MaterialTheme.typography.headlineMedium)
+        Text(text = stringResource(id = R.string.labelLocation), style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -51,7 +53,7 @@ fun ManageLocation() {
             OutlinedTextField(
                 value = numberOfLocations.toString(),
                 onValueChange = {},
-                label = { Text(text = "Cantidad") },
+                label = { Text(text = stringResource(id = R.string.labelCount)) },
                 readOnly = true,
                 modifier = Modifier.width(100.dp)
             )
@@ -86,7 +88,7 @@ fun ManageLocation() {
 
         // Botón para guardar cambios
         Button(onClick = { /* Acción para guardar cambios de localidades */ }) {
-            Text("Guardar Cambios")
+            Text(stringResource(id = R.string.saveChange))
         }
     }
 }

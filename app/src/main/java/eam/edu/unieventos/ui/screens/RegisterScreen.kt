@@ -16,10 +16,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextAlign
+import eam.edu.unieventos.R
 
 @Composable
 fun RegisterScreen() {
@@ -43,7 +45,7 @@ fun RegisterScreen() {
             TextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text(text = "Nombre") },
+                label = { Text(text = stringResource(id = R.string.name)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -54,7 +56,7 @@ fun RegisterScreen() {
             TextField(
                 value = id,
                 onValueChange = { id = it },
-                label = { Text(text = "Cédula") },
+                label = { Text(text = stringResource(id = R.string.id)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -65,7 +67,7 @@ fun RegisterScreen() {
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text(text = "Correo") },
+                label = { Text(text = stringResource(id = R.string.emailLabel)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -76,7 +78,7 @@ fun RegisterScreen() {
             TextField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = { Text(text = "Número de teléfono") },
+                label = { Text(text = stringResource(id = R.string.phoneNumber)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -88,7 +90,7 @@ fun RegisterScreen() {
             TextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text(text = "Contraseña") },
+                label = { Text(text = stringResource(id = R.string.passwordLabel)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -107,7 +109,7 @@ fun RegisterScreen() {
                 )
             ) {
                 Text(
-                    text = "REGISTRARSE",
+                    text = stringResource(id = R.string.register),
                     color = Color.White,
                     fontSize = 16.sp
                 )
@@ -116,7 +118,7 @@ fun RegisterScreen() {
 
             TextButton(onClick = { }) {
                 Text(
-                    text = "YA TIENES CUENTA? INICIA SESIÓN",
+                    text = stringResource(id = R.string.questionLogin),
                     color = Color.Cyan,
                     textAlign = TextAlign.Center
                 )

@@ -7,10 +7,7 @@ import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -21,9 +18,10 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import eam.edu.unieventos.R
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -31,10 +29,10 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateCoupons() {
+
     var discountAmount by remember { mutableStateOf("") }
     var event by remember { mutableStateOf("") }
     var dateEnd by remember { mutableStateOf("") }
-    var exposeEvent by remember { mutableStateOf(false) }
     var events = listOf("Event 1", "Event 2", "Event 3", "Event 4")
     var expandedDate by remember { mutableStateOf(false) }
     var datePickerState = rememberDatePickerState()
@@ -45,49 +43,27 @@ fun CreateCoupons() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Crear Cupones", style = MaterialTheme.typography.headlineMedium)
+        Text(text = stringResource(id = R.string.createCouponsTitle), style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = discountAmount,
             onValueChange = { discountAmount = it },
-            label = { Text("Porcentaje del Cupón") },
+            label = { Text(stringResource(id = R.string.porcentageCoupon)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.width(200.dp)
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        ExposedDropdownMenuBox(
-            expanded = exposeEvent,
-            onExpandedChange = {exposeEvent = !exposeEvent},
-            modifier = Modifier.width(223.dp)
-        ) {
-            OutlinedTextField(
-                modifier = Modifier.menuAnchor(),
-                value = event,
-                onValueChange = {},
-                readOnly = true,
-                placeholder = {
-                    Text(text = "seleccione el evento")
-                },
-                trailingIcon = {ExposedDropdownMenuDefaults.TrailingIcon(expanded = exposeEvent)}
-            )
-            ExposedDropdownMenu(expanded = exposeEvent,
-                onDismissRequest = { exposeEvent=false  }
-            ) {
-                events.forEach{ item ->
-                    DropdownMenuItem(
-                        text = { Text(text = item) },
-                        onClick = {
-                            event= item
-                            exposeEvent = false
-                        }
-                    )
-                }
+        DropdownMenu(
+            value = event,
+            onValeChange ={
+                event = it
+            } ,
+            items = events
+        )
 
 
-            }
-        }
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
@@ -95,7 +71,7 @@ fun CreateCoupons() {
             onValueChange = {},
             readOnly = true,
             placeholder = {
-                Text(text = "Fecha Fin")
+                Text(text = stringResource(id = R.string.dateEnd))
             },
             trailingIcon = {
                 IconButton(
@@ -131,7 +107,7 @@ fun CreateCoupons() {
                         }
                     )
                     {
-                        Text(text = "OK")
+                        Text(text = stringResource(id = R.string.ok))
                         
                     }
                 },
@@ -140,7 +116,7 @@ fun CreateCoupons() {
                         onClick = { expandedDate = false
                         }
                     ) {
-                        Text(text = "Cancelar")
+                        Text(text = stringResource(id = R.string.cancel))
                     }
                 }
 
@@ -154,7 +130,7 @@ fun CreateCoupons() {
 
         Button(onClick = {
         }) {
-            Text("Crear Cupón")
+            Text(stringResource(id = R.string.createCoupon))
         }
 
 

@@ -9,8 +9,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import eam.edu.unieventos.R
 
 @Composable
 fun ValidationScreen() {
@@ -32,7 +34,7 @@ fun ValidationScreen() {
 
 
             Text(
-                text = "Tu codigo de validación: (CODIGO AQUI)",
+                text = stringResource(id = R.string.labelCodeRule),
                 color = Color.Black,
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
@@ -41,7 +43,7 @@ fun ValidationScreen() {
             TextField(
                 value = code,
                 onValueChange = { code = it },
-                label = { Text(text = "Codigo de validación") },
+                label = { Text(text = stringResource(id = R.string.validateCode)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -61,7 +63,7 @@ fun ValidationScreen() {
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "Reenviar codigo?",
+                text = stringResource(id = R.string.resendCode),
                 color = Color(0xFF00BFFF),
 
             )
@@ -79,7 +81,7 @@ fun ValidationScreen() {
                 )
             ) {
                 Text(
-                    text = "Validar cuenta",
+                    text = stringResource(id = R.string.validateAccount),
                     color = Color.White,
                     fontSize = 16.sp
                 )

@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eam.edu.unieventos.R
@@ -39,8 +40,8 @@ fun HomeScreen(
                     expanded = expandedMenu,
                     onDismissRequest = { expandedMenu = false }
                 ) {
-                    DropdownMenuItem(text = {Text(text = "Eventos")}, onClick = {})
-                    DropdownMenuItem(text = {Text(text = "Cupones")}, onClick = {})
+                    DropdownMenuItem(text = {Text(text = stringResource(id = R.string.labelEvents))}, onClick = {})
+                    DropdownMenuItem(text = {Text(text = stringResource(id = R.string.labelCoupons))}, onClick = {})
                 }
             }
         },
@@ -61,7 +62,7 @@ fun HomeScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Buscar evento") },
+                placeholder = { Text(stringResource(id = R.string.searchEvent)) },
                 leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -156,7 +157,7 @@ fun EventItem(eventName: String) {
 
             // Botón de ver detalles
             Button(onClick = {}) {
-                Text(text = "VER DETALLES")
+                Text(text = stringResource(id = R.string.lookDetails))
             }
         }
     }

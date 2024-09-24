@@ -20,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import eam.edu.unieventos.R
 
 
@@ -81,7 +82,7 @@ fun LoginForm(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text(stringResource(id = R.string.emailLabel)) },
                 singleLine= true
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -89,7 +90,7 @@ fun LoginForm(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text(stringResource(id = R.string.passwordLabel)) },
                 visualTransformation = PasswordVisualTransformation(),
                 singleLine= true
             )
@@ -116,7 +117,7 @@ fun LoginForm(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("Iniciar Sesión")
+                    Text(stringResource(id = R.string.signIn))
                 }
     
                 Button(
@@ -129,14 +130,14 @@ fun LoginForm(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("Registrarse")
+                    Text(stringResource(id = R.string.register))
                 }
             }
     
             Spacer(modifier = Modifier.height(16.dp))
     
             Text(
-                text = "Olvidaste tu contraseña?",
+                text = stringResource(id = R.string.forgottenPassword),
                 color = Color(0xFF00BFFF),
                 modifier = Modifier.clickable {
                     //En el lugar donde deseemos que se llame esta funcion,simplemente la llamamos
@@ -147,7 +148,7 @@ fun LoginForm(
     
             if (loginError) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Credenciales incorrectas", color = MaterialTheme.colorScheme.error)
+                Text(text =  stringResource(id = R.string.emailError), color = MaterialTheme.colorScheme.error)
             }
         }
     }

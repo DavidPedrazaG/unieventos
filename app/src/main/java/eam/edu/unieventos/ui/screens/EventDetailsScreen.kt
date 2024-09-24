@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -80,7 +81,7 @@ fun EventDetailScreen(
             ) {
                 Column {
                     Text(
-                        text = "Fecha",
+                        text = stringResource(id = R.string.date),
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
@@ -89,7 +90,7 @@ fun EventDetailScreen(
 
                 Column {
                     Text(
-                        text = "Hora",
+                        text = stringResource(id = R.string.hour),
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
@@ -101,7 +102,7 @@ fun EventDetailScreen(
 
             // Descripción
             Text(
-                text = "Descripción",
+                text = stringResource(id = R.string.descrption),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -117,7 +118,7 @@ fun EventDetailScreen(
 
             // Iconos de localidades
             Text(
-                text = "Localidades",
+                text = stringResource(id = R.string.labelLocation),
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -149,12 +150,12 @@ fun EventDetailScreen(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.ShoppingCart, // Reemplaza con el ícono del carrito
+                    imageVector = Icons.Default.ShoppingCart,
                     contentDescription = "Add to Cart",
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "AÑADIR AL CARRO", fontSize = 16.sp)
+                Text(text =  stringResource(id = R.string.addCart), fontSize = 16.sp)
             }
         }
     }

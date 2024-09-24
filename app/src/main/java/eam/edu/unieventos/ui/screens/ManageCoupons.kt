@@ -21,7 +21,6 @@ fun ManageCoupons() {
     var discountAmount by remember { mutableStateOf("") }
     var event by remember { mutableStateOf("") }
     var dateEnd by remember { mutableStateOf("") }
-    var exposeEvent by remember { mutableStateOf(false) }
     var events = listOf("Event 1", "Event 2", "Event 3", "Event 4")
     var expandedDate by remember { mutableStateOf(false) }
     var datePickerState = rememberDatePickerState()
@@ -60,35 +59,15 @@ fun ManageCoupons() {
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Campo de selección de evento asociado
-        ExposedDropdownMenuBox(
-            expanded = exposeEvent,
-            onExpandedChange = { exposeEvent = !exposeEvent },
-            modifier = Modifier.width(223.dp)
-        ) {
-            OutlinedTextField(
-                modifier = Modifier.menuAnchor(),
-                value = event,
-                onValueChange = {},
-                readOnly = true,
-                placeholder = { Text(text = "Seleccione el evento") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = exposeEvent) }
-            )
-            ExposedDropdownMenu(
-                expanded = exposeEvent,
-                onDismissRequest = { exposeEvent = false }
-            ) {
-                events.forEach { item ->
-                    DropdownMenuItem(
-                        text = { Text(text = item) },
-                        onClick = {
-                            event = item
-                            exposeEvent = false
-                        }
-                    )
-                }
-            }
-        }
+       DropdownMenu(
+           value = event,
+           onValeChange = {
+               event = it
+           } ,
+           items = events
+       )
+
+
         Spacer(modifier = Modifier.height(8.dp))
 
         // Campo de fecha de expiración
