@@ -1,5 +1,5 @@
 package eam.edu.unieventos.ui.screens
-import androidx.compose.foundation.background
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -16,25 +15,34 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextAlign
-import eam.edu.unieventos.R
+import androidx.compose.ui.platform.LocalContext
+import eam.edu.unieventos.model.Role
+import eam.edu.unieventos.model.User
+import eam.edu.unieventos.ui.viewmodel.UsersViewModel
 
 @Composable
-fun RegisterScreen() {
+fun RegisterScreen(
+    onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+
+    ) {
     var name by remember { mutableStateOf("") }
     var id by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
+    val usersViewModel: UsersViewModel = remember { UsersViewModel(context) }
 
-    Box(modifier = Modifier
-            .fillMaxSize(), contentAlignment = Alignment.Center
-    ){
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
@@ -45,40 +53,37 @@ fun RegisterScreen() {
             TextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text(text = stringResource(id = R.string.name)) },
+                label = { Text(text = "Nombre") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
 
-
             TextField(
                 value = id,
                 onValueChange = { id = it },
-                label = { Text(text = stringResource(id = R.string.id)) },
+                label = { Text(text = "Cédula") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 singleLine= true
             )
 
-
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text(text = stringResource(id = R.string.emailLabel)) },
+                label = { Text(text = "Correo") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
 
-
             TextField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = { Text(text = stringResource(id = R.string.phoneNumber)) },
+                label = { Text(text = "Número de teléfono") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -86,20 +91,30 @@ fun RegisterScreen() {
                 singleLine =  true
             )
 
-
             TextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text(text = stringResource(id = R.string.passwordLabel)) },
+                label = { Text(text = "Contraseña") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
 
-
             Button(
-                onClick = {  },
+                onClick = {
+                    val user = User(
+                        id = id,
+                        name = name,
+                        cc = id,
+                        role = Role.CLIENT,
+                        email = email,
+                        cellphone = phone,
+                        password = password
+                    )
+                    usersViewModel.createUser(user, context)
+                    onNavigateToLogin()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
@@ -109,22 +124,22 @@ fun RegisterScreen() {
                 )
             ) {
                 Text(
-                    text = stringResource(id = R.string.register),
+                    text = "REGISTRARSE",
                     color = Color.White,
                     fontSize = 16.sp
                 )
             }
 
-
-            TextButton(onClick = { }) {
+            TextButton(onClick = {
+                onNavigateBack()
+            }) {
                 Text(
-                    text = stringResource(id = R.string.questionLogin),
+                    text = "YA TIENES CUENTA? INICIA SESIÓN",
                     color = Color.Cyan,
                     textAlign = TextAlign.Center
                 )
             }
         }
     }
-
 }
 

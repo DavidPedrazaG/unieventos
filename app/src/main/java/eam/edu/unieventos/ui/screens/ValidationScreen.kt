@@ -1,5 +1,7 @@
 package eam.edu.unieventos.ui.screens
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -9,16 +11,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import eam.edu.unieventos.R
 
 @Composable
-fun ValidationScreen() {
-
+fun ValidationScreen(
+    onValidationSuccess: () -> Unit
+) {
+    val generatedCode by remember { mutableStateOf((100000..999999).random().toString()) }
     var code by remember { mutableStateOf("") }
-    var timer by remember { mutableStateOf(59) } // Temporizador de ejemplo
+    var timer by remember { mutableStateOf(59) }
+    var validationError by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
 
     Box(modifier = Modifier
         .fillMaxSize(), contentAlignment = Alignment.Center
@@ -30,11 +36,8 @@ fun ValidationScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-
-
-
             Text(
-                text = stringResource(id = R.string.labelCodeRule),
+                text = "Tu código de validación: $generatedCode",
                 color = Color.Black,
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
@@ -43,16 +46,12 @@ fun ValidationScreen() {
             TextField(
                 value = code,
                 onValueChange = { code = it },
-                label = { Text(text = stringResource(id = R.string.validateCode)) },
+                label = { Text(text = "Codigo de validación") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 singleLine= true
             )
-
-
-
-
 
             Text(
                 text = "VÁLIDO POR $timer SEGUNDOS",
@@ -63,15 +62,23 @@ fun ValidationScreen() {
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = stringResource(id = R.string.resendCode),
+                text = "Reenviar codigo?",
                 color = Color(0xFF00BFFF),
 
-            )
+
+                )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = {  },
+                onClick = {
+                    if (code == generatedCode) {
+                        setValidationStatus(context)
+                        onValidationSuccess()
+                    } else {
+                        validationError = true
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
@@ -81,11 +88,30 @@ fun ValidationScreen() {
                 )
             ) {
                 Text(
-                    text = stringResource(id = R.string.validateAccount),
+                    text = "Validar cuenta",
                     color = Color.White,
                     fontSize = 16.sp
                 )
             }
+            if (validationError) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Código incorrecto", color = Color.Red)
+
+            }
         }
     }
+}
+
+fun validateCode(context: Context, inputCode: String): Boolean {
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    val savedCode = sharedPreferences.getString("validation_code", "")
+    return inputCode == savedCode
+}
+
+
+fun setValidationStatus(context: Context) {
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+    editor.putBoolean("is_validated", true)
+    editor.apply()
 }

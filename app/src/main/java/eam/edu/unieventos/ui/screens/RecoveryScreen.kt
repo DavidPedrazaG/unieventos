@@ -10,20 +10,28 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import eam.edu.unieventos.R
+import eam.edu.unieventos.ui.viewmodel.UsersViewModel
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
-fun RecoveryScreen() {
+fun RecoveryScreen(
+    onNavigateBack: () -> Unit,
+
+    ) {
+
     var email by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") } // Nueva contraseña
+    var temporalCode by remember { mutableStateOf("") }
+    var isEmailValid by remember { mutableStateOf(false) }
     var timer by remember { mutableStateOf(59) } // Temporizador de ejemplo
+    val context = LocalContext.current
+    val usersViewModel: UsersViewModel = remember { UsersViewModel(context) }
 
 
     Box(modifier = Modifier
@@ -37,7 +45,7 @@ fun RecoveryScreen() {
         ) {
 
             Text(
-                text = stringResource(id = R.string.recoveryPassword),
+                text = "RECUPERAR CONTRASEÑA",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -48,7 +56,7 @@ fun RecoveryScreen() {
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text(text = stringResource(id = R.string.emailLabel)) },
+                label = { Text(text = "Correo Electrónico") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -57,7 +65,15 @@ fun RecoveryScreen() {
 
 
             Button(
-                onClick = {  },
+                onClick = {
+                    val user = usersViewModel.validateEmail(email)
+                    if(user != null){
+                        temporalCode = (100000..999999).random().toString()
+                        isEmailValid = true
+                    }else{
+
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
@@ -67,24 +83,27 @@ fun RecoveryScreen() {
                 )
             ) {
                 Text(
-                    text = stringResource(id = R.string.sendCode),
+                    text = "ENVIAR CÓDIGO",
                     color = Color.White,
                     fontSize = 16.sp
                 )
             }
 
 
-            Text(
-                text = stringResource(id = R.string.labelCodeRule),
-                color = Color.Black,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-            )
+
+            if (isEmailValid) {
+                Text(
+                    text = "TU CÓDIGO ES: $temporalCode",
+                    color = Color.Black,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                )
+            }
 
 
             TextField(
                 value = code,
                 onValueChange = { code = it },
-                label = { Text(text = stringResource(id = R.string.getIntoCode)) },
+                label = { Text(text = "Ingresar código") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -95,7 +114,7 @@ fun RecoveryScreen() {
             TextField(
                 value = newPassword,
                 onValueChange = { newPassword = it },
-                label = { Text(text = stringResource(id = R.string.getIntoPassword)) },
+                label = { Text(text = "Ingresar contraseña") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -111,7 +130,12 @@ fun RecoveryScreen() {
 
 
             Button(
-                onClick = {  },
+                onClick = {
+                    if(code == temporalCode){
+                        usersViewModel.updatePassword(context, email, newPassword)
+                        onNavigateBack()
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
@@ -121,7 +145,7 @@ fun RecoveryScreen() {
                 )
             ) {
                 Text(
-                    text = stringResource(id = R.string.recoveryPassword),
+                    text = "RECUPERAR CONTRASEÑA",
                     color = Color.White,
                     fontSize = 16.sp
                 )

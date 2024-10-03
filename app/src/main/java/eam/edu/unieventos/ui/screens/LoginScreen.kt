@@ -1,12 +1,11 @@
 package eam.edu.unieventos.ui.screens
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -16,142 +15,137 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import eam.edu.unieventos.R
-
-
+import eam.edu.unieventos.model.Role
+import eam.edu.unieventos.ui.viewmodel.UsersViewModel
+import eam.edu.unieventos.utils.SharedPreferenceUtils
+import androidx.compose.material3.Scaffold
 
 @Composable
 fun LoginScreen(
-    //En los parametros de la función debemos llamar a la función que creamos como una lambda
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
     onNavigateToValidate: () -> Unit,
-    onNavegateToHome: () -> Unit
+    onNavigateToHome: (Role) -> Unit
 ) {
     val context = LocalContext.current
-
     Scaffold { padding ->
-        //Aqui llamamos a la función que tiene el contenido de la inferfaz y en los parametros que pide, le enviamos las interfaces que usaremos
         LoginForm(
             padding = padding,
             context = context,
             onNavigateToRegister = onNavigateToRegister,
             onNavigateToRecovery = onNavigateToRecovery,
             onNavigateToValidate = onNavigateToValidate,
-            onNavegateToHome = onNavegateToHome
+            onNavigateToHome = onNavigateToHome
         )
-
     }
 }
 
 @Composable
 fun LoginForm(
-    //En esta función tambien llamaremos a las funciones lambda que usaremos para redireccionarnos
     padding: PaddingValues,
     context: Context,
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
     onNavigateToValidate: () -> Unit,
-    onNavegateToHome: () -> Unit
-){
-        var email by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var loginError by remember { mutableStateOf(false) }
-    
-    
-    
-    
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+    onNavigateToHome: (Role) -> Unit
+) {
+    val usersViewModel: UsersViewModel = remember { UsersViewModel(context) }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var loginError by remember { mutableStateOf(false) }
+    val sharedPreferences = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.usuario_login),
+            contentDescription = "Login Image",
+            modifier = Modifier.size(372.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.usuario_login),
-                contentDescription = "Login Image",
-                modifier = Modifier.size(372.dp)
-            )
-    
-            Spacer(modifier = Modifier.height(16.dp))
-    
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text(stringResource(id = R.string.emailLabel)) },
-                singleLine= true
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-    
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text(stringResource(id = R.string.passwordLabel)) },
-                visualTransformation = PasswordVisualTransformation(),
-                singleLine= true
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-    
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = {
-                        if (email == "Pedro" && password == "12345") {
-                            //En el lugar donde deseemos que se llame esta funcion,simplemente la llamamos
+            Button(
+                onClick = {
+                    val user = usersViewModel.login(email, password)
+                    if (user != null) {
+                        val isValidated = sharedPreferences.getBoolean("${email}_validated", false)
+                        SharedPreferenceUtils.savePreference(context, user.id, user.role)
+                        if (isValidated) {
+                            onNavigateToHome(user.role)
+                        } else {
                             onNavigateToValidate()
-                        } else if(email == "admin" && password == "admin"){
-                            onNavegateToHome()
                         }
-                        else {
-                            loginError = true
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF6A0dad),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text(stringResource(id = R.string.signIn))
-                }
-    
-                Button(
-                    onClick = {
-                        //En el lugar donde deseemos que se llame esta funcion,simplemente la llamamos
-                        onNavigateToRegister()
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF6A0dad),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text(stringResource(id = R.string.register))
-                }
+                    } else {
+                        loginError = true
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF6A0dad),
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Iniciar Sesión")
             }
-    
-            Spacer(modifier = Modifier.height(16.dp))
-    
-            Text(
-                text = stringResource(id = R.string.forgottenPassword),
-                color = Color(0xFF00BFFF),
-                modifier = Modifier.clickable {
-                    //En el lugar donde deseemos que se llame esta funcion,simplemente la llamamos
-                    onNavigateToRecovery()
-                }
-            )
-    
-    
-            if (loginError) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text =  stringResource(id = R.string.emailError), color = MaterialTheme.colorScheme.error)
+
+            Button(
+                onClick = { onNavigateToRegister() },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF6A0dad),
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Registrarse")
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Olvidaste tu contraseña?",
+            color = Color(0xFF00BFFF),
+            modifier = Modifier.clickable {
+                onNavigateToRecovery()
+            }
+        )
+
+        if (loginError) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Credenciales incorrectas", color = Color.Red)
+        }
     }
+}
+
 
     
 

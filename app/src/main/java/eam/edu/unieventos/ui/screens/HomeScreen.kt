@@ -3,26 +3,33 @@ package eam.edu.unieventos.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eam.edu.unieventos.R
+
 import eam.edu.unieventos.ui.components.CustomBottomNavigationBar
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    onNavegateToEvent: () -> Unit
+    onNavegateToEvent: () -> Unit,
+    onLogout: () -> Unit
+
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedLocation by remember { mutableStateOf("Armenia") }
@@ -40,8 +47,8 @@ fun HomeScreen(
                     expanded = expandedMenu,
                     onDismissRequest = { expandedMenu = false }
                 ) {
-                    DropdownMenuItem(text = {Text(text = stringResource(id = R.string.labelEvents))}, onClick = {})
-                    DropdownMenuItem(text = {Text(text = stringResource(id = R.string.labelCoupons))}, onClick = {})
+                    DropdownMenuItem(text = {Text(text = "Eventos")}, onClick = {})
+                    DropdownMenuItem(text = {Text(text = "Cupones")}, onClick = {})
                 }
             }
         },
@@ -58,17 +65,31 @@ fun HomeScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Campo de búsqueda
+            CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.largeTopAppBarColors(Color.Transparent),
+                title = {
+                    Text(text = stringResource(R.string.app_name))
+                },
+                actions = {
+                    IconButton(onClick = { onLogout() }) {
+                        Icon(imageVector = Icons.Rounded.Logout,
+                            contentDescription = null)
+                    }
+                }
+
+            )
+
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text(stringResource(id = R.string.searchEvent)) },
+                placeholder = { Text("Buscar evento") },
                 leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar") },
-                modifier = Modifier.fillMaxWidth()
-            )
+                modifier = Modifier.fillMaxWidth(),
+
+                )
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Menú desplegable de ubicación
+
             ExposedDropdownMenuBox(
                 expanded = expandedLocationDropdown,
                 onExpandedChange = { expandedLocationDropdown = !expandedLocationDropdown }
@@ -98,7 +119,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Carrito de compras
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -111,7 +132,7 @@ fun HomeScreen(
                 }
             }
 
-            // Lista de eventos
+
             LazyColumn {
                 items(3) { index ->
                     EventItem(eventName = "Nombre evento $index")
@@ -134,13 +155,13 @@ fun EventItem(eventName: String) {
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagen del evento (placeholder)
+
             Box(
                 modifier = Modifier.size(64.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.placeholder_image), // Asegúrate de que esta imagen exista
+                    painter = painterResource(id = R.drawable.placeholder_image),
                     contentDescription = "Evento imagen",
                     contentScale = androidx.compose.ui.layout.ContentScale.Crop
                 )
@@ -148,17 +169,18 @@ fun EventItem(eventName: String) {
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Nombre del evento
+
             Column(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(text = eventName, fontSize = 18.sp)
             }
 
-            // Botón de ver detalles
+
             Button(onClick = {}) {
-                Text(text = stringResource(id = R.string.lookDetails))
+                Text(text = "VER DETALLES")
             }
         }
     }
+
 }

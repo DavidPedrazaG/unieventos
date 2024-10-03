@@ -15,6 +15,7 @@ import eam.edu.unieventos.ui.navigation.Navigation
 import eam.edu.unieventos.ui.screens.EventDetailScreen
 import eam.edu.unieventos.ui.theme.UniEventosTheme
 import eam.edu.unieventos.ui.screens.HomeScreen
+import eam.edu.unieventos.ui.viewmodel.UsersViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +23,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             UniEventosTheme {
-                Navigation()
+                val usersViewModel = UsersViewModel(applicationContext)
+                Navigation(usersViewModel = usersViewModel)
             }
         }
     }

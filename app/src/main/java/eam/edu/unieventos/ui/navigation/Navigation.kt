@@ -1,9 +1,11 @@
 package eam.edu.unieventos.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import eam.edu.unieventos.model.Role
 import eam.edu.unieventos.ui.navigation.RouteScreen
 import eam.edu.unieventos.ui.screens.EventDetailScreen
 import eam.edu.unieventos.ui.screens.HomeScreen
@@ -11,18 +13,36 @@ import eam.edu.unieventos.ui.screens.LoginScreen
 import eam.edu.unieventos.ui.screens.RecoveryScreen
 import eam.edu.unieventos.ui.screens.RegisterScreen
 import eam.edu.unieventos.ui.screens.ValidationScreen
+import eam.edu.unieventos.ui.viewmodel.UsersViewModel
+import eam.edu.unieventos.utils.SharedPreferenceUtils
 
 @Composable
-fun Navigation(){
+fun Navigation(
+    usersViewModel: UsersViewModel
+){
 
 
-    //Este es el controlador de navegaciones, con esto le indicaremos hacia que interfaz debe viajar
     val navController = rememberNavController()
+    val context = LocalContext.current
+
+    var startDestination: RouteScreen = RouteScreen.Login
+    val sesion = SharedPreferenceUtils.getCurrenUser(context)
+
+    if(sesion != null){
+        startDestination = if(sesion.rol == Role.ADMIN){
+            RouteScreen.Home
+        }else{
+            RouteScreen.Home
+        }
+
+    }
+
+
 
     //Navhost es una funcion que importamos del compose, esta pide como parametros el controlador y el donde esta y hacia adonde va a ir
     NavHost(
         navController = navController, //Controlador
-        startDestination = RouteScreen.Login //Destino inicial
+        startDestination = startDestination //Destino inicial
     ){
         //Se crea un composable donde entre los <> se indica cual es la interfaz inicial, en este caso routescreen.login
         composable<RouteScreen.Login>{
@@ -39,20 +59,42 @@ fun Navigation(){
                 onNavigateToValidate = {
                     navController.navigate(RouteScreen.Validation)
                 },
-                onNavegateToHome = {
-                    navController.navigate((RouteScreen.Home))
+                onNavigateToHome = { role ->
+
+                    val home =  if(role == Role.ADMIN){
+                        RouteScreen.Home
+                    }else{
+                        RouteScreen.Home
+                    }
+
+                    navController.navigate(home)
                 }
             )
         }
         //OJO es necesario crear el composable de la interfaz a la que queremos ir, sin esto no nos llevara a ningun lado
         composable<RouteScreen.Register>{
-            RegisterScreen()
+            RegisterScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToLogin = {
+                    navController.navigate(RouteScreen.Login)
+                }
+            )
         }
         composable<RouteScreen.Recovery> {
-            RecoveryScreen()
+            RecoveryScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
         composable<RouteScreen.Validation> {
-            ValidationScreen()
+            ValidationScreen(
+                onValidationSuccess = {
+                    navController.navigate(RouteScreen.Home)
+                }
+            )
         }
         composable<RouteScreen.Event> { 
             EventDetailScreen(
@@ -69,6 +111,10 @@ fun Navigation(){
             HomeScreen(
                 onNavegateToEvent = {
                     navController.navigate((RouteScreen.Event))
+                },
+                onLogout = {
+                    SharedPreferenceUtils.clearPreference(context)
+                    navController.navigate(RouteScreen.Login)
                 }
             )
         }
