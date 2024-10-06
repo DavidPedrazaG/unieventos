@@ -12,7 +12,7 @@ data class Event(
     val type: String,
     val poster: String,
     val locationImage: String,
-    val locations: List<Location>,
+    val locations: List<String>,
     val  dateEvent : Date
 ) {
 }

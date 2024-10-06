@@ -7,7 +7,7 @@ data class Coupon (
     val code: String,
     val discountPercentage: Float,
     val expirationDate: Date,
-    val event: Event?,
+    val eventId: String?,
     val isActive: Boolean
 ){
 }
