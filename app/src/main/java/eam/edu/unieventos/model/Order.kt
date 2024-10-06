@@ -6,7 +6,7 @@ public data class Order (
     val id:String,
     val code: String,
     val clientId: String,
-    val items: MutableList<String> = mutableListOf(),
+    var items: MutableList<String> = mutableListOf(),
     val usedCoupon: String,
     val totalAmount: Float,
     val purchaseDate : Date,
