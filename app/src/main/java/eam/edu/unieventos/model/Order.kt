@@ -5,9 +5,9 @@ import java.util.Date
 public data class Order (
     val id:String,
     val code: String,
-    val client: Client,
-    val items: MutableList<Item> = mutableListOf(),
-    val usedCoupon: Coupon,
+    val clientId: String,
+    val items: MutableList<String> = mutableListOf(),
+    val usedCoupon: String,
     val totalAmount: Float,
     val purchaseDate : Date,
     val paymentDay: Date,
