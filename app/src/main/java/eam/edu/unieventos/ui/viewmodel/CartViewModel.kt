@@ -40,7 +40,7 @@ class CartViewModel(private val context: Context) : ViewModel() {
         return cart.items
     }
 
-    fun addItem(cart: Cart? = null, context: Context, itemId: String){
+    fun addItem(cart: Cart, context: Context, itemId: String){
         val sharedPreferences = context.getSharedPreferences("CartPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         if (cart!=null) {
@@ -58,7 +58,7 @@ class CartViewModel(private val context: Context) : ViewModel() {
         cart.items.add(itemId)
         editor.putStringSet("${cart.id}_items", cart.items.toSet())
         editor.apply()
-        val item = itemViewModel.getItemById(context = context, itemId=itemId)
+        val item = itemViewModel.getItemById(itemId=itemId)
         if (item != null) {
             itemViewModel.removeItem(context = context, item = item)
         }
@@ -86,28 +86,7 @@ class CartViewModel(private val context: Context) : ViewModel() {
         return storedCarts
     }
 
-    fun getCartByClient(context: Context, clientID: String): Cart? {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("CartPrefs", Context.MODE_PRIVATE)
-        val storedCarts = mutableListOf<Cart>()
-        val storedIds = sharedPreferences.getStringSet("stored_carts", emptySet()) ?: emptySet()
-
-        for (code in storedIds) {
-            val clientId = sharedPreferences.getString("${code}_clientId", "")?: ""
-                if (clientId == clientID) {
-                    val id = sharedPreferences.getString("${code}_id", "") ?: ""
-                    val itemsNull: MutableList<String> = mutableListOf()
-                    val items = sharedPreferences.getStringSet("${code}_items", itemsNull.toSet())
-                        ?: itemsNull
-
-                    val cart = Cart(
-                        id = id,
-                        clientId = clientId,
-                        items = items as MutableList<String>
-                    )
-                    return cart
-                }
-        }
-
-        return null
+    fun getCartByClient(clientID: String): Cart? {
+        return _carts.value.find { it.clientId == clientID }
     }
 }

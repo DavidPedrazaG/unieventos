@@ -3,6 +3,7 @@ package eam.edu.unieventos.ui.viewmodel
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
+import eam.edu.unieventos.model.Cart
 import eam.edu.unieventos.model.Item
 import eam.edu.unieventos.model.Order
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,7 @@ class ItemViewModel (private val context: Context) : ViewModel(){
         _items.value = getItemsList(context)
     }
 
-    fun addItem(item: Item, context: Context) {
+    fun addItem(item: Item, context: Context, cart: Cart) {
         val sharedPreferences = context.getSharedPreferences("ItemPrefs", Context.MODE_PRIVATE)
         if (!sharedPreferences.contains("${item.id}_id")) {
             val editor = sharedPreferences.edit()
@@ -31,7 +32,7 @@ class ItemViewModel (private val context: Context) : ViewModel(){
             editor.putString("${item.id}_location_id", item.locationId)
             editor.putStringSet("stored_items", (sharedPreferences.getStringSet("stored_items", emptySet()) ?: emptySet()).plus(item.id))
             editor.apply()
-            cartViewModel.addItem(context = context, itemId = item.id)
+            cartViewModel.addItem(context = context, itemId = item.id, cart = cart)
         } else {
             println("El item con id ${item.id} ya existe.")
         }
@@ -86,90 +87,8 @@ class ItemViewModel (private val context: Context) : ViewModel(){
         return storedItems
     }
 
-    fun getItemById(context: Context, itemId: String): Item? {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("ItemPrefs", Context.MODE_PRIVATE)
-        val sortedItems = sharedPreferences.getStringSet("stored_items", emptySet()) ?: emptySet()
-
-        for (code in sortedItems) {
-            if (code == itemId){
-                val id = sharedPreferences.getString("${code}_id", "") ?: ""
-                val ticketQuantity = sharedPreferences.getInt("${code}_ticketQuantity", 0)
-                val totalPrice = sharedPreferences.getFloat("${code}_totalPrice", 0f)
-                val eventId = sharedPreferences.getString("${code}_event_id", null) ?: ""
-                val locationId = sharedPreferences.getString("${code}_location_id", null) ?: ""
-
-                val item = Item(
-                    id = id,
-                    eventId = eventId,
-                    locationId = locationId,
-                    ticketQuantity = ticketQuantity,
-                    totalPrice = totalPrice
-                )
-                return item
-            }
-        }
-
-        return null
-    }
-
-    private fun getItemsListByOrder(context: Context, orderItemList: List<String>): List<Item> {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("ItemPrefs", Context.MODE_PRIVATE)
-        val storedItems = mutableListOf<Item>()
-        val storedCodes = sharedPreferences.getStringSet("stored_codes", emptySet()) ?: emptySet()
-
-        for (code in storedCodes) {
-            for (orderItem in orderItemList){
-                if (orderItem == code){
-                    val id = sharedPreferences.getString("${code}_id", "") ?: ""
-                    val ticketQuantity = sharedPreferences.getInt("${code}_ticketQuantity", 0)
-                    val totalPrice = sharedPreferences.getFloat("${code}_totalPrice", 0f)
-                    val eventId = sharedPreferences.getString("${code}_event_id", null) ?: ""
-                    val locationId = sharedPreferences.getString("${code}_location_id", null) ?: ""
-
-                    val item = Item(
-                        id = id,
-                        eventId = eventId,
-                        locationId = locationId,
-                        ticketQuantity = ticketQuantity,
-                        totalPrice = totalPrice
-                    )
-                    storedItems.add(item)
-                }
-            }
-
-        }
-
-        return storedItems
-    }
-
-    private fun getItemsListByCart(context: Context, cartItemList: List<String>): List<Item> {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("ItemPrefs", Context.MODE_PRIVATE)
-        val storedItems = mutableListOf<Item>()
-        val storedCodes = sharedPreferences.getStringSet("stored_codes", emptySet()) ?: emptySet()
-
-        for (code in storedCodes) {
-            for (cartItem in cartItemList){
-                if (cartItem == code){
-                    val id = sharedPreferences.getString("${code}_id", "") ?: ""
-                    val ticketQuantity = sharedPreferences.getInt("${code}_ticketQuantity", 0)
-                    val totalPrice = sharedPreferences.getFloat("${code}_totalPrice", 0f)
-                    val eventId = sharedPreferences.getString("${code}_event_id", null) ?: ""
-                    val locationId = sharedPreferences.getString("${code}_location_id", null) ?: ""
-
-                    val item = Item(
-                        id = id,
-                        eventId = eventId,
-                        locationId = locationId,
-                        ticketQuantity = ticketQuantity,
-                        totalPrice = totalPrice
-                    )
-                    storedItems.add(item)
-                }
-            }
-
-        }
-
-        return storedItems
+    fun getItemById(itemId: String): Item? {
+        return _items.value.find { it.id == itemId }
     }
 
 }

@@ -74,40 +74,12 @@ class OrderViewModel(private val context: Context) : ViewModel() {
         return storedOrders
     }
 
-    fun getOrdersListByClient(context: Context, clientID: String): List<Order> {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("OrderPrefs", Context.MODE_PRIVATE)
-        val storedOrders = mutableListOf<Order>()
-        val storedIds = sharedPreferences.getStringSet("stored_orders", emptySet()) ?: emptySet()
+    fun getOrderByCode(code: String): Order {
+        return _orders.value.find { it.code == code }!!
+    }
 
-        for (code in storedIds) {
-            val clientId = sharedPreferences.getString("${code}_clientId", "")?: ""
-            if (clientId == clientID) {
-                val id = sharedPreferences.getString("${code}_id", "") ?: ""
-                val code = sharedPreferences.getString("${code}_code", "") ?: ""
-                val itemsNull: MutableList<String> = mutableListOf()
-                val items =
-                    sharedPreferences.getStringSet("${code}_items", itemsNull.toSet()) ?: itemsNull
-                val usedCoupon = sharedPreferences.getString("${code}_userCoupon", "")
-                val totalAmount = sharedPreferences.getFloat("${code}_totalAmount", 0f)
-                val purchaseDate = sharedPreferences.getLong("${code}_purchaseDate", 0)
-                val paymentDay = sharedPreferences.getLong("${code}_paymentDay", 0)
-                val isActive = sharedPreferences.getBoolean("${code}_isActive", true)
-                val order = Order(
-                    id = id,
-                    code = code,
-                    clientId = clientId,
-                    items = items as MutableList<String>,
-                    usedCoupon = usedCoupon ?: "",
-                    totalAmount = totalAmount,
-                    purchaseDate = Date(purchaseDate),
-                    paymentDay = Date(paymentDay),
-                    isActive = isActive
-                )
-                storedOrders.add(order)
-            }
-        }
-
-        return storedOrders
+    fun getOrdersListByClient(clientID: String): List<Order> {
+        return _orders.value.filter { it.clientId == clientID }
     }
 
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "344042002731",
+    "project_id": "unieventos-1b58f",
+    "storage_bucket": "unieventos-1b58f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:344042002731:android:38938da90768ac134bcd6e",
+        "android_client_info": {
+          "package_name": "eam.edu.unieventos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwQYs45CHWvx-il6eZuZRQVn3B_ep-yOE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
