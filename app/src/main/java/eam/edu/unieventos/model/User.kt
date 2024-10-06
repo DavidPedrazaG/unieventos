@@ -1,13 +1,16 @@
 package eam.edu.unieventos.model
 
-data class User(
+open class User(
     val id: String,
     val name: String,
-    val cc: String,
-    val role: Role,
+    val idCard: String,
+    val role: String,
     val email: String,
-    val cellphone: String,
+    val address: String,
+    val phoneNumber: String,
     val password: String,
+    var isActive: Boolean,
+    var userAppConfigId: String
 ) {
 
 }
