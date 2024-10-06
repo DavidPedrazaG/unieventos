@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import eam.edu.unieventos.model.Coupon
+import eam.edu.unieventos.model.Event
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +20,19 @@ class CouponViewModel(private val context: Context) : ViewModel() {
     init {
         _coupons.value = getCouponsList(context)
     }
+
+    fun getCouponById(id: String): Coupon? {
+        return _coupons.value.find { it.id == id }
+    }
+
+    fun getCouponByCode(code: String): Coupon? {
+        return _coupons.value.find { it.code == code }
+    }
+
+    fun getCouponsByEvent(eventId: String): List<Coupon> {
+        return _coupons.value.filter { it.eventId == eventId }
+    }
+
 
     fun createCoupon(coupon: Coupon) {
         val sharedPreferences = context.getSharedPreferences("CouponPrefs", Context.MODE_PRIVATE)

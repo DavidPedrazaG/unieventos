@@ -3,6 +3,7 @@ package eam.edu.unieventos.ui.viewmodel
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
+import eam.edu.unieventos.model.Event
 import eam.edu.unieventos.model.Location
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,18 @@ class LocationViewModel(private val context: Context) : ViewModel() {
     init {
         _locations.value = getLocationsList(context)
     }
+    fun getLocationById(id: String): Location? {
+        return _locations.value.find { it.id == id }
+    }
+
+    fun getLocationByName(name: String): Location? {
+        return _locations.value.find { it.name == name }
+    }
+
+    fun getLocationsByEvent(eventId: String): List<Location> {
+        return _locations.value.filter { it.eventId == eventId }
+    }
+
 
     fun createLocation(location: Location) {
         val sharedPreferences = context.getSharedPreferences("LocationPrefs", Context.MODE_PRIVATE)

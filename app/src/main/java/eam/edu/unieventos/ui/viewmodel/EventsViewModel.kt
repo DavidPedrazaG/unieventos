@@ -20,6 +20,23 @@ class EventsViewModel(private val context: Context) : ViewModel() {
         _events.value = getEventsList(context)
     }
 
+    fun getEventById(id: String): Event? {
+        return _events.value.find { it.id == id }
+    }
+
+    fun getEventByCode(code: String): Event? {
+        return _events.value.find { it.code == code }
+    }
+
+    fun getEventByName(name: String): Event? {
+        return _events.value.find { it.name == name }
+    }
+
+    fun getEventsByType(type: String): List<Event> {
+        return _events.value.filter { it.type == type }
+    }
+
+
     fun createEvent(event: Event) {
         val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
@@ -42,9 +59,6 @@ class EventsViewModel(private val context: Context) : ViewModel() {
         editor.apply()
     }
 
-    fun validateEvent(code: String): Event? {
-        return _events.value.find { it.code == code }
-    }
 
     fun updateEvent(event: Event) {
         val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
@@ -57,8 +71,7 @@ class EventsViewModel(private val context: Context) : ViewModel() {
         editor.putString("${event.code}_type", event.type)
         editor.putString("${event.code}_poster", event.poster)
         editor.putString("${event.code}_locationImage", event.locationImage)
-        editor.putLong("${event.code}_dateEvent", event.dateEvent.time)  // Actualizar el timestamp
-
+        editor.putLong("${event.code}_dateEvent", event.dateEvent.time)
         editor.putStringSet("${event.code}_locations", event.locations.toSet())
 
         editor.apply()
