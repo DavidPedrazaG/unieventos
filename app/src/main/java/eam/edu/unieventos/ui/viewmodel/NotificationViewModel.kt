@@ -25,8 +25,10 @@ class NotificationViewModel(private val context: Context) : ViewModel() {
         val editor = sharedPreferences.edit()
 
         editor.putString("${notification.id}_message", notification.message)
-        editor.putString("${notification.id}_clientId", notification.clientId)
-        editor.putString("${notification.id}_sentDate", dateFormat.format(notification.sendDate)) // Convierte Date a String
+        editor.putString("${notification.id}_from", notification.from)
+        editor.putString("${notification.id}_to", notification.to)
+        editor.putString("${notification.id}_eventId", notification.eventId)
+        editor.putString("${notification.id}_sentDate", dateFormat.format(notification.sendDate))
         editor.putBoolean("${notification.id}_isRead", notification.isRead)
 
         editor.putStringSet(
@@ -43,7 +45,9 @@ class NotificationViewModel(private val context: Context) : ViewModel() {
 
         for (id in storedNotificationIds) {
             val message = sharedPreferences.getString("${id}_message", "") ?: ""
-            val clientId = sharedPreferences.getString("${id}_clientId", "") ?: ""
+            val from = sharedPreferences.getString("${id}_from", "") ?: ""
+            val to = sharedPreferences.getString("${id}_to", "") ?: "" // Recupera 'to'
+            val eventId = sharedPreferences.getString("${id}_eventId", "") ?: ""
             val sentDateString = sharedPreferences.getString("${id}_sentDate", "") ?: ""
             val sentDate = if (sentDateString.isNotEmpty()) {
                 dateFormat.parse(sentDateString) ?: Date()
@@ -54,8 +58,10 @@ class NotificationViewModel(private val context: Context) : ViewModel() {
 
             val notification = Notification(
                 id = id,
-                clientId = clientId,
+                from = from,
+                to = to, // Establece 'to'
                 message = message,
+                eventId = eventId,
                 sendDate = sentDate,
                 isRead = isRead
             )
@@ -75,4 +81,9 @@ class NotificationViewModel(private val context: Context) : ViewModel() {
 
         _notifications.value = getNotificationsList(context)
     }
+    fun generateNotificationId(): String {
+        val uniqueId = System.currentTimeMillis().toString() + (0..999).random().toString()
+        return uniqueId
+    }
 }
+

@@ -102,4 +102,16 @@ class CouponViewModel(private val context: Context) : ViewModel() {
 
         return storedCoupons
     }
+
+    fun generateCouponCode(): String {
+        val prefix = "CUP"
+        val timestamp = System.currentTimeMillis().toString()
+        return "$prefix$timestamp"
+    }
+
+
+    fun generateCouponId(): String {
+        val uniqueId = System.currentTimeMillis().toString() + (0..999).random().toString()
+        return uniqueId
+    }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import eam.edu.unieventos.model.AppUserConfiguration
+import eam.edu.unieventos.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,6 +56,8 @@ class AppUserConfigurationViewModel(private val context: Context) : ViewModel() 
         return storedAppUserConfigs
     }
 
+
+
     fun updateAppUserConfig(userId: String, appUserConfig: AppUserConfiguration) {
         val sharedPreferences = context.getSharedPreferences("AppUserConfigPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
@@ -65,5 +68,9 @@ class AppUserConfigurationViewModel(private val context: Context) : ViewModel() 
         editor.apply()
 
         _appUserConfigurations.value = getAppUserConfigurationsList(context)
+    }
+
+    fun getAppUserConfigurationByUser(userId: String): AppUserConfiguration? {
+        return _appUserConfigurations.value.find { it.userId == userId }
     }
 }
