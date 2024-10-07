@@ -148,6 +148,11 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
         editor.apply()
     }
 
+    fun generateUserId(): String {
+        val uniqueId = System.currentTimeMillis().toString() + (0..999).random().toString()
+        return uniqueId
+    }
+
     private fun getClientsList(context: Context): List<Client> {
         val sharedPreferences: SharedPreferences = context.getSharedPreferences("ClientPrefs", Context.MODE_PRIVATE)
         val storedClients = mutableListOf<Client>()

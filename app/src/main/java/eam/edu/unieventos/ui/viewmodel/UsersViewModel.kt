@@ -125,6 +125,24 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
             storedUsers.add(user)
         }
 
+
+        val adminEmail = "admin@unieventos.com"
+        if (storedUsers.none { it.email == adminEmail }) {
+            val hardcodedAdminUser = User(
+                id = "admin1",
+                name = "Admin User",
+                idCard = "123456789",
+                role = "Admin",
+                email = adminEmail,
+                phoneNumber = "1234567890",
+                password = "admin123",
+                address = "Admin Street 123",
+                isActive = true,
+                userAppConfigId = "configAdmin1"
+            )
+            storedUsers.add(hardcodedAdminUser)
+        }
+
         return storedUsers
     }
 }

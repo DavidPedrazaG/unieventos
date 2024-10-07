@@ -33,7 +33,7 @@ fun RegisterScreen(
 ) {
     // Variables para almacenar los datos del cliente
     var name by remember { mutableStateOf("") }
-    var id by remember { mutableStateOf("") }
+
     var idCard by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -68,15 +68,6 @@ fun RegisterScreen(
                 singleLine = true
             )
 
-            TextField(
-                value = id,
-                onValueChange = { id = it },
-                label = { Text(text = "ID") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                singleLine= true
-            )
 
             TextField(
                 value = idCard,
@@ -131,7 +122,7 @@ fun RegisterScreen(
 
             Button(
                 onClick = {
-
+                    val id = clientViewModel.generateUserId()
                     val client = Client(
                         availableCoupons = emptyList(),
                         purchaseHistory = emptyList(),
