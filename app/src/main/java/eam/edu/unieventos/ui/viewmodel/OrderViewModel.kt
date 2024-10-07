@@ -50,8 +50,9 @@ class OrderViewModel(private val context: Context) : ViewModel() {
             val id = sharedPreferences.getString("${code}_id", "") ?: ""
             val code = sharedPreferences.getString("${code}_code", "") ?: ""
             val clientId = sharedPreferences.getString("${code}_clientId", "")?: ""
-            val itemsNull:MutableList<String> = mutableListOf()
-            val items = sharedPreferences.getStringSet("${code}_items", itemsNull.toSet())?: itemsNull
+            val itemsSet = sharedPreferences.getStringSet("${code}_items", emptySet()) ?: emptySet()
+            val items:MutableList<String> = mutableListOf()
+            items.addAll(itemsSet)
             val usedCoupon = sharedPreferences.getString("${code}_userCoupon", "")
             val totalAmount = sharedPreferences.getFloat("${code}_totalAmount", 0f)
             val purchaseDate = sharedPreferences.getLong("${code}_purchaseDate", 0)
@@ -61,7 +62,7 @@ class OrderViewModel(private val context: Context) : ViewModel() {
                 id = id,
                 code = code,
                 clientId = clientId,
-                items = items as MutableList<String>,
+                items = items,
                 usedCoupon = usedCoupon ?: "",
                 totalAmount = totalAmount,
                 purchaseDate = Date(purchaseDate),

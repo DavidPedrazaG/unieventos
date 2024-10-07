@@ -90,13 +90,13 @@ class CartViewModel(private val context: Context) : ViewModel() {
         for (code in storedIds) {
             val id = sharedPreferences.getString("${code}_id", "") ?: ""
             val clientId = sharedPreferences.getString("${code}_clientId", "")?: ""
-            val itemsNull:MutableList<String> = mutableListOf()
-            val items = sharedPreferences.getStringSet("${code}_items", itemsNull.toSet())?: itemsNull
-
+            val itemsSet = sharedPreferences.getStringSet("${code}_items", emptySet()) ?: emptySet()
+            val items:MutableList<String> = mutableListOf()
+            items.addAll(itemsSet)
             val cart = Cart(
                 id = id,
                 clientId = clientId,
-                items = items as MutableList<String>
+                items = items
             )
             storedCarts.add(cart)
         }
