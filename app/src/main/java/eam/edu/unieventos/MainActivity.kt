@@ -1,5 +1,6 @@
 package eam.edu.unieventos
 
+import UsersViewModel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,7 +16,7 @@ import eam.edu.unieventos.ui.navigation.Navigation
 import eam.edu.unieventos.ui.screens.EventDetailScreen
 import eam.edu.unieventos.ui.theme.UniEventosTheme
 import eam.edu.unieventos.ui.screens.HomeScreen
-import eam.edu.unieventos.ui.viewmodel.UsersViewModel
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

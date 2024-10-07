@@ -1,5 +1,6 @@
 package eam.edu.unieventos.ui.screens
 
+import ClientsViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,22 +23,29 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalContext
 import eam.edu.unieventos.model.Role
 import eam.edu.unieventos.model.User
-import eam.edu.unieventos.ui.viewmodel.UsersViewModel
+
+import eam.edu.unieventos.model.Client
 
 @Composable
 fun RegisterScreen(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
-
-    ) {
+) {
+    // Variables para almacenar los datos del cliente
     var name by remember { mutableStateOf("") }
     var id by remember { mutableStateOf("") }
+    var idCard by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    // Puedes inicializar isActive y userAppConfigId aquí según tu lógica
+    val isActive = true // O según sea necesario
+    val userAppConfigId = "default-config-id" // O el ID correspondiente
+
     val context = LocalContext.current
-    val usersViewModel: UsersViewModel = remember { UsersViewModel(context) }
+    val clientViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -49,7 +57,7 @@ fun RegisterScreen(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
+            // Campos para la información del cliente
             TextField(
                 value = name,
                 onValueChange = { name = it },
@@ -63,11 +71,21 @@ fun RegisterScreen(
             TextField(
                 value = id,
                 onValueChange = { id = it },
-                label = { Text(text = "Cédula") },
+                label = { Text(text = "ID") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 singleLine= true
+            )
+
+            TextField(
+                value = idCard,
+                onValueChange = { idCard = it },
+                label = { Text(text = "Cédula") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                singleLine = true
             )
 
             TextField(
@@ -88,7 +106,17 @@ fun RegisterScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
-                singleLine =  true
+                singleLine = true
+            )
+
+            TextField(
+                value = address,
+                onValueChange = { address = it },
+                label = { Text(text = "Dirección") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                singleLine = true
             )
 
             TextField(
@@ -103,16 +131,25 @@ fun RegisterScreen(
 
             Button(
                 onClick = {
-                    val user = User(
+
+                    val client = Client(
+                        availableCoupons = emptyList(),
+                        purchaseHistory = emptyList(),
+                        friends = emptyList(),
+                        notifications = emptyList(),
+                        cartId = null,
                         id = id,
+                        idCard = idCard,
                         name = name,
-                        cc = id,
-                        role = Role.CLIENT,
+                        phoneNumber = phone,
+                        address = address,
                         email = email,
-                        cellphone = phone,
-                        password = password
+                        password = password,
+                        isActive = isActive,
+                        role = "client",
+                        userAppConfigId = userAppConfigId
                     )
-                    usersViewModel.createUser(user, context)
+                    clientViewModel.createUser(client)
                     onNavigateToLogin()
                 },
                 modifier = Modifier
@@ -142,4 +179,3 @@ fun RegisterScreen(
         }
     }
 }
-

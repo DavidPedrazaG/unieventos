@@ -7,11 +7,11 @@ import eam.edu.unieventos.model.User
 
 object SharedPreferenceUtils {
 
-    fun savePreference(context: Context, idUser: String, rol: Role){
+    fun savePreference(context: Context, idUser: String, rol: String){
         val sharedPreferences = context.getSharedPreferences("sesion", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         editor.putString("idUser", idUser)
-        editor.putString("rol", rol.name)
+        editor.putString("rol", rol)
         editor.apply()
     }
 
@@ -30,7 +30,7 @@ object SharedPreferenceUtils {
         return if(idUser.isNullOrEmpty() || rol.isNullOrEmpty()){
             return null
         }else{
-            UserDTO(idUser,Role.valueOf(rol))
+            UserDTO(idUser, rol)
         }
 
 

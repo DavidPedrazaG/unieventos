@@ -136,6 +136,17 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
         return _clients.value.find { it.idCard == idCard }
     }
 
+    override fun validateEmail(email: String): User? {
+        return _clients.value.find { it.email == email }
+    }
+
+    override fun updatePassword(email: String, newPassword: String) {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("ClientPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("${email}_password", newPassword)
+        editor.apply()
+    }
+
     private fun getClientsList(context: Context): List<Client> {
         val sharedPreferences: SharedPreferences = context.getSharedPreferences("ClientPrefs", Context.MODE_PRIVATE)
         val storedClients = mutableListOf<Client>()

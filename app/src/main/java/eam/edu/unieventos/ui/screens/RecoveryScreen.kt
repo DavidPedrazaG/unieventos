@@ -1,7 +1,11 @@
 package eam.edu.unieventos.ui.screens
+
+
+import ClientsViewModel
+import eam.edu.unieventos.model.Client
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -15,15 +19,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import eam.edu.unieventos.ui.viewmodel.UsersViewModel
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun RecoveryScreen(
     onNavigateBack: () -> Unit,
-
-    ) {
-
+) {
     var email by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") } // Nueva contraseña
@@ -31,19 +32,17 @@ fun RecoveryScreen(
     var isEmailValid by remember { mutableStateOf(false) }
     var timer by remember { mutableStateOf(59) } // Temporizador de ejemplo
     val context = LocalContext.current
-    val usersViewModel: UsersViewModel = remember { UsersViewModel(context) }
-
+    val clientViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
 
     Box(modifier = Modifier
         .fillMaxSize(), contentAlignment = Alignment.Center
-    ){
+    ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Text(
                 text = "RECUPERAR CONTRASEÑA",
                 fontSize = 24.sp,
@@ -52,7 +51,6 @@ fun RecoveryScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-
             TextField(
                 value = email,
                 onValueChange = { email = it },
@@ -60,18 +58,18 @@ fun RecoveryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
-                singleLine= true
+                singleLine = true
             )
-
 
             Button(
                 onClick = {
-                    val user = usersViewModel.validateEmail(email)
-                    if(user != null){
+                    // Lógica para validar el correo
+                    val client = clientViewModel.validateEmail(email) // Cambia aquí si es necesario
+                    if (client != null) {
                         temporalCode = (100000..999999).random().toString()
                         isEmailValid = true
-                    }else{
-
+                    } else {
+                        // Manejar caso de correo no válido
                     }
                 },
                 modifier = Modifier
@@ -89,8 +87,6 @@ fun RecoveryScreen(
                 )
             }
 
-
-
             if (isEmailValid) {
                 Text(
                     text = "TU CÓDIGO ES: $temporalCode",
@@ -99,7 +95,6 @@ fun RecoveryScreen(
                 )
             }
 
-
             TextField(
                 value = code,
                 onValueChange = { code = it },
@@ -107,9 +102,8 @@ fun RecoveryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
-                singleLine= true
+                singleLine = true
             )
-
 
             TextField(
                 value = newPassword,
@@ -118,9 +112,8 @@ fun RecoveryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
-                singleLine= true
+                singleLine = true
             )
-
 
             Text(
                 text = "VÁLIDO POR $timer SEGUNDOS",
@@ -128,11 +121,10 @@ fun RecoveryScreen(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
 
-
             Button(
                 onClick = {
-                    if(code == temporalCode){
-                        usersViewModel.updatePassword(context, email, newPassword)
+                    if (code == temporalCode) {
+                        clientViewModel.updatePassword(email, newPassword) // Cambia aquí si es necesario
                         onNavigateBack()
                     }
                 },

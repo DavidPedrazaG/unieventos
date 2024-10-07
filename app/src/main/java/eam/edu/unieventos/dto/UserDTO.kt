@@ -4,7 +4,7 @@ import eam.edu.unieventos.model.Role
 
 data class UserDTO (
     val id: String,
-    val rol: Role
+    val rol: String
 ){
 
 }

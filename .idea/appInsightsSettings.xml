@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="eam.edu.unieventos" />
+                  <option name="mobileSdkAppId" value="1:344042002731:android:38938da90768ac134bcd6e" />
+                  <option name="projectId" value="unieventos-1b58f" />
+                  <option name="projectNumber" value="344042002731" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
