@@ -10,13 +10,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import eam.edu.unieventos.ui.viewmodel.CartViewModel
-import eam.edu.unieventos.ui.viewmodel.CouponViewModel
+import eam.edu.unieventos.ui.viewmodel.CouponsViewModel
 import eam.edu.unieventos.ui.viewmodel.NotificationViewModel
 import java.util.Calendar
 
-class ClientViewModel(context: Context) : UsersViewModel(context) {
+class ClientsViewModel(context: Context) : UsersViewModel(context) {
 
-    private val _couponViewModel = CouponViewModel(context)
+    private val _couponViewModel = CouponsViewModel(context)
     private val _notificationViewModel = NotificationViewModel(context)
     private val _cartViewModel = CartViewModel(context)
     private val _clients = MutableStateFlow(emptyList<Client>())

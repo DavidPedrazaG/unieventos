@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class LocationViewModel(private val context: Context) : ViewModel() {
+class LocationsViewModel(private val context: Context) : ViewModel() {
 
     private val _locations = MutableStateFlow(emptyList<Location>())
     val locations: StateFlow<List<Location>> = _locations.asStateFlow()

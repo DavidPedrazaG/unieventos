@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class CouponViewModel(private val context: Context) : ViewModel() {
+class CouponsViewModel(private val context: Context) : ViewModel() {
 
     private val _coupons = MutableStateFlow(emptyList<Coupon>())
     val coupons: StateFlow<List<Coupon>> = _coupons.asStateFlow()
