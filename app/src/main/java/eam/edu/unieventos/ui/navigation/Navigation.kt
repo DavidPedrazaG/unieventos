@@ -1,6 +1,6 @@
 package eam.edu.unieventos.ui.navigation
 
-import UsersViewModel
+import eam.edu.unieventos.ui.viewmodel.UsersViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost

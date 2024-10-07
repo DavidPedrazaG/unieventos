@@ -13,29 +13,11 @@ import eam.edu.unieventos.ui.viewmodel.CartViewModel
 
 class ItemViewModel (private val context: Context) : ViewModel(){
 
-    private val cartViewModel: CartViewModel = CartViewModel(context = context)
     private val _items = MutableStateFlow(emptyList<Item>())
     val items: StateFlow<List<Item>> = _items.asStateFlow()
 
     init {
         _items.value = getItemsList(context)
-    }
-
-    fun addItem(item: Item, context: Context, cart: Cart) {
-        val sharedPreferences = context.getSharedPreferences("ItemPrefs", Context.MODE_PRIVATE)
-        if (!sharedPreferences.contains("${item.id}_id")) {
-            val editor = sharedPreferences.edit()
-            editor.putString("${item.id}_id", item.id)
-            editor.putInt("${item.id}_ticketQuantity", item.ticketQuantity)
-            editor.putFloat("${item.id}_totalPrice", item.totalPrice)
-            editor.putString("${item.id}_event_id", item.eventId)
-            editor.putString("${item.id}_location_id", item.locationId)
-            editor.putStringSet("stored_items", (sharedPreferences.getStringSet("stored_items", emptySet()) ?: emptySet()).plus(item.id))
-            editor.apply()
-            cartViewModel.addItem(context = context, itemId = item.id, cart = cart)
-        } else {
-            println("El item con id ${item.id} ya existe.")
-        }
     }
 
 

@@ -1,6 +1,6 @@
 package eam.edu.unieventos
 
-import UsersViewModel
+import eam.edu.unieventos.ui.viewmodel.UsersViewModel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent

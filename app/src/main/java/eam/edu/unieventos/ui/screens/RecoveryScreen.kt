@@ -1,7 +1,7 @@
 package eam.edu.unieventos.ui.screens
 
 
-import ClientsViewModel
+import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
 import eam.edu.unieventos.model.Client
 
 import androidx.compose.foundation.layout.*

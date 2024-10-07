@@ -1,6 +1,6 @@
 package eam.edu.unieventos.ui.screens
 
-import ClientsViewModel
+import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

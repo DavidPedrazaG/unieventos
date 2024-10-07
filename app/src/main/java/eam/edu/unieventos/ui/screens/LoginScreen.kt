@@ -1,6 +1,6 @@
 package eam.edu.unieventos.ui.screens
 
-import UsersViewModel
+import eam.edu.unieventos.ui.viewmodel.UsersViewModel
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.Image
