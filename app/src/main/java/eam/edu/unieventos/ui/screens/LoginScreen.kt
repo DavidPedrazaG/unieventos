@@ -21,7 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import eam.edu.unieventos.R
 import eam.edu.unieventos.model.Role
-import eam.edu.unieventos.ui.viewmodel.UsersViewModel
+
 import eam.edu.unieventos.utils.SharedPreferenceUtils
 import androidx.compose.material3.Scaffold
 
@@ -30,7 +30,7 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
     onNavigateToValidate: () -> Unit,
-    onNavigateToHome: (Role) -> Unit
+    onNavigateToHome: (String) -> Unit
 ) {
     val context = LocalContext.current
     Scaffold { padding ->
@@ -52,7 +52,7 @@ fun LoginForm(
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
     onNavigateToValidate: () -> Unit,
-    onNavigateToHome: (Role) -> Unit
+    onNavigateToHome: (String) -> Unit
 ) {
     val usersViewModel: UsersViewModel = remember { UsersViewModel(context) }
     var email by remember { mutableStateOf("") }

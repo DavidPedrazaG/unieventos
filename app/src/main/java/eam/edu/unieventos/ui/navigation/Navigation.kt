@@ -1,5 +1,6 @@
 package eam.edu.unieventos.ui.navigation
 
+import UsersViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
@@ -13,7 +14,7 @@ import eam.edu.unieventos.ui.screens.LoginScreen
 import eam.edu.unieventos.ui.screens.RecoveryScreen
 import eam.edu.unieventos.ui.screens.RegisterScreen
 import eam.edu.unieventos.ui.screens.ValidationScreen
-import eam.edu.unieventos.ui.viewmodel.UsersViewModel
+
 import eam.edu.unieventos.utils.SharedPreferenceUtils
 
 @Composable
@@ -29,7 +30,7 @@ fun Navigation(
     val sesion = SharedPreferenceUtils.getCurrenUser(context)
 
     if(sesion != null){
-        startDestination = if(sesion.rol == Role.ADMIN){
+        startDestination = if (sesion.rol == "admin") {
             RouteScreen.Home
         }else{
             RouteScreen.Home
@@ -61,13 +62,12 @@ fun Navigation(
                 },
                 onNavigateToHome = { role ->
 
-                    val home =  if(role == Role.ADMIN){
-                        RouteScreen.Home
-                    }else{
-                        RouteScreen.Home
+                    val homeScreen = if (role == "admin") {
+                        RouteScreen.Home // Navegar a la pantalla de inicio para admin
+                    } else {
+                        RouteScreen.Home // Navegar a la pantalla de inicio para cliente
                     }
-
-                    navController.navigate(home)
+                    navController.navigate(homeScreen)
                 }
             )
         }

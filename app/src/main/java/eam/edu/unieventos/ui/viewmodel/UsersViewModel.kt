@@ -80,12 +80,12 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
     }
 
 
-    fun validateEmail(email: String): User? {
+    open fun validateEmail(email: String): User? {
         return _users.value.find { it.email == email }
     }
 
 
-    fun updatePassword(email: String, newPassword: String) {
+    open fun updatePassword(email: String, newPassword: String) {
         val sharedPreferences: SharedPreferences = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         editor.putString("${email}_password", newPassword)
@@ -126,3 +126,5 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
         return storedUsers
     }
 }
+
+
