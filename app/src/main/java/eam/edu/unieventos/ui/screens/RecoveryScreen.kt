@@ -1,6 +1,8 @@
 package eam.edu.unieventos.ui.screens
 
 
+import android.content.Context
+import android.content.SharedPreferences
 import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
 import eam.edu.unieventos.model.Client
 
@@ -23,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun RecoveryScreen(
+    email: String,
     onNavigateBack: () -> Unit,
 ) {
     var email by remember { mutableStateOf("") }
@@ -135,7 +138,8 @@ fun RecoveryScreen(
             Button(
                 onClick = {
                     if (code == temporalCode) {
-                        clientViewModel.updatePassword(email, newPassword)
+
+                        updatePasswordClient(context,email, newPassword)
                         onNavigateBack()
                     }
                 },
@@ -155,4 +159,14 @@ fun RecoveryScreen(
             }
         }
     }
+}
+
+fun updatePasswordClient(context: Context, email:String, newPassword: String) {
+    val clientsViewModel: ClientsViewModel =  ClientsViewModel(context)
+    val user = clientsViewModel.getUserByEmail(email)
+    val client = user as eam.edu.unieventos.model.Client
+    if (client != null) {
+        client.password = newPassword
+    }
+    clientsViewModel.updateClient(client)
 }

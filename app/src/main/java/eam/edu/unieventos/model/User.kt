@@ -8,7 +8,7 @@ open class User(
     val email: String,
     val address: String,
     val phoneNumber: String,
-    val password: String,
+    var password: String,
     var isActive: Boolean,
     var userAppConfigId: String,
     var isValidated: Boolean = false
