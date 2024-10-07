@@ -29,7 +29,7 @@ import androidx.compose.material3.Scaffold
 fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
-    onNavigateToValidate: () -> Unit,
+    onNavigateToValidate: (String) -> Unit,
     onNavigateToHome: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -51,7 +51,7 @@ fun LoginForm(
     context: Context,
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
-    onNavigateToValidate: () -> Unit,
+    onNavigateToValidate: (String) -> Unit,
     onNavigateToHome: (String) -> Unit
 ) {
     val usersViewModel: UsersViewModel = remember { UsersViewModel(context) }
@@ -100,12 +100,12 @@ fun LoginForm(
                 onClick = {
                     val user = usersViewModel.login(email, password)
                     if (user != null) {
-                        val isValidated = sharedPreferences.getBoolean("${email}_validated", false)
+                        val isValidated = user.isValidated
                         SharedPreferenceUtils.savePreference(context, user.id, user.role)
                         if (isValidated) {
                             onNavigateToHome(user.role)
                         } else {
-                            onNavigateToValidate()
+                            onNavigateToValidate(email)
                         }
                     } else {
                         loginError = true

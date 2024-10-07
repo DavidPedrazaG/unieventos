@@ -27,12 +27,23 @@ fun RecoveryScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
-    var newPassword by remember { mutableStateOf("") } // Nueva contraseña
+    var newPassword by remember { mutableStateOf("") }
     var temporalCode by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(false) }
-    var timer by remember { mutableStateOf(59) } // Temporizador de ejemplo
+    var timer by remember { mutableStateOf(59) }
     val context = LocalContext.current
     val clientViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
+
+    LaunchedEffect(key1 = timer) {
+        if (timer > 0) {
+            kotlinx.coroutines.delay(1000L)
+            timer -= 1
+        } else {
+
+            temporalCode = (100000..999999).random().toString()
+            timer = 60
+        }
+    }
 
     Box(modifier = Modifier
         .fillMaxSize(), contentAlignment = Alignment.Center
@@ -63,13 +74,13 @@ fun RecoveryScreen(
 
             Button(
                 onClick = {
-                    // Lógica para validar el correo
-                    val client = clientViewModel.validateEmail(email) // Cambia aquí si es necesario
+
+                    val client = clientViewModel.validateEmail(email)
                     if (client != null) {
                         temporalCode = (100000..999999).random().toString()
                         isEmailValid = true
                     } else {
-                        // Manejar caso de correo no válido
+
                     }
                 },
                 modifier = Modifier
@@ -124,7 +135,7 @@ fun RecoveryScreen(
             Button(
                 onClick = {
                     if (code == temporalCode) {
-                        clientViewModel.updatePassword(email, newPassword) // Cambia aquí si es necesario
+                        clientViewModel.updatePassword(email, newPassword)
                         onNavigateBack()
                     }
                 },

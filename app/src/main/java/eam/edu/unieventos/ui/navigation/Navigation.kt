@@ -14,20 +14,22 @@ import eam.edu.unieventos.ui.screens.LoginScreen
 import eam.edu.unieventos.ui.screens.RecoveryScreen
 import eam.edu.unieventos.ui.screens.RegisterScreen
 import eam.edu.unieventos.ui.screens.ValidationScreen
+import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
 
 import eam.edu.unieventos.utils.SharedPreferenceUtils
 
 @Composable
 fun Navigation(
-    usersViewModel: UsersViewModel
+
 ){
 
-
+    var email: String = ""
     val navController = rememberNavController()
     val context = LocalContext.current
 
     var startDestination: RouteScreen = RouteScreen.Login
     val sesion = SharedPreferenceUtils.getCurrenUser(context)
+
 
     if(sesion != null){
         startDestination = if (sesion.rol == "admin") {
@@ -57,7 +59,8 @@ fun Navigation(
                 onNavigateToRecovery = {
                     navController.navigate(RouteScreen.Recovery)
                 },
-                onNavigateToValidate = {
+                onNavigateToValidate = { emailRecieved ->
+                    email = emailRecieved
                     navController.navigate(RouteScreen.Validation)
                 },
                 onNavigateToHome = { role ->
@@ -91,6 +94,7 @@ fun Navigation(
         }
         composable<RouteScreen.Validation> {
             ValidationScreen(
+                email = email,
                 onValidationSuccess = {
                     navController.navigate(RouteScreen.Home)
                 }

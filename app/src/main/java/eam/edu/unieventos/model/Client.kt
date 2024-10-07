@@ -15,7 +15,8 @@ package eam.edu.unieventos.model
     password: String,
     isActive: Boolean,
     role: String,
-    userAppConfigId: String
+    userAppConfigId: String,
+    isValidated: Boolean
 ) : User(
     id = id,
     idCard = idCard,
@@ -26,5 +27,7 @@ package eam.edu.unieventos.model
     password = password,
     isActive = isActive,
     role = role,
-    userAppConfigId = userAppConfigId
+    userAppConfigId = userAppConfigId,
+    isValidated = isValidated
+
 )

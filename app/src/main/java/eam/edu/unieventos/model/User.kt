@@ -10,7 +10,8 @@ open class User(
     val phoneNumber: String,
     val password: String,
     var isActive: Boolean,
-    var userAppConfigId: String
+    var userAppConfigId: String,
+    var isValidated: Boolean = false
 ) {
 
 }

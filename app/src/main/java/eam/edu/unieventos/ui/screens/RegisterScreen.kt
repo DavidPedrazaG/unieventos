@@ -31,7 +31,7 @@ fun RegisterScreen(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
 ) {
-    // Variables para almacenar los datos del cliente
+
     var name by remember { mutableStateOf("") }
 
     var idCard by remember { mutableStateOf("") }
@@ -40,9 +40,10 @@ fun RegisterScreen(
     var address by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    // Puedes inicializar isActive y userAppConfigId aquí según tu lógica
-    val isActive = true // O según sea necesario
-    val userAppConfigId = "default-config-id" // O el ID correspondiente
+
+    val isActive = true
+    val userAppConfigId = "default-config-id"
+    val isValidated = false
 
     val context = LocalContext.current
     val clientViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
@@ -138,7 +139,9 @@ fun RegisterScreen(
                         password = password,
                         isActive = isActive,
                         role = "client",
-                        userAppConfigId = userAppConfigId
+                        userAppConfigId = userAppConfigId,
+                        isValidated = isValidated
+
                     )
                     clientViewModel.createUser(client)
                     onNavigateToLogin()

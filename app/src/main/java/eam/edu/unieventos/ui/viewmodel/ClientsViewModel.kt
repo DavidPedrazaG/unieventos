@@ -20,12 +20,7 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
     private val _couponViewModel = CouponsViewModel(context)
     private val _notificationViewModel = NotificationViewModel(context)
     private val _cartViewModel = CartViewModel(context)
-    private val _clients = MutableStateFlow(emptyList<Client>())
-    val clients: StateFlow<List<Client>> = _clients.asStateFlow()
 
-    init {
-        _clients.value = getClientsList(context)
-    }
 
 
     override fun createUser(user: User) {
@@ -36,13 +31,14 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
             editor.putString("${user.id}_id", user.id)
             editor.putString("${user.id}_name", user.name)
             editor.putString("${user.id}_idCard", user.idCard)
-            editor.putString("${user.id}_role", user.role)
+            editor.putString("${user.id}_role", "Client")
             editor.putString("${user.id}_email", user.email)
             editor.putString("${user.id}_address", user.address)
             editor.putString("${user.id}_phoneNumber", user.phoneNumber)
             editor.putString("${user.id}_password", user.password)
             editor.putBoolean("${user.id}_isActive", user.isActive)
             editor.putString("${user.id}_userAppConfigId", user.userAppConfigId)
+            editor.putBoolean("${user.id}_isValidated", user.isValidated)
             editor.putString("${user.id}_friends", user.friends.joinToString(","))
             editor.putString("${user.id}_availableCoupons", user.availableCoupons.joinToString(","))
             editor.putString("${user.id}_purchaseHistory", user.purchaseHistory.joinToString(","))
@@ -126,8 +122,30 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
         return _clients.value.find { it.id == userId }
     }
 
-    fun getByEmail(email: String): User? {
-        return _clients.value.find { it.email == email }
+    fun updateClient(user: Client) {
+        val sharedPreferences = context.getSharedPreferences("ClientPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        val existingUser = getUserById(user.id)
+        if (existingUser != null) {
+            editor.putString("${user.id}_id", user.id)
+            editor.putString("${user.id}_name", user.name)
+            editor.putString("${user.id}_idCard", user.idCard)
+            editor.putString("${user.id}_role", user.role)
+            editor.putString("${user.id}_phoneNumber", user.phoneNumber)
+            editor.putString("${user.id}_password", user.password)
+            editor.putString("${user.id}_address", user.address)
+            editor.putBoolean("${user.id}_isActive", user.isActive)
+            editor.putString("${user.id}_userAppConfigId", user.userAppConfigId)
+            editor.putBoolean("${user.id}_isValidated", user.isValidated)
+            editor.putString("${user.id}_friends", user.friends.joinToString(","))
+            editor.putString("${user.id}_availableCoupons", user.availableCoupons.joinToString(","))
+            editor.putString("${user.id}_purchaseHistory", user.purchaseHistory.joinToString(","))
+            editor.putString("${user.id}_notifications", user.notifications.joinToString(","))
+            editor.apply()
+
+            _users.value = getUsersList(context)
+        }
     }
 
     fun getByPhone(phone: String): User? {
@@ -153,48 +171,8 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
         return uniqueId
     }
 
-    private fun getClientsList(context: Context): List<Client> {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("ClientPrefs", Context.MODE_PRIVATE)
-        val storedClients = mutableListOf<Client>()
-        val storedClientIds = sharedPreferences.getStringSet("stored_client_ids", emptySet()) ?: emptySet()
 
-        for (clientId in storedClientIds) {
-            val name = sharedPreferences.getString("${clientId}_name", "") ?: ""
-            val idCard = sharedPreferences.getString("${clientId}_idCard", "") ?: ""
-            val role = sharedPreferences.getString("${clientId}_role", "") ?: "Client"
-            val email = sharedPreferences.getString("${clientId}_email", "") ?: ""
-            val address = sharedPreferences.getString("${clientId}_address", "") ?: ""
-            val phoneNumber = sharedPreferences.getString("${clientId}_phoneNumber", "") ?: ""
-            val password = sharedPreferences.getString("${clientId}_password", "") ?: ""
-            val isActive = sharedPreferences.getBoolean("${clientId}_isActive", true)
-            val userAppConfigId = sharedPreferences.getString("${clientId}_userAppConfigId", "") ?: ""
-            val availableCoupons = sharedPreferences.getString("${clientId}_availableCoupons", "")?.split(",") ?: emptyList()
-            val purchaseHistory = sharedPreferences.getString("${clientId}_purchaseHistory", "")?.split(",") ?: emptyList()
-            val notifications = sharedPreferences.getString("${clientId}_notifications", "")?.split(",") ?: emptyList()
-            val cartId = sharedPreferences.getString("${clientId}_cartId", "") ?: ""
-            val friends = sharedPreferences.getString("${clientId}_friends", "")?.split(",") ?: emptyList()
 
-            val client = Client(
-                id = clientId,
-                name = name,
-                idCard = idCard,
-                role = role,
-                email = email,
-                address = address,
-                phoneNumber = phoneNumber,
-                password = password,
-                isActive = isActive,
-                userAppConfigId = userAppConfigId,
-                availableCoupons = availableCoupons,
-                purchaseHistory = purchaseHistory,
-                notifications = notifications,
-                cartId = cartId,
-                friends = friends
-            )
-            storedClients.add(client)
-        }
 
-        return storedClients
-    }
 }
 

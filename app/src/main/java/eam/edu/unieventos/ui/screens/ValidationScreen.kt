@@ -14,17 +14,33 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
+import eam.edu.unieventos.ui.viewmodel.UsersViewModel
 
 @Composable
 fun ValidationScreen(
+    email: String,
     onValidationSuccess: () -> Unit
 ) {
-    val generatedCode by remember { mutableStateOf((100000..999999).random().toString()) }
+
+    var generatedCode by remember { mutableStateOf((100000..999999).random().toString()) }
     var code by remember { mutableStateOf("") }
     var timer by remember { mutableStateOf(59) }
     var validationError by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val clientsViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
 
+
+    LaunchedEffect(key1 = timer) {
+        if (timer > 0) {
+            kotlinx.coroutines.delay(1000L)
+            timer -= 1
+        } else {
+
+            generatedCode = (100000..999999).random().toString()
+            timer = 60
+        }
+    }
 
     Box(modifier = Modifier
         .fillMaxSize(), contentAlignment = Alignment.Center
@@ -73,7 +89,7 @@ fun ValidationScreen(
             Button(
                 onClick = {
                     if (code == generatedCode) {
-                        setValidationStatus(context)
+                        setValidationStatus(context,email)
                         onValidationSuccess()
                     } else {
                         validationError = true
@@ -100,18 +116,18 @@ fun ValidationScreen(
             }
         }
     }
-}
 
-fun validateCode(context: Context, inputCode: String): Boolean {
-    val sharedPreferences: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-    val savedCode = sharedPreferences.getString("validation_code", "")
-    return inputCode == savedCode
+
 }
 
 
-fun setValidationStatus(context: Context) {
-    val sharedPreferences: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-    val editor = sharedPreferences.edit()
-    editor.putBoolean("is_validated", true)
-    editor.apply()
+
+fun setValidationStatus(context: Context,email: String) {
+    val clientsViewModel: ClientsViewModel =  ClientsViewModel(context)
+    val user = clientsViewModel.getUserByEmail(email)
+    val client = user as eam.edu.unieventos.model.Client
+    if (client != null) {
+        client.isValidated = true
+    }
+    clientsViewModel.updateClient(client)
 }

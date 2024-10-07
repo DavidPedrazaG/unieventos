@@ -24,8 +24,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             UniEventosTheme {
-                val usersViewModel = UsersViewModel(applicationContext)
-                Navigation(usersViewModel = usersViewModel)
+
+                Navigation()
             }
         }
     }
