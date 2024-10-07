@@ -102,8 +102,10 @@ fun LoginForm(
                     if (user != null) {
                         val isValidated = user.isValidated
                         SharedPreferenceUtils.savePreference(context, user.id, user.role)
-                        if (isValidated) {
+
+                        if (isValidated || user.role == "Admin") {
                             onNavigateToHome(user.role)
+
                         } else {
                             onNavigateToValidate(email)
                         }
