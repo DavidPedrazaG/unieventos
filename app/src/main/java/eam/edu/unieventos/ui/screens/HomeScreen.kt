@@ -1,5 +1,6 @@
 package eam.edu.unieventos.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,17 +20,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eam.edu.unieventos.R
-
 import eam.edu.unieventos.ui.components.CustomBottomNavigationBar
-
+import androidx.compose.material.icons.rounded.SupervisedUserCircle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onNavegateToEvent: () -> Unit,
-    onLogout: () -> Unit
-
+    onLogout: () -> Unit,
+    onNavegateToUserConfig:() -> Unit,
+    context: Context
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedLocation by remember { mutableStateOf("Armenia") }
@@ -54,7 +55,9 @@ fun HomeScreen(
         },
         bottomBar = {
             CustomBottomNavigationBar(
-                selected = 0
+                modifier = Modifier,
+                selected = 0, // Indica cuál ítem está seleccionado inicialmente
+                context = context
             )
         }
     ) { paddingValues ->
@@ -69,6 +72,14 @@ fun HomeScreen(
                 colors = TopAppBarDefaults.largeTopAppBarColors(Color.Transparent),
                 title = {
                     Text(text = stringResource(R.string.app_name))
+                },
+                navigationIcon = {
+                    IconButton(onClick = { onNavegateToUserConfig() }) { // Al hacer clic, navega a la pantalla de configuración
+                        Icon(
+                            imageVector =  Icons.Rounded.SupervisedUserCircle,
+                            contentDescription = "Configuración de usuario"
+                        )
+                    }
                 },
                 actions = {
                     IconButton(onClick = { onLogout() }) {
