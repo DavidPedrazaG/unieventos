@@ -23,4 +23,7 @@ sealed class RouteScreen {
 
     @Serializable
     data object Event: RouteScreen()
+
+    @Serializable
+    data object UserConfig: RouteScreen()
 }

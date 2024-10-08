@@ -13,6 +13,7 @@ import eam.edu.unieventos.ui.screens.HomeScreen
 import eam.edu.unieventos.ui.screens.LoginScreen
 import eam.edu.unieventos.ui.screens.RecoveryScreen
 import eam.edu.unieventos.ui.screens.RegisterScreen
+import eam.edu.unieventos.ui.screens.UserConfigurationScreen
 import eam.edu.unieventos.ui.screens.ValidationScreen
 import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
 
@@ -120,6 +121,17 @@ fun Navigation(
                 onLogout = {
                     SharedPreferenceUtils.clearPreference(context)
                     navController.navigate(RouteScreen.Login)
+                },
+                onNavegateToUserConfig = {
+                    navController.navigate(RouteScreen.UserConfig)
+                }
+            )
+        }
+
+        composable<RouteScreen.UserConfig> {
+            UserConfigurationScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
