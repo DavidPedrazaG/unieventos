@@ -124,7 +124,8 @@ fun Navigation(
                 },
                 onNavegateToUserConfig = {
                     navController.navigate(RouteScreen.UserConfig)
-                }
+                },
+                context = context
             )
         }
 
