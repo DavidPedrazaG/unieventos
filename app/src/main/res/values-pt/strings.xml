@@ -27,7 +27,7 @@
     <string name="saveChange">Salvar Alterações</string>
     <string name="recoveryPassword">Recuperar Senha</string>
     <string name="sendCode">ENVIAR CÓDIGO</string>
-    <string name="labelCodeRule">SEU CÓDIGO É: (CÓDIGO AQUI)</string>
+    <string name="labelCodeRule">SEU CÓDIGO É:</string>
     <string name="getIntoCode">Inserir código</string>
     <string name="getIntoPassword">Inserir Senha</string>
     <string name="id">Identificação</string>
@@ -42,4 +42,5 @@
     <string name="history">Histórico</string>
     <string name="settings">Configurações</string>
     <string name="notifications">Notificações</string>
+    <string name="Email">E-mail</string>
 </resources>
