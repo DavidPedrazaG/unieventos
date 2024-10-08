@@ -12,8 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import eam.edu.unieventos.R
 import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
 import eam.edu.unieventos.ui.viewmodel.UsersViewModel
 
@@ -25,7 +27,7 @@ fun ValidationScreen(
 
     var generatedCode by remember { mutableStateOf((100000..999999).random().toString()) }
     var code by remember { mutableStateOf("") }
-    var timer by remember { mutableStateOf(59) }
+    var timer by remember { mutableStateOf(60) }
     var validationError by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val clientsViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
@@ -53,7 +55,7 @@ fun ValidationScreen(
         ) {
 
             Text(
-                text = "Tu código de validación: $generatedCode",
+                text = "${stringResource(id = R.string.validateCode)} $generatedCode",
                 color = Color.Black,
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
@@ -62,7 +64,7 @@ fun ValidationScreen(
             TextField(
                 value = code,
                 onValueChange = { code = it },
-                label = { Text(text = "Codigo de validación") },
+                label = { Text(text = stringResource(id = R.string.validateCode)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -70,7 +72,7 @@ fun ValidationScreen(
             )
 
             Text(
-                text = "VÁLIDO POR $timer SEGUNDOS",
+                text = stringResource(id = R.string.valid_for_seconds, timer),
                 color = Color.Gray,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -78,7 +80,7 @@ fun ValidationScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "Reenviar codigo?",
+                text = stringResource(id = R.string.resendCode),
                 color = Color(0xFF00BFFF),
 
 
@@ -104,14 +106,14 @@ fun ValidationScreen(
                 )
             ) {
                 Text(
-                    text = "Validar cuenta",
+                    text = stringResource(id = R.string.validateAccount),
                     color = Color.White,
                     fontSize = 16.sp
                 )
             }
             if (validationError) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Código incorrecto", color = Color.Red)
+                Text(text = stringResource(id = R.string.wrongCode), color = Color.Red)
 
             }
         }

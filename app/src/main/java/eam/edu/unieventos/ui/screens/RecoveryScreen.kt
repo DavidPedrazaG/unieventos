@@ -22,6 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import eam.edu.unieventos.R
 
 @Composable
 fun RecoveryScreen(
@@ -33,7 +35,7 @@ fun RecoveryScreen(
     var newPassword by remember { mutableStateOf("") }
     var temporalCode by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(false) }
-    var timer by remember { mutableStateOf(59) }
+    var timer by remember { mutableStateOf(60) }
     val context = LocalContext.current
     val clientViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
 
@@ -58,7 +60,7 @@ fun RecoveryScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "RECUPERAR CONTRASEÑA",
+                text = stringResource(id = R.string.recoveryPassword),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -68,7 +70,7 @@ fun RecoveryScreen(
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text(text = "Correo Electrónico") },
+                label = { Text(text = stringResource(id = R.string.Email)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -95,7 +97,7 @@ fun RecoveryScreen(
                 )
             ) {
                 Text(
-                    text = "ENVIAR CÓDIGO",
+                    text = stringResource(id = R.string.sendCode),
                     color = Color.White,
                     fontSize = 16.sp
                 )
@@ -103,7 +105,7 @@ fun RecoveryScreen(
 
             if (isEmailValid) {
                 Text(
-                    text = "TU CÓDIGO ES: $temporalCode",
+                    text = "${stringResource(id = R.string.labelCodeRule)} $temporalCode",
                     color = Color.Black,
                     modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                 )
@@ -112,7 +114,7 @@ fun RecoveryScreen(
             TextField(
                 value = code,
                 onValueChange = { code = it },
-                label = { Text(text = "Ingresar código") },
+                label = { Text(text = stringResource(id = R.string.getIntoCode)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -122,7 +124,7 @@ fun RecoveryScreen(
             TextField(
                 value = newPassword,
                 onValueChange = { newPassword = it },
-                label = { Text(text = "Ingresar contraseña") },
+                label = { Text(text = stringResource(id = R.string.getIntoPassword)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -130,7 +132,7 @@ fun RecoveryScreen(
             )
 
             Text(
-                text = "VÁLIDO POR $timer SEGUNDOS",
+                text = stringResource(id = R.string.valid_for_seconds, timer),
                 color = Color.Gray,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -152,7 +154,7 @@ fun RecoveryScreen(
                 )
             ) {
                 Text(
-                    text = "RECUPERAR CONTRASEÑA",
+                    text = stringResource(id = R.string.recoveryPassword),
                     color = Color.White,
                     fontSize = 16.sp
                 )

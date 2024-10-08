@@ -32,6 +32,7 @@
     <string name="getIntoPassword">Inserir Senha</string>
     <string name="id">Identificação</string>
     <string name="name">Nome</string>
+    <string name="address">Endereço</string>
     <string name="phoneNumber">Número de Telefone</string>
     <string name="questionLogin">JÁ TEM UMA CONTA? ENTRAR</string>
     <string name="validateCode">Código de validação</string>
@@ -43,4 +44,7 @@
     <string name="settings">Configurações</string>
     <string name="notifications">Notificações</string>
     <string name="Email">E-mail</string>
+    <string name="wrongCode">Código Errado</string>
+    <string name="valid_for_seconds">VÁLIDO POR %1$d SEGUNDOS</string>
+
 </resources>

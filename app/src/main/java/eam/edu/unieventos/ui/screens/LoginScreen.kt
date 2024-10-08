@@ -24,6 +24,7 @@ import eam.edu.unieventos.model.Role
 
 import eam.edu.unieventos.utils.SharedPreferenceUtils
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun LoginScreen(
@@ -78,7 +79,7 @@ fun LoginForm(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
+            label = { Text(text = stringResource(id = R.string.emailLabel))},
             singleLine = true
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -86,7 +87,7 @@ fun LoginForm(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text(text = stringResource(id = R.string.passwordLabel)) },
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true
         )
@@ -118,7 +119,7 @@ fun LoginForm(
                     contentColor = Color.White
                 )
             ) {
-                Text("Iniciar Sesión")
+                Text(text = stringResource(id = R.string.signIn))
             }
 
             Button(
@@ -128,14 +129,14 @@ fun LoginForm(
                     contentColor = Color.White
                 )
             ) {
-                Text("Registrarse")
+                Text(text = stringResource(id = R.string.register))
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Olvidaste tu contraseña?",
+            text = stringResource(id = R.string.forgottenPassword),
             color = Color(0xFF00BFFF),
             modifier = Modifier.clickable {
                 onNavigateToRecovery()
