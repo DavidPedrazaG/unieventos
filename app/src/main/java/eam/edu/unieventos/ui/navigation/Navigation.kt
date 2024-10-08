@@ -87,6 +87,7 @@ fun Navigation(
         }
         composable<RouteScreen.Recovery> {
             RecoveryScreen(
+                email = email,
                 onNavigateBack = {
                     navController.popBackStack()
                 }
