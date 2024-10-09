@@ -148,6 +148,14 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
         }
     }
 
+    fun deactivateClient(client: Client) {
+        if (client.isActive) {
+            client.isActive = false
+
+            updateClient(client)
+        }
+    }
+
     fun getByPhone(phone: String): User? {
         return _clients.value.find { it.phoneNumber == phone }
     }

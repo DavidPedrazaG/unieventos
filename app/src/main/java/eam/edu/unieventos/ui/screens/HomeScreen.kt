@@ -57,7 +57,7 @@ fun HomeScreen(
             CustomBottomNavigationBar(
                 modifier = Modifier,
                 selected = 0, // Indica cuál ítem está seleccionado inicialmente
-                context = context
+                //context = context
             )
         }
     ) { paddingValues ->

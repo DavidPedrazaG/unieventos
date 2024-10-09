@@ -3,9 +3,11 @@ package eam.edu.unieventos.ui.navigation
 import eam.edu.unieventos.ui.viewmodel.UsersViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import eam.edu.unieventos.model.Client
 import eam.edu.unieventos.model.Role
 import eam.edu.unieventos.ui.navigation.RouteScreen
 import eam.edu.unieventos.ui.screens.EventDetailScreen
@@ -25,6 +27,7 @@ fun Navigation(
 ){
 
     var email: String = ""
+
     val navController = rememberNavController()
     val context = LocalContext.current
 
@@ -35,6 +38,7 @@ fun Navigation(
     if(sesion != null){
         startDestination = if (sesion.rol == "admin") {
             RouteScreen.Home
+
         }else{
             RouteScreen.Home
         }
@@ -131,8 +135,12 @@ fun Navigation(
 
         composable<RouteScreen.UserConfig> {
             UserConfigurationScreen(
+
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToLogin = {
+                    navController.navigate(RouteScreen.Login)
                 }
             )
         }

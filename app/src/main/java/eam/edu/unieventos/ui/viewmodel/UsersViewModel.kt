@@ -98,12 +98,28 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
         }
     }
 
+
+
     fun login(email: String, password: String): User? {
+
         val user = _users.value.find { it.email == email && it.password == password }
-        if (user == null){
-            return _clients.value.find { it.email == email && it.password == password }
+        if (user != null) {
+            return user
         }
-        return user
+
+
+        val client = _clients.value.find { it.email == email && it.password == password }
+        if (client != null) {
+
+            return if (client.isActive) {
+                client
+            } else {
+
+                null
+            }
+        }
+
+        return null
     }
 
 
