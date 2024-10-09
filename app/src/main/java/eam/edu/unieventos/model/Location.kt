@@ -7,7 +7,7 @@ data class Location(
     val price: Float,
     val maxCapacity: Int,
     val ticketsSold: Int,
-    var eventId: String?,
+    var eventCode: String,
     val isActive: Boolean
 ) {
 }
