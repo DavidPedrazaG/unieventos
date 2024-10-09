@@ -6,13 +6,15 @@ data class Event(
     val id : String,
     val code: String,
     val name: String,
-    val address: String,
+    val place: String,
     val city: String,
     val description: String,
     val type: String,
     val poster: String,
     val locationImage: String,
     val locations: List<String>,
-    val  dateEvent : Date
+    val  dateEvent : Date,
+    var isActive: Boolean
+
 ) {
 }

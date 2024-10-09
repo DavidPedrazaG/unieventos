@@ -8,6 +8,7 @@ import eam.edu.unieventos.model.Location
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import android.util.Log
 
 class LocationsViewModel(private val context: Context) : ViewModel() {
 
@@ -25,8 +26,8 @@ class LocationsViewModel(private val context: Context) : ViewModel() {
         return _locations.value.find { it.name == name }
     }
 
-    fun getLocationsByEvent(eventId: String): List<Location> {
-        return _locations.value.filter { it.eventId == eventId }
+    fun getLocationsByEvent(eventCode: String): List<Location> {
+        return _locations.value.filter { it.eventCode == eventCode }
     }
 
 
@@ -40,7 +41,7 @@ class LocationsViewModel(private val context: Context) : ViewModel() {
         editor.putInt("${location.id}_maxCapacity", location.maxCapacity)
         editor.putInt("${location.id}_ticketsSold", location.ticketsSold)
         editor.putBoolean("${location.id}_isActive", location.isActive)
-        editor.putString("${location.id}_eventId", location.eventId)
+        editor.putString("${location.id}_eventId", location.eventCode)
 
         editor.putStringSet("stored_locations", (sharedPreferences.getStringSet("stored_locations", emptySet()) ?: emptySet()).plus(location.id))
         editor.apply()
@@ -59,7 +60,7 @@ class LocationsViewModel(private val context: Context) : ViewModel() {
         editor.putInt("${location.id}_maxCapacity", location.maxCapacity)
         editor.putInt("${location.id}_ticketsSold", location.ticketsSold)
         editor.putBoolean("${location.id}_isActive", location.isActive)
-        editor.putString("${location.id}_eventId", location.eventId)
+        editor.putString("${location.id}_eventId", location.eventCode)
 
         editor.apply()
     }
@@ -82,7 +83,7 @@ class LocationsViewModel(private val context: Context) : ViewModel() {
             val maxCapacity = sharedPreferences.getInt("${id}_maxCapacity", 0)
             val ticketsSold = sharedPreferences.getInt("${id}_ticketsSold", 0)
             val isActive = sharedPreferences.getBoolean("${id}_isActive", true)
-            val eventId = sharedPreferences.getString("${id}_eventId", null)
+            val eventId = sharedPreferences.getString("${id}_eventId", "") ?:""
 
             val location = Location(
                 id = id,
@@ -90,7 +91,7 @@ class LocationsViewModel(private val context: Context) : ViewModel() {
                 price = price,
                 maxCapacity = maxCapacity,
                 ticketsSold = ticketsSold,
-                eventId = eventId,
+                eventCode = eventId,
                 isActive = isActive
             )
             storedLocations.add(location)
@@ -98,4 +99,18 @@ class LocationsViewModel(private val context: Context) : ViewModel() {
 
         return storedLocations
     }
+
+
+
+    fun printLocations() {
+        val locationsList = _locations.value
+        if (locationsList.isEmpty()) {
+            Log.d("LocationsViewModel", "No hay localidades disponibles.")
+        } else {
+            for (location in locationsList) {
+                Log.d("LocationsViewModel", "ID: ${location.id}, Name: ${location.name}, Price: ${location.price}, Max Capacity: ${location.maxCapacity}, Tickets Sold: ${location.ticketsSold}, Is Active: ${location.isActive}, Event ID: ${location.eventCode}")
+            }
+        }
+    }
+
 }

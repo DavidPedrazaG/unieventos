@@ -17,14 +17,16 @@ fun LocationRow(
     locationName: String,
     onNameChange: (String) -> Unit,
     price: String,
-    onPriceChange: (String) -> Unit
+    onPriceChange: (String) -> Unit,
+    maxCapacity : String,
+    onMaxChange: (String) -> Unit,
 ) {
-    Row(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        horizontalAlignment = Alignment.CenterHorizontally, // Alinear el contenido horizontalmente al centro
+        verticalArrangement = Arrangement.Center // Alinear verticalmente los elementos al centro
     ) {
-        // Campo de texto que muestra el número de la localidad
+        // Campo de texto que muestra el número de la localidad (centrado arriba)
         OutlinedTextField(
             value = index.toString(),
             onValueChange = {},
@@ -38,25 +40,48 @@ fun LocationRow(
             modifier = Modifier.width(80.dp)
         )
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // Campo de texto para el nombre de la localidad
-        OutlinedTextField(
-            value = locationName,
-            onValueChange = onNameChange,
-            label = { Text(text = "Nombre") },
-            modifier = Modifier.weight(1f)
-        )
+        // Fila con los otros campos
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween, // Distribuir espacio equitativamente
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Campo de texto para el nombre de la localidad
+            OutlinedTextField(
+                value = locationName,
+                onValueChange = onNameChange,
+                label = { Text(text = "Nombre") },
+                modifier = Modifier
+                    //.weight(1f)
+                    .width(130.dp)
+            )
 
-        Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
-        // Campo de texto para el precio de la localidad
-        OutlinedTextField(
-            value = price,
-            onValueChange = onPriceChange,
-            label = { Text(text = "Precio") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.width(100.dp)
-        )
+            // Campo de texto para el precio de la localidad
+            OutlinedTextField(
+                value = price,
+                onValueChange = onPriceChange,
+                label = { Text(text = "Precio") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.width(95.dp)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Campo de texto para la capacidad máxima
+            OutlinedTextField(
+                value = maxCapacity,
+                onValueChange = onMaxChange,
+                label = { Text(text = "Capacidad Maxima") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier
+                    .width(145.dp)
+            )
+        }
+
     }
 }
+
