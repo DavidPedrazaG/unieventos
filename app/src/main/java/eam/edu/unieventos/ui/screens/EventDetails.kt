@@ -227,12 +227,8 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
         // Botón para añadir al carrito
         Button(
             onClick = {
-                if (selectedTickets.isNotEmpty()) {
-                    // Agregar al carrito
-                    addItem(cart, cartItems,event, selectedTickets, context, itemViewModel, cartViewModel)
-                } else {
-                    Toast.makeText(context, "Selecciona al menos una entrada", Toast.LENGTH_SHORT).show()
-                }
+                // Agregar al carrito
+                addItem(cart, cartItems,event, selectedTickets, context, itemViewModel, cartViewModel)
             }
         ) {
             Text(text = "Añadir al carrito")
@@ -268,25 +264,46 @@ fun addItem(cart: Cart?, cartItems: MutableList<Item>, event: Event, selectedTic
             val location = ticket.third
             if (location != null) {
                 val totalPrice = location.price * quantity
-                val newItemId = Item(
-                    id = UUID.randomUUID().toString(),
-                    eventId = event.code,
-                    locationId = location.id,
-                    ticketQuantity = quantity,
-                    totalPrice = totalPrice
-                )
-                Log.e("ITEM", "LAAAAAAAAA QUAAAAAA: ${newItemId.ticketQuantity}")
                 if(cartItems.isEmpty()){
+                    val newItemId = Item(
+                        id = UUID.randomUUID().toString(),
+                        eventId = event.id,
+                        locationId = location.id,
+                        ticketQuantity = quantity,
+                        totalPrice = totalPrice
+                    )
                     cartViewModel.addItem(newItemId, context, cart)
                     Toast.makeText(context, "Entradas añadidas al carrito", Toast.LENGTH_SHORT).show()
                 }
                 val existingItem = cartItems.find { it.locationId == location.id }
                 if (existingItem != null) {
-                    itemViewModel.updateItem(newItemId, context)
+                    if(quantity == 0){
+                        itemViewModel.removeItem(existingItem, context)
+                    }else{
+                        val newItemId = Item(
+                            id = existingItem.id,
+                            eventId = event.id,
+                            locationId = location.id,
+                            ticketQuantity = quantity,
+                            totalPrice = totalPrice
+                        )
+                        itemViewModel.updateItem(newItemId, context)
+                    }
                     Toast.makeText(context, "Entradas actualizadas", Toast.LENGTH_SHORT).show()
                 } else {
-                    cartViewModel.addItem(newItemId, context, cart)
-                    Toast.makeText(context, "Entradas añadidas al carrito", Toast.LENGTH_SHORT).show()
+                    if(quantity > 0){
+                        val newItemId = Item(
+                            id = UUID.randomUUID().toString(),
+                            eventId = event.id,
+                            locationId = location.id,
+                            ticketQuantity = quantity,
+                            totalPrice = totalPrice
+                        )
+                        cartViewModel.addItem(newItemId, context, cart)
+                        Toast.makeText(context, "Entradas añadidas al carrito", Toast.LENGTH_SHORT).show()
+                    }else{
+                        Toast.makeText(context, "Selecciona al menos una entrada", Toast.LENGTH_SHORT).show()
+                    }
                 }
 
             }

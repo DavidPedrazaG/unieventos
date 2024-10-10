@@ -33,6 +33,7 @@ class ItemViewModel (private val context: Context) : ViewModel(){
             editor.putString("${item.id}_event_id", item.eventId)
             editor.putString("${item.id}_location_id", item.locationId)
             editor.apply()
+            _items.value = getItemsList(context)
             Log.i("ITEM", "Item updated: $item)")
         }
     }
