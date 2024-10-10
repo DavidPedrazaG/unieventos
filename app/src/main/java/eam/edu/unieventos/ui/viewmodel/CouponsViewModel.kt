@@ -203,6 +203,20 @@ class CouponsViewModel(private val context: Context) : ViewModel() {
     }
 
 
+    fun printCoupons() {
+        val couponsList = getCouponsList(context) // Obtiene la lista de todos los cupones
+        Log.i("CouponsViewModel", "Imprimiendo todos los cupones:")
+
+        couponsList.forEach { coupon ->
+            Log.i(
+                "CouponsViewModel",
+                "ID: ${coupon.id}, Code: ${coupon.code}, Discount: ${coupon.discountPercentage}, " +
+                        "Expiration Date: ${coupon.expirationDate}, Event Code: ${coupon.eventCode}, " +
+                        "Type: ${coupon.type}, Is Active: ${coupon.isActive}"
+            )
+        }
+    }
+
 
 
 }
