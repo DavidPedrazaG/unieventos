@@ -264,17 +264,6 @@ fun addItem(cart: Cart?, cartItems: MutableList<Item>, event: Event, selectedTic
             val location = ticket.third
             if (location != null) {
                 val totalPrice = location.price * quantity
-                if(cartItems.isEmpty()){
-                    val newItemId = Item(
-                        id = UUID.randomUUID().toString(),
-                        eventId = event.id,
-                        locationId = location.id,
-                        ticketQuantity = quantity,
-                        totalPrice = totalPrice
-                    )
-                    cartViewModel.addItem(newItemId, context, cart)
-                    Toast.makeText(context, "Entradas añadidas al carrito", Toast.LENGTH_SHORT).show()
-                }
                 val existingItem = cartItems.find { it.locationId == location.id }
                 if (existingItem != null) {
                     if(quantity == 0){
