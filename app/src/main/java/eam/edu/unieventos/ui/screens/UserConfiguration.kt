@@ -41,9 +41,12 @@ fun UserConfigurationScreen(
     var password by remember { mutableStateOf(client.password ) }
     var address by remember { mutableStateOf(client.address ) }
 
-
-
     val clientsViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
+
+    // Para mostrar errores
+    var cedulaError by remember { mutableStateOf(false) }
+    var phoneError by remember { mutableStateOf(false) }
+    var emailError by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -59,7 +62,6 @@ fun UserConfigurationScreen(
                 tint = Color(0xFF6A0dad)
             )
         }
-
 
         Column(
             modifier = Modifier
@@ -84,7 +86,6 @@ fun UserConfigurationScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -94,42 +95,78 @@ fun UserConfigurationScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Cédula
             OutlinedTextField(
                 value = id,
-                onValueChange = { id = it },
-                label = { Text(text = "Cedula") },
+                onValueChange = {
+                    // Solo permite números
+                    if (it.all { char -> char.isDigit() }) {
+                        id = it
+                        cedulaError = false
+                    } else {
+                        cedulaError = true
+                    }
+                },
+                isError = cedulaError,
+                label = { Text(text = "Cédula") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
+            if (cedulaError) {
+                Text("Solo se permiten números en la cédula", color = Color.Red, fontSize = 12.sp)
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text(text = "Correo") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
+            // Teléfono
             OutlinedTextField(
                 value = phoneNumber,
-                onValueChange = { phoneNumber = it },
-                label = { Text(text = "Numero de telefono") },
+                onValueChange = {
+                    // Solo permite números
+                    if (it.all { char -> char.isDigit() }) {
+                        phoneNumber = it
+                        phoneError = false
+                    } else {
+                        phoneError = true
+                    }
+                },
+                isError = phoneError,
+                label = { Text(text = "Número de teléfono") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
             )
+            if (phoneError) {
+                Text("Solo se permiten números en el teléfono", color = Color.Red, fontSize = 12.sp)
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Dirección
             OutlinedTextField(
-                value = address, // Nuevo campo de dirección
+                value = address, // Campo de dirección
                 onValueChange = { address = it },
                 label = { Text(text = "Dirección") },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Email
+            OutlinedTextField(
+                value = email,
+                onValueChange = {
+                    email = it
+
+                    emailError = !it.contains("@")
+                },
+                isError = emailError,
+                label = { Text(text = "Correo") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            )
+            if (emailError) {
+                Text("El correo debe contener '@'", color = Color.Red, fontSize = 12.sp)
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -143,25 +180,28 @@ fun UserConfigurationScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(
                     onClick = {
-
-                        client.name = name
-                        client.idCard = id
-                        client.email = email
-                        client.phoneNumber = phoneNumber
-                        client.address = address
-                        client.password = password
-                        clientsViewModel.updateClient(client)
-                        onNavigateBack()
+                       
+                        if (!cedulaError && !phoneError && !emailError) {
+                            client.name = name
+                            client.idCard = id
+                            client.email = email
+                            client.phoneNumber = phoneNumber
+                            client.address = address
+                            client.password = password
+                            clientsViewModel.updateClient(client)
+                            onNavigateBack()
+                        }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A0dad),
-                        contentColor = Color.White),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF6A0dad),
+                        contentColor = Color.White
+                    ),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(text = "GUARDAR CAMBIOS", fontSize = 14.sp)
@@ -175,8 +215,10 @@ fun UserConfigurationScreen(
                         clientsViewModel.deactivateClient(client)
                         onNavigateToLogin()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A0dad),
-                        contentColor = Color.White),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF6A0dad),
+                        contentColor = Color.White
+                    ),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(text = "ELIMINAR CUENTA", fontSize = 14.sp, color = Color.White)
