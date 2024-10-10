@@ -1,5 +1,6 @@
 package eam.edu.unieventos.ui.screens
 
+import android.app.TimePickerDialog
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -24,6 +25,7 @@ import eam.edu.unieventos.ui.viewmodel.EventsViewModel
 import eam.edu.unieventos.ui.viewmodel.LocationsViewModel
 import java.sql.Date
 import java.text.SimpleDateFormat
+import java.time.LocalTime
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,6 +48,9 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
     var locationImage by remember { mutableStateOf(event?.locationImage ?: "") }
     var dateEvent by remember { mutableStateOf(event?.dateEvent) }
     var isActive by remember { mutableStateOf(event?.isActive ?: true) }
+
+    var timeEvent by remember { mutableStateOf<LocalTime?>(event?.time) } // Nueva variable para la hora del evento
+
 
     // Localidades del evento
     val initialLocations = event?.locations?.mapNotNull { locationViewModel.getLocationById(it) } ?: emptyList()
@@ -200,6 +205,37 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Hora del evento
+            OutlinedTextField(
+                value = timeEvent?.toString() ?: "",
+                onValueChange = {},
+                readOnly = true,
+                placeholder = { Text(text = "Seleccionar Hora") },
+                trailingIcon = {
+                    IconButton(onClick = {
+                        // Mostrar TimePickerDialog para seleccionar la hora
+                        val timePickerDialog = TimePickerDialog(
+                            context,
+                            { _, hourOfDay, minute ->
+                                timeEvent = LocalTime.of(hourOfDay, minute)
+                            },
+                            timeEvent?.hour ?: 0, // Hora por defecto
+                            timeEvent?.minute ?: 0, // Minutos por defecto
+                            true
+                        )
+                        timePickerDialog.show()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Rounded.DateRange,
+                            contentDescription = "Icon Time"
+                        )
+                    }
+                },
+                modifier = Modifier.width(190.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Campo para seleccionar cuántas localidades se quieren
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -288,6 +324,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                         locationImage = locationImage,
                         locations = updatedLocations.map { it.id },
                         dateEvent = dateEvent ?: event.dateEvent,
+                        time =   timeEvent ?: LocalTime.now(),
                         isActive = isActive
                     )
 

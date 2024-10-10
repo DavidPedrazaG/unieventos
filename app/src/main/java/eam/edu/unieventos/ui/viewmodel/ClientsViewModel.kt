@@ -58,7 +58,7 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
                 add(Calendar.YEAR, 10)
             }.time
 
-            val coupon = Coupon(id = couponId, code = couponCode, discountPercentage = 15f, expirationDate = expirationDate, eventId = null, isActive = true)
+            val coupon = Coupon(id = couponId, code = couponCode, discountPercentage = 15f, expirationDate = expirationDate, eventCode = null,1 , isActive = true)
             _couponViewModel.createCoupon(coupon)
 
 

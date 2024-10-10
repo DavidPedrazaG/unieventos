@@ -1,7 +1,7 @@
 package eam.edu.unieventos.model
 
  class Client(
-    val availableCoupons: List<String>,  // List of coupon IDs
+    var availableCoupons: List<String>,  // List of coupon codes
     val purchaseHistory: List<String>,   // List of order IDs
     val friends: List<String>,           // List of client IDs (friend list)
     val notifications: List<String>,     // List of notification IDs

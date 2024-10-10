@@ -1,5 +1,6 @@
 package eam.edu.unieventos.model
 
+import java.time.LocalTime
 import java.util.Date
 
 data class Event(
@@ -14,6 +15,7 @@ data class Event(
     val locationImage: String,
     val locations: List<String>,
     val  dateEvent : Date,
+    val time : LocalTime,
     var isActive: Boolean
 
 ) {
