@@ -25,12 +25,13 @@ import eam.edu.unieventos.model.Role
 import eam.edu.unieventos.utils.SharedPreferenceUtils
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.res.stringResource
+import eam.edu.unieventos.services.EmailService
 
 @Composable
 fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
-    onNavigateToValidate: (String) -> Unit,
+    onNavigateToValidate: (String, String) -> Unit,
     onNavigateToHome: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -52,7 +53,7 @@ fun LoginForm(
     context: Context,
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
-    onNavigateToValidate: (String) -> Unit,
+    onNavigateToValidate: (String, String) -> Unit,
     onNavigateToHome: (String) -> Unit
 ) {
     val usersViewModel: UsersViewModel = remember { UsersViewModel(context) }
@@ -104,11 +105,20 @@ fun LoginForm(
                         val isValidated = user.isValidated
                         SharedPreferenceUtils.savePreference(context, user.id, user.role)
 
+                        val generatedCode = (100000..999999).random().toString()
+
+                        val emailService = EmailService()
+                        emailService.sendEmail(
+                            to = email,
+                            subject = "Código de validación",
+                            body = "Tu código de validación es: $generatedCode"
+                        )
+
                         if (isValidated || user.role == "Admin") {
                             onNavigateToHome(user.role)
 
                         } else {
-                            onNavigateToValidate(email)
+                            onNavigateToValidate(email,generatedCode)
                         }
                     } else {
                         loginError = true

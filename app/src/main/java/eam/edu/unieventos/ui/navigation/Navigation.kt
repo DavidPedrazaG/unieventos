@@ -30,6 +30,7 @@ fun Navigation(
 ){
 
     var email: String = ""
+    var code : String = ""
     var event: String = ""
     var coupon: String = ""
     val navController = rememberNavController()
@@ -68,8 +69,9 @@ fun Navigation(
                 onNavigateToRecovery = {
                     navController.navigate(RouteScreen.Recovery)
                 },
-                onNavigateToValidate = { emailRecieved ->
+                onNavigateToValidate = { emailRecieved,generatedCode ->
                     email = emailRecieved
+                    code = generatedCode
                     navController.navigate(RouteScreen.Validation)
                 },
                 onNavigateToHome = { role ->
