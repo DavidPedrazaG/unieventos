@@ -25,6 +25,8 @@ import eam.edu.unieventos.dto.UserDTO
 import eam.edu.unieventos.model.Event
 import eam.edu.unieventos.ui.viewmodel.EventsViewModel
 import eam.edu.unieventos.utils.SharedPreferenceUtils
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -241,7 +243,7 @@ fun EventItem(
                 if (event != null) {
                     Text(text = event.name, fontSize = 18.sp)
                     Text(text = "Tipo: ${event.type}", fontSize = 16.sp)
-                    Text(text = "Fecha: ${event.dateEvent.toString()}", fontSize = 14.sp)
+                    Text(text = "Fecha: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(event.dateEvent)}", fontSize = 14.sp)
                     Text(text = "Hora: ${event.time.toString()}", fontSize = 14.sp)
                 }
             }

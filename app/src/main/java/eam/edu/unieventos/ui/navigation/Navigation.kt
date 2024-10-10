@@ -207,6 +207,10 @@ fun Navigation(
                 },
                 onNavegateToCoupons = {
                     navController.navigate(RouteScreen.Coupons)
+                },
+                onNavegateToEventDetail = { eventRecived ->
+                    event = eventRecived
+                    navController.navigate(RouteScreen.EventDetail)
                 }
             )
         }

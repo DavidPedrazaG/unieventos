@@ -107,4 +107,8 @@ class CartViewModel(private val context: Context) : ViewModel() {
     fun getCartByClient(clientID: String): Cart? {
         return _carts.value.find { it.clientId == clientID }
     }
+
+    fun getCartById(cartID: String): Cart? {
+        return _carts.value.find { it.id == cartID }
+    }
 }

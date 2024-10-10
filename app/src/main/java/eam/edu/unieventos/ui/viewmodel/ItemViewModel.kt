@@ -2,6 +2,7 @@ package eam.edu.unieventos.ui.viewmodel
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import eam.edu.unieventos.model.Cart
 import eam.edu.unieventos.model.Item
@@ -24,12 +25,16 @@ class ItemViewModel (private val context: Context) : ViewModel(){
     fun updateItem(item: Item, context: Context) {
         val sharedPreferences = context.getSharedPreferences("ItemPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        editor.putString("${item.id}_id", item.id)
-        editor.putInt("${item.id}_ticketQuantity", item.ticketQuantity)
-        editor.putFloat("${item.id}_totalPrice", item.totalPrice)
-        editor.putString("${item.id}_event_id", item.eventId)
-        editor.putString("${item.id}_location_id", item.locationId)
-        editor.apply()
+        val existingItem = getItemById(item.id)
+        if (existingItem != null) {
+            editor.putString("${item.id}_id", item.id)
+            editor.putInt("${item.id}_ticketQuantity", item.ticketQuantity)
+            editor.putFloat("${item.id}_totalPrice", item.totalPrice)
+            editor.putString("${item.id}_event_id", item.eventId)
+            editor.putString("${item.id}_location_id", item.locationId)
+            editor.apply()
+            Log.i("ITEM", "Item updated: $item)")
+        }
     }
 
     fun removeItem(item: Item, context: Context) {
@@ -47,7 +52,7 @@ class ItemViewModel (private val context: Context) : ViewModel(){
     private fun getItemsList(context: Context): List<Item> {
         val sharedPreferences: SharedPreferences = context.getSharedPreferences("ItemPrefs", Context.MODE_PRIVATE)
         val storedItems = mutableListOf<Item>()
-        val storedCodes = sharedPreferences.getStringSet("stored_codes", emptySet()) ?: emptySet()
+        val storedCodes = sharedPreferences.getStringSet("stored_items", emptySet()) ?: emptySet()
 
         for (code in storedCodes) {
             val id = sharedPreferences.getString("${code}_id", "") ?: ""
@@ -73,4 +78,36 @@ class ItemViewModel (private val context: Context) : ViewModel(){
         return _items.value.find { it.id == itemId }
     }
 
+    fun logItems(){
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("ItemPrefs", Context.MODE_PRIVATE)
+        val storedItems = mutableListOf<Item>()
+        val storedCodes = sharedPreferences.getStringSet("stored_items", emptySet()) ?: emptySet()
+        Log.i("ITEM", "before for")
+        for (code in storedCodes) {
+            val id = sharedPreferences.getString("${code}_id", "") ?: ""
+            val ticketQuantity = sharedPreferences.getInt("${code}_ticketQuantity", 0)
+            val totalPrice = sharedPreferences.getFloat("${code}_totalPrice", 0f)
+            val eventId = sharedPreferences.getString("${code}_event_id", null) ?: ""
+            val locationId = sharedPreferences.getString("${code}_location_id", null) ?: ""
+
+            val item = Item(
+                id = id,
+                eventId = eventId,
+                locationId = locationId,
+                ticketQuantity = ticketQuantity,
+                totalPrice = totalPrice
+            )
+            storedItems.add(item)
+        }
+
+        storedItems.forEach { item ->
+            Log.i("ITEM", "------------------------------------------------")
+            Log.i("ITEM", "Item ${item.id} id: ${item.id}")
+            Log.i("ITEM", "Item ${item.id} location id: ${item.locationId}")
+            Log.i("ITEM", "Item ${item.id} event id: ${item.eventId}")
+            Log.i("ITEM", "Item ${item.id} ticket quantity: ${item.ticketQuantity}")
+            Log.i("ITEM", "Item ${item.id} total price: ${item.totalPrice}")
+            Log.i("ITEM", "------------------------------------------------")
+        }
+    }
 }
