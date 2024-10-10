@@ -1,23 +1,26 @@
 package eam.edu.unieventos.ui.navigation
 
-import eam.edu.unieventos.ui.viewmodel.UsersViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import eam.edu.unieventos.model.Client
-import eam.edu.unieventos.model.Role
-import eam.edu.unieventos.ui.navigation.RouteScreen
-import eam.edu.unieventos.ui.screens.EventDetailScreen
+import eam.edu.unieventos.ui.screens.ActiveCouponsList
+import eam.edu.unieventos.ui.screens.AddCoupon
 import eam.edu.unieventos.ui.screens.HomeScreen
 import eam.edu.unieventos.ui.screens.LoginScreen
+import eam.edu.unieventos.ui.screens.NotificationssScreen
+import eam.edu.unieventos.ui.screens.PurchaseHistoryScreen
 import eam.edu.unieventos.ui.screens.RecoveryScreen
 import eam.edu.unieventos.ui.screens.RegisterScreen
 import eam.edu.unieventos.ui.screens.UserConfigurationScreen
 import eam.edu.unieventos.ui.screens.ValidationScreen
-import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
+import eam.edu.unieventos.ui.screens.SettingsScreen
+import eam.edu.unieventos.ui.screens.AddEvent
+import eam.edu.unieventos.ui.screens.EventDetails
+import eam.edu.unieventos.ui.screens.EditEvent
+import eam.edu.unieventos.ui.screens.PurchaseScreen
+import eam.edu.unieventos.ui.screens.EditCoupon
 
 import eam.edu.unieventos.utils.SharedPreferenceUtils
 
@@ -27,7 +30,8 @@ fun Navigation(
 ){
 
     var email: String = ""
-
+    var event: String = ""
+    var coupon: String = ""
     val navController = rememberNavController()
     val context = LocalContext.current
 
@@ -69,13 +73,7 @@ fun Navigation(
                     navController.navigate(RouteScreen.Validation)
                 },
                 onNavigateToHome = { role ->
-
-                    val homeScreen = if (role == "admin") {
-                        RouteScreen.Home // Navegar a la pantalla de inicio para admin
-                    } else {
-                        RouteScreen.Home // Navegar a la pantalla de inicio para cliente
-                    }
-                    navController.navigate(homeScreen)
+                    navController.navigate(RouteScreen.Home)
                 }
             )
         }
@@ -106,22 +104,9 @@ fun Navigation(
                 }
             )
         }
-        composable<RouteScreen.Event> { 
-            EventDetailScreen(
-                eventName = "Evento",
-                eventDate = "23/09/204",
-                eventTime = "16:00",
-                eventDescription = "Gran Evento",
-                onBackClick = { /*TODO*/ }) {
-                
-            }
-        }
 
         composable<RouteScreen.Home>{
             HomeScreen(
-                onNavegateToEvent = {
-                    navController.navigate((RouteScreen.Event))
-                },
                 onLogout = {
                     SharedPreferenceUtils.clearPreference(context)
                     navController.navigate(RouteScreen.Login)
@@ -129,7 +114,192 @@ fun Navigation(
                 onNavegateToUserConfig = {
                     navController.navigate(RouteScreen.UserConfig)
                 },
+                onNavegateToSettings = {
+                    navController.navigate(RouteScreen.Settings)
+                },
+                onNavegateToPurchaseHistory = {
+                    navController.navigate(RouteScreen.PurchaseHistory)
+                },
+                onNavegateToNotifications = {
+                    navController.navigate(RouteScreen.Notifications)
+                },
+                onNavegateToHome = {
+                    navController.navigate(RouteScreen.Home)
+                },
+                onNavegateToAddEvent = {
+                    navController.navigate(RouteScreen.AddEvent)
+                },
+                onNavegateToAddCoupon = {
+                    navController.navigate(RouteScreen.AddCoupon)
+                },
+                onNavegateToEventEdit = { eventRecived ->
+                    event = eventRecived
+                    navController.navigate(RouteScreen.EditEvent)
+
+                },
+                onNavegateToEventDetail = { eventRecived ->
+                    event = eventRecived
+                    navController.navigate(RouteScreen.EventDetail)
+                },
+                onNavegateToCoupons = {
+                    navController.navigate(RouteScreen.Coupons)
+                },
+                onNavegateToPurchase = {
+                    navController.navigate(RouteScreen.Purchase)
+                },
                 context = context
+            )
+        }
+
+        composable<RouteScreen.AddEvent> {
+            AddEvent()
+        }
+
+        composable<RouteScreen.EventDetail> {
+            EventDetails(
+                eventCode = event,
+                onBack = {
+                    navController.popBackStack()
+                },
+                onViewCart={
+                    navController.navigate(RouteScreen.Purchase)
+                }
+            )
+        }
+
+
+        composable<RouteScreen.AddCoupon> {
+            AddCoupon(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable<RouteScreen.EditEvent> {
+            EditEvent(
+                eventCode = event,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable<RouteScreen.Purchase>{
+            PurchaseScreen(
+                context = context,
+                onNavegateToSettings = {
+                    navController.navigate(RouteScreen.Settings)
+                },
+                onNavegateToNotifications = {
+                    navController.navigate(RouteScreen.Notifications)
+                },
+                onNavegateToPurchaseHistory = {
+                    navController.navigate(RouteScreen.PurchaseHistory)
+                },
+                onNavegateToHome = {
+                    navController.navigate(RouteScreen.Home)
+                },
+                onNavegateToCoupons = {
+                    navController.navigate(RouteScreen.Coupons)
+                }
+            )
+        }
+
+        composable<RouteScreen.Settings>{
+            SettingsScreen(
+                context = context,
+                onNavegateToSettings = {
+                    navController.navigate(RouteScreen.Settings)
+                },
+                onNavegateToPurchaseHistory = {
+                    navController.navigate(RouteScreen.PurchaseHistory)
+                },
+                onNavegateToNotifications = {
+                    navController.navigate(RouteScreen.Notifications)
+                },
+                onNavegateToHome = {
+                    navController.navigate(RouteScreen.Home)
+                },
+                onNavegateToCoupons = {
+                    navController.navigate(RouteScreen.Coupons)
+                }
+            )
+        }
+
+        composable<RouteScreen.EditCoupon> {
+            EditCoupon(
+                onClose = {
+                    navController.popBackStack()
+                },
+                couponCode = coupon
+            )
+        }
+
+        composable<RouteScreen.Coupons> {
+            ActiveCouponsList(
+                context = context,
+                onNavegateToSettings = {
+                    navController.navigate(RouteScreen.Settings)
+                },
+                onNavegateToPurchaseHistory = {
+                    navController.navigate(RouteScreen.PurchaseHistory)
+                },
+                onNavegateToNotifications = {
+                    navController.navigate(RouteScreen.Notifications)
+                },
+                onNavegateToHome = {
+                    navController.navigate(RouteScreen.Home)
+                },
+                onNavegateToCoupons = {
+                    navController.navigate(RouteScreen.Coupons)
+                },
+                onNavegateToEditCoupon = { couponRecived ->
+                    coupon = couponRecived
+                    navController.navigate(RouteScreen.EditCoupon)
+                }
+            )
+        }
+
+        composable<RouteScreen.PurchaseHistory> {
+            PurchaseHistoryScreen(
+                context = context,
+                onNavegateToSettings = {
+                    navController.navigate(RouteScreen.Settings)
+                },
+                onNavegateToPurchaseHistory = {
+                    navController.navigate(RouteScreen.PurchaseHistory)
+                },
+                onNavegateToNotifications = {
+                    navController.navigate(RouteScreen.Notifications)
+                },
+                onNavegateToHome = {
+                    navController.navigate(RouteScreen.Home)
+                },
+                onNavegateToCoupons = {
+                    navController.navigate(RouteScreen.Coupons)
+                }
+            )
+        }
+
+        composable<RouteScreen.Notifications> {
+            NotificationssScreen(
+                context = context,
+                onNavegateToSettings = {
+                    navController.navigate(RouteScreen.Settings)
+                },
+                onNavegateToPurchaseHistory = {
+                    navController.navigate(RouteScreen.PurchaseHistory)
+                },
+                onNavegateToNotifications = {
+                    navController.navigate(RouteScreen.Notifications)
+                },
+                onNavegateToHome = {
+                    navController.navigate(RouteScreen.Home)
+                },
+                onNavegateToCoupons = {
+                    navController.navigate(RouteScreen.Coupons)
+                }
             )
         }
 

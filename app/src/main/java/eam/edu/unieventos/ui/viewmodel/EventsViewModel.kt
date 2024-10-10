@@ -20,6 +20,7 @@ class EventsViewModel(private val context: Context) : ViewModel() {
 
     init {
         _events.value = getEventsList(context)
+        Log.i("Prueba","${_events.value.size} y ${events.value.size}")
     }
 
 
@@ -236,7 +237,7 @@ class EventsViewModel(private val context: Context) : ViewModel() {
     private fun getEventsList(context: Context): List<Event> {
         val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
         val storedEvents = mutableListOf<Event>()
-        val storedCodes = sharedPreferences.getStringSet("stored_events", emptySet()) ?: emptySet()
+        val storedCodes = sharedPreferences.getStringSet("stored_code_events", emptySet()) ?: emptySet()
         Log.i("camilo","Antes del For")
         for (code in storedCodes) {
             val id = sharedPreferences.getString("${code}_id", "") ?: ""
@@ -285,7 +286,7 @@ class EventsViewModel(private val context: Context) : ViewModel() {
 
         }
 
-
+        Log.i("Prueba","${storedEvents.size}")
         return storedEvents
     }
 

@@ -5,12 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,7 +16,7 @@ import eam.edu.unieventos.ui.components.CustomBottomNavigationBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PurchaseScreen(
+fun NotificationssScreen(
     modifier: Modifier = Modifier,
     context: Context,
     onNavegateToSettings: () -> Unit,
@@ -34,7 +29,7 @@ fun PurchaseScreen(
         bottomBar = {
             CustomBottomNavigationBar(
                 modifier = Modifier,
-                selected = 0,
+                selected = 2,
                 context = context,
                 onNavegateToSettings = onNavegateToSettings,
                 onNavegateToPurchaseHistory = onNavegateToPurchaseHistory,
@@ -52,7 +47,7 @@ fun PurchaseScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box{
-                Text(text = "Carrito de compras")
+                Text(text = "Notificacion")
             }
         }
     }

@@ -21,7 +21,7 @@ import eam.edu.unieventos.ui.components.CustomBottomNavigationBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PurchaseScreen(
+fun PurchaseHistoryScreen(
     modifier: Modifier = Modifier,
     context: Context,
     onNavegateToSettings: () -> Unit,
@@ -34,7 +34,7 @@ fun PurchaseScreen(
         bottomBar = {
             CustomBottomNavigationBar(
                 modifier = Modifier,
-                selected = 0,
+                selected = 1,
                 context = context,
                 onNavegateToSettings = onNavegateToSettings,
                 onNavegateToPurchaseHistory = onNavegateToPurchaseHistory,
@@ -52,7 +52,7 @@ fun PurchaseScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box{
-                Text(text = "Carrito de compras")
+                Text(text = "Historial de compras")
             }
         }
     }
