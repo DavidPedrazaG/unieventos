@@ -46,6 +46,9 @@
     <string name="Email">Email</string>
     <string name="wrongCode">Wrong code</string>
     <string name="valid_for_seconds">VALID FOR %1$d SECONDS</string>
+    <string name="deleteAccount">Delete Account</string>
+    <string name="justNumbers">Only numbers are allowed</string>
+    <string name="gmailvalidator">The email must contain @</string>
 
 
 </resources>

@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -89,17 +90,17 @@ fun UserConfigurationScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text(text = "Nombre") },
+                label = { Text(text = stringResource(id = R.string.name)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Cédula
+
             OutlinedTextField(
                 value = id,
                 onValueChange = {
-                    // Solo permite números
+
                     if (it.all { char -> char.isDigit() }) {
                         id = it
                         cedulaError = false
@@ -108,12 +109,12 @@ fun UserConfigurationScreen(
                     }
                 },
                 isError = cedulaError,
-                label = { Text(text = "Cédula") },
+                label = { Text(text = stringResource(id = R.string.id)) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
             if (cedulaError) {
-                Text("Solo se permiten números en la cédula", color = Color.Red, fontSize = 12.sp)
+                Text(text = stringResource(id = R.string.justNumbers), color = Color.Red, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -131,21 +132,21 @@ fun UserConfigurationScreen(
                     }
                 },
                 isError = phoneError,
-                label = { Text(text = "Número de teléfono") },
+                label = { Text(text = stringResource(id = R.string.phoneNumber)) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
             )
             if (phoneError) {
-                Text("Solo se permiten números en el teléfono", color = Color.Red, fontSize = 12.sp)
+                Text(text = stringResource(id = R.string.justNumbers), color = Color.Red, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
             // Dirección
             OutlinedTextField(
-                value = address, // Campo de dirección
+                value = address,
                 onValueChange = { address = it },
-                label = { Text(text = "Dirección") },
+                label = { Text(text = stringResource(id = R.string.address)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -160,12 +161,12 @@ fun UserConfigurationScreen(
                     emailError = !it.contains("@")
                 },
                 isError = emailError,
-                label = { Text(text = "Correo") },
+                label = { Text(text = stringResource(id = R.string.Email)) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
             if (emailError) {
-                Text("El correo debe contener '@'", color = Color.Red, fontSize = 12.sp)
+                Text(text = stringResource(id = R.string.gmailvalidator), color = Color.Red, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -173,7 +174,7 @@ fun UserConfigurationScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text(text = "Contraseña") },
+                label = { Text(text = stringResource(id = R.string.passwordLabel)) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
@@ -204,7 +205,7 @@ fun UserConfigurationScreen(
                     ),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = "GUARDAR CAMBIOS", fontSize = 14.sp)
+                    Text(text = stringResource(id = R.string.saveChange), fontSize = 14.sp)
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -221,7 +222,7 @@ fun UserConfigurationScreen(
                     ),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = "ELIMINAR CUENTA", fontSize = 14.sp, color = Color.White)
+                    Text(text = stringResource(id = R.string.deleteAccount), fontSize = 14.sp, color = Color.White)
                 }
             }
         }
