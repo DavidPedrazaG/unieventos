@@ -155,6 +155,10 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
             updateClient(client)
         }
     }
+    open fun getDeactivatedClientByEmail(email: String): Client? {
+        return _clients.value.find { it.email == email && !it.isActive }
+    }
+
 
     fun getByPhone(phone: String): User? {
         return _clients.value.find { it.phoneNumber == phone }

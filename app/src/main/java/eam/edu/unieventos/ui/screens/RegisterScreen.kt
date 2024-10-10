@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -49,6 +50,10 @@ fun RegisterScreen(
 
     val context = LocalContext.current
     val clientViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
+
+    var showAlert by remember { mutableStateOf(false) }
+
+    var existingClient: Client? by remember { mutableStateOf(null) }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -125,28 +130,33 @@ fun RegisterScreen(
 
             Button(
                 onClick = {
-                    val id = clientViewModel.generateUserId()
-                    val client = Client(
-                        availableCoupons = emptyList(),
-                        purchaseHistory = emptyList(),
-                        friends = emptyList(),
-                        notifications = emptyList(),
-                        cartId = null,
-                        id = id,
-                        idCard = idCard,
-                        name = name,
-                        phoneNumber = phone,
-                        address = address,
-                        email = email,
-                        password = password,
-                        isActive = isActive,
-                        role = "client",
-                        userAppConfigId = userAppConfigId,
-                        isValidated = isValidated
-
-                    )
-                    clientViewModel.createUser(client)
-                    onNavigateToLogin()
+                    val deactivatedClient = clientViewModel.getDeactivatedClientByEmail(email)
+                    if (deactivatedClient != null) {
+                        existingClient = deactivatedClient
+                        showAlert = true
+                    } else {
+                        val id = clientViewModel.generateUserId()
+                        val newClient = Client(
+                            availableCoupons = emptyList(),
+                            purchaseHistory = emptyList(),
+                            friends = emptyList(),
+                            notifications = emptyList(),
+                            cartId = null,
+                            id = id,
+                            idCard = idCard,
+                            name = name,
+                            phoneNumber = phone,
+                            address = address,
+                            email = email,
+                            password = password,
+                            isActive = isActive,
+                            role = "client",
+                            userAppConfigId = userAppConfigId,
+                            isValidated = isValidated
+                        )
+                        clientViewModel.createUser(newClient)
+                        onNavigateToLogin()
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -173,5 +183,57 @@ fun RegisterScreen(
                 )
             }
         }
+    }
+
+    if (showAlert && existingClient != null) {
+        AlertDialog(
+            onDismissRequest = { showAlert = false },
+            title = { Text("Usuario existente") },
+            text = { Text("Se ha encontrado un usuario con el mismo correo. ¿Deseas reactivar la cuenta o crear una nueva?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        existingClient?.let {
+                            it.isActive = true
+                            clientViewModel.updateClient(it)
+                        }
+                        showAlert = false
+                        onNavigateToLogin()
+                    }
+                ) {
+                    Text("Reactivar")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        val id = clientViewModel.generateUserId()
+                        val newClient = Client(
+                            availableCoupons = emptyList(),
+                            purchaseHistory = emptyList(),
+                            friends = emptyList(),
+                            notifications = emptyList(),
+                            cartId = null,
+                            id = id,
+                            idCard = idCard,
+                            name = name,
+                            phoneNumber = phone,
+                            address = address,
+                            email = email,
+                            password = password,
+                            isActive = isActive,
+                            role = "client",
+                            userAppConfigId = userAppConfigId,
+                            isValidated = isValidated
+                        )
+                        clientViewModel.createUser(newClient)
+                        showAlert = false
+                        onNavigateToLogin()
+                    }
+                ) {
+                    Text("Crear nueva")
+                }
+            }
+        )
     }
 }
