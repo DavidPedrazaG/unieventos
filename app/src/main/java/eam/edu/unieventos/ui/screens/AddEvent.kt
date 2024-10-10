@@ -1,5 +1,6 @@
 package eam.edu.unieventos.ui.screens
 
+import android.app.TimePickerDialog
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +23,7 @@ import eam.edu.unieventos.ui.viewmodel.EventsViewModel
 import eam.edu.unieventos.ui.viewmodel.LocationsViewModel
 import java.sql.Date
 import java.text.SimpleDateFormat
+import java.time.LocalTime
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +37,7 @@ fun AddEvent() {
     var poster by remember { mutableStateOf("") }
     var locationImage by remember { mutableStateOf("") }
     var dateEvent by remember { mutableStateOf<Date?>(null) }
+    var timeEvent by remember { mutableStateOf<LocalTime?>(null) } // Nueva variable para la hora del evento
     val isActive = true
 
     // Variables para localidades dinámicas
@@ -53,15 +56,11 @@ fun AddEvent() {
     // Scroll state para permitir desplazamiento
     val scrollState = rememberScrollState()
 
-    //para los laction vatiables
-    var namaLocation by remember { mutableStateOf("") }
-
-
+    // Box para el diseño general de la pantalla
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        // Agregamos scroll a la columna
         Column(
             modifier = Modifier
                 .padding(16.dp)
@@ -185,6 +184,35 @@ fun AddEvent() {
                 }
             }
 
+            // Hora del evento
+            OutlinedTextField(
+                value = timeEvent?.toString() ?: "",
+                onValueChange = {},
+                readOnly = true,
+                placeholder = { Text(text = "Seleccionar Hora") },
+                trailingIcon = {
+                    IconButton(onClick = {
+                        // Mostrar TimePickerDialog para seleccionar la hora
+                        val timePickerDialog = TimePickerDialog(
+                            context,
+                            { _, hourOfDay, minute ->
+                                timeEvent = LocalTime.of(hourOfDay, minute)
+                            },
+                            timeEvent?.hour ?: 0, // Hora por defecto
+                            timeEvent?.minute ?: 0, // Minutos por defecto
+                            true
+                        )
+                        timePickerDialog.show()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Rounded.DateRange,
+                            contentDescription = "Icon Time"
+                        )
+                    }
+                },
+                modifier = Modifier.width(190.dp)
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Campo para seleccionar cuántas localidades se quieren
@@ -243,8 +271,7 @@ fun AddEvent() {
 
             // Botón para guardar el evento
             Button(onClick = {
-                    //locationViewModel.printLocations()
-                //eventViewModel.logAllEvents()
+                eventViewModel.logAllEvents()
                 val eventCode = eventViewModel.generateRandomCode(6);
                 val locations = mutableListOf<Location>()
 
@@ -266,7 +293,7 @@ fun AddEvent() {
                 }
                 val newEvent = dateEvent?.let {
                     Event(
-                        id = eventViewModel.generateRandomCode(7),
+                        id = eventViewModel.generateRandomId(7),
                         code = eventCode ,
                         name = name,
                         place = address,
@@ -277,20 +304,18 @@ fun AddEvent() {
                         locationImage = locationImage,
                         locations = locations.map { it.id },
                         dateEvent = it,
+                        time = timeEvent ?: LocalTime.now(), // Hora del evento
                         isActive = isActive
                     )
                 }
 
                 if (newEvent != null) {
-                    //eventViewModel.logAllEvents()
                     eventViewModel.createEvent(newEvent) // Guardar el evento en el ViewModel
                     Toast.makeText(context, "Evento guardado correctamente", Toast.LENGTH_SHORT).show()
-
 
                     locations.forEach { location ->
                         locationViewModel.createLocation(location) // Asegúrate de tener este método en tu ViewModel
                     }
-
 
                     // Limpiar el formulario
                     name = ""
@@ -301,6 +326,7 @@ fun AddEvent() {
                     poster = ""
                     locationImage = ""
                     dateEvent = null
+                    timeEvent = null // Limpiar la hora también
 
                     numberOfLocations = 1
                     locationNames.clear()
@@ -309,8 +335,7 @@ fun AddEvent() {
                     locationNames.add("")
                     locationPrices.add("")
                     locationMaxCapacity.add("")
-
-                    //eventViewModel.logAllEvents()
+                    eventViewModel.logAllEvents()
                 } else {
                     Toast.makeText(context, "Por favor selecciona una fecha", Toast.LENGTH_SHORT).show()
                 }

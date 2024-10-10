@@ -65,12 +65,6 @@ class LocationsViewModel(private val context: Context) : ViewModel() {
         editor.apply()
     }
 
-    fun updateLocationStatus(id: String, isActive: Boolean) {
-        val sharedPreferences = context.getSharedPreferences("LocationPrefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putBoolean("${id}_isActive", isActive)
-        editor.apply()
-    }
 
     private fun getLocationsList(context: Context): List<Location> {
         val sharedPreferences = context.getSharedPreferences("LocationPrefs", Context.MODE_PRIVATE)
@@ -112,5 +106,59 @@ class LocationsViewModel(private val context: Context) : ViewModel() {
             }
         }
     }
+
+
+    fun deactivateLocation(locationId: String) {
+        val sharedPreferences = context.getSharedPreferences("LocationPrefs", Context.MODE_PRIVATE)
+
+        // Verifica si existe la ubicación
+        if (sharedPreferences.contains("${locationId}_id")) {
+            // Actualiza el estado de la ubicación a inactiva
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("${locationId}_isActive", false)
+            editor.apply()
+
+            // Actualiza la lista de ubicaciones en el ViewModel
+            val updatedLocations = _locations.value.map {
+                if (it.id == locationId) {
+                    it.copy(isActive = false) // Crea una nueva instancia de Location con isActive en false
+                } else {
+                    it
+                }
+            }
+            _locations.value = updatedLocations
+
+            Log.i("LocationsViewModel", "Ubicación desactivada: $locationId")
+        } else {
+            Log.e("LocationsViewModel", "Ubicación no encontrada con ID: $locationId")
+        }
+    }
+
+    fun activateLocation(locationId: String) {
+        val sharedPreferences = context.getSharedPreferences("LocationPrefs", Context.MODE_PRIVATE)
+
+        // Verifica si existe la ubicación
+        if (sharedPreferences.contains("${locationId}_id")) {
+            // Actualiza el estado de la ubicación a activa
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("${locationId}_isActive", true)
+            editor.apply()
+
+            // Actualiza la lista de ubicaciones en el ViewModel
+            val updatedLocations = _locations.value.map {
+                if (it.id == locationId) {
+                    it.copy(isActive = true) // Crea una nueva instancia de Location con isActive en true
+                } else {
+                    it
+                }
+            }
+            _locations.value = updatedLocations
+
+            Log.i("LocationsViewModel", "Ubicación activada: $locationId")
+        } else {
+            Log.e("LocationsViewModel", "Ubicación no encontrada con ID: $locationId")
+        }
+    }
+
 
 }
