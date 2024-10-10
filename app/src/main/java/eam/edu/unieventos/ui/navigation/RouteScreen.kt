@@ -23,4 +23,38 @@ sealed class RouteScreen {
 
     @Serializable
     data object Event: RouteScreen()
+
+    @Serializable
+    data object UserConfig: RouteScreen()
+
+    @Serializable
+    data object PurchaseHistory: RouteScreen()
+
+    @Serializable
+    data object Notifications: RouteScreen()
+
+    @Serializable
+    data object Settings: RouteScreen()
+
+    @Serializable
+    data object AddEvent: RouteScreen()
+
+    @Serializable
+    data object AddCoupon: RouteScreen()
+
+    @Serializable
+    data object EventDetail: RouteScreen()
+
+    @Serializable
+    data object Coupons: RouteScreen()
+
+    @Serializable
+    data object EditCoupon: RouteScreen()
+
+    @Serializable
+    data object EditEvent: RouteScreen()
+
+    @Serializable
+    data object Purchase: RouteScreen()
+
 }
