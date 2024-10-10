@@ -154,7 +154,10 @@ fun Navigation(
         }
 
         composable<RouteScreen.AddEvent> {
-            AddEvent()
+            AddEvent(onBack = {
+                navController.popBackStack()
+            }
+            )
         }
 
         composable<RouteScreen.EventDetail> {

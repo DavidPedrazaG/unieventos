@@ -9,13 +9,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.Remove
+import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import eam.edu.unieventos.R
 import eam.edu.unieventos.model.Event
 import eam.edu.unieventos.model.Location
@@ -28,7 +31,8 @@ import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddEvent() {
+fun AddEvent(onBack: () -> Unit) {
+
     var name by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
@@ -39,6 +43,30 @@ fun AddEvent() {
     var dateEvent by remember { mutableStateOf<Date?>(null) }
     var timeEvent by remember { mutableStateOf<LocalTime?>(null) } // Nueva variable para la hora del evento
     val isActive = true
+
+    var cities = listOf(
+        "Arauca", "Armenia", "Barranquilla", "Bogotá",
+        "Bucaramanga", "Cali", "Cartagena", "Cúcuta",
+        "Florencia", "Ibagué", "Inírida", "Leticia",
+        "Manizales", "Medellín", "Mitú", "Mocoa",
+        "Montería", "Neiva", "Pasto", "Pereira",
+        "Popayán", "Puerto Carreño", "Quibdó", "Riohacha",
+        "San Andrés", "San José del Guaviare", "Santa Marta", "Sincelejo",
+        "Tunja", "Valledupar", "Villavicencio", "Yopal"
+    )
+
+    var events = listOf(
+        "Conferencia",
+        "Festival",
+        "Taller",
+        "Exposición",
+        "Maratón",
+        "Torneo",
+        "Feria",
+        "Competencia",
+        "Seminario",
+        "Concierto"
+    )
 
     // Variables para localidades dinámicas
     var numberOfLocations by remember { mutableStateOf(1) }
@@ -57,24 +85,25 @@ fun AddEvent() {
     val scrollState = rememberScrollState()
 
     // Box para el diseño general de la pantalla
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Scaffold(
+    ) {paddingValues ->
+
+
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(paddingValues)
                 .fillMaxWidth()
                 .verticalScroll(scrollState), // Añade el scroll aquí
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(40.dp))
             // Campos para la información del evento
             TextField(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text(text = "Nombre del Evento") },
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
@@ -84,47 +113,72 @@ fun AddEvent() {
                 onValueChange = { address = it },
                 label = { Text(text = "Sitio") },
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
 
-            TextField(
-                value = city,
-                onValueChange = { city = it },
-                label = { Text(text = "Ciudad") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                singleLine = true
-            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            // para la ciudad
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Ciudad:",
+                    color = Color.Black,
+                    fontSize = 20.sp
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                DropdownMenu(
+                    value = city,
+                    onValeChange = {
+                        city = it
+                    },
+                    items = cities
+                )
+            }
+
+
+            Spacer(modifier = Modifier.height(8.dp))
+
 
             TextField(
                 value = description,
                 onValueChange = { description = it },
                 label = { Text(text = "Descripción") },
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
 
-            TextField(
-                value = type,
-                onValueChange = { type = it },
-                label = { Text(text = "Tipo de Evento") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                singleLine = true
-            )
+            // para el tipo
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Tipo:",
+                    color = Color.Black,
+                    fontSize = 20.sp
+                )
+
+                Spacer(modifier = Modifier.width(30.dp))
+
+                DropdownMenu(
+                    value = type,
+                    onValeChange = {
+                        type = it
+                    },
+                    items = events
+                )
+            }
 
             TextField(
                 value = poster,
                 onValueChange = { poster = it },
                 label = { Text(text = "URL del Póster") },
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
@@ -134,7 +188,7 @@ fun AddEvent() {
                 onValueChange = { locationImage = it },
                 label = { Text(text = "URL de la Imagen de Ubicación") },
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
@@ -144,7 +198,7 @@ fun AddEvent() {
                 value = dateEvent?.let { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it) } ?: "",
                 onValueChange = {},
                 readOnly = true,
-                placeholder = { Text(text = stringResource(id = R.string.dateEnd)) },
+                placeholder = { Text(text = "Fecha") },
                 trailingIcon = {
                     IconButton(
                         onClick = { expandedDate = true }
@@ -184,12 +238,14 @@ fun AddEvent() {
                 }
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Hora del evento
             OutlinedTextField(
                 value = timeEvent?.toString() ?: "",
                 onValueChange = {},
                 readOnly = true,
-                placeholder = { Text(text = "Seleccionar Hora") },
+                placeholder = { Text(text = "Hora") },
                 trailingIcon = {
                     IconButton(onClick = {
                         // Mostrar TimePickerDialog para seleccionar la hora
@@ -205,7 +261,7 @@ fun AddEvent() {
                         timePickerDialog.show()
                     }) {
                         Icon(
-                            imageVector = Icons.Rounded.DateRange,
+                            imageVector = Icons.Rounded.Timer,
                             contentDescription = "Icon Time"
                         )
                     }
@@ -271,6 +327,10 @@ fun AddEvent() {
 
             // Botón para guardar el evento
             Button(onClick = {
+                if(type.equals("Select a Value")){
+                    Toast.makeText(context, "Seleccione un tipo de evento", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
                 eventViewModel.logAllEvents()
                 val eventCode = eventViewModel.generateRandomCode(6);
                 val locations = mutableListOf<Location>()
@@ -309,7 +369,7 @@ fun AddEvent() {
                     )
                 }
 
-                if (newEvent != null) {
+                if (newEvent != null ) {
                     eventViewModel.createEvent(newEvent) // Guardar el evento en el ViewModel
                     Toast.makeText(context, "Evento guardado correctamente", Toast.LENGTH_SHORT).show()
 
@@ -342,6 +402,16 @@ fun AddEvent() {
             }) {
                 Text(stringResource(id = R.string.labelCreateLocation))
             }
+            Spacer(modifier = Modifier.height(30.dp))
+
+            // Botón para cancelar la edición
+            Button(onClick = onBack, colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Red
+            )) {
+                Text(stringResource(id = R.string.cancel))
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }

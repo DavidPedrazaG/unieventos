@@ -52,6 +52,31 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
     var timeEvent by remember { mutableStateOf<LocalTime?>(event?.time) } // Nueva variable para la hora del evento
 
 
+    var cities = listOf(
+        "Arauca", "Armenia", "Barranquilla", "Bogotá",
+        "Bucaramanga", "Cali", "Cartagena", "Cúcuta",
+        "Florencia", "Ibagué", "Inírida", "Leticia",
+        "Manizales", "Medellín", "Mitú", "Mocoa",
+        "Montería", "Neiva", "Pasto", "Pereira",
+        "Popayán", "Puerto Carreño", "Quibdó", "Riohacha",
+        "San Andrés", "San José del Guaviare", "Santa Marta", "Sincelejo",
+        "Tunja", "Valledupar", "Villavicencio", "Yopal"
+    )
+
+    var events = listOf(
+        "Conferencia",
+        "Festival",
+        "Taller",
+        "Exposición",
+        "Maratón",
+        "Torneo",
+        "Feria",
+        "Competencia",
+        "Seminario",
+        "Concierto"
+    )
+
+
     // Localidades del evento
     val initialLocations = event?.locations?.mapNotNull { locationViewModel.getLocationById(it) } ?: emptyList()
     var numberOfLocations by remember { mutableStateOf(initialLocations.size) }
@@ -65,17 +90,17 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
     // Scroll state para permitir desplazamiento
     val scrollState = rememberScrollState()
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Scaffold(
+    ) {paddingValues ->
+
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(paddingValues)
                 .fillMaxWidth()
                 .verticalScroll(scrollState), // Añade el scroll aquí
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(40.dp))
             // Campo para el código del evento
             OutlinedTextField(
                 value = event?.code ?: "",
@@ -94,7 +119,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                 onValueChange = { name = it },
                 label = { Text(text = "Nombre del Evento") },
                 modifier = Modifier
-                    .fillMaxWidth(0.7f)
+                    .fillMaxWidth(0.8f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
@@ -104,47 +129,71 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                 onValueChange = { address = it },
                 label = { Text(text = "Sitio") },
                 modifier = Modifier
-                    .fillMaxWidth(0.7f)
+                    .fillMaxWidth(0.8f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
 
-            TextField(
-                value = city,
-                onValueChange = { city = it },
-                label = { Text(text = "Ciudad") },
-                modifier = Modifier
-                    .fillMaxWidth(0.7f)
-                    .padding(vertical = 8.dp),
-                singleLine = true
-            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            // para la ciudad
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Ciudad:",
+                    color = Color.Black,
+                    fontSize = 20.sp
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                DropdownMenu(
+                    value = city,
+                    onValeChange = {
+                        city = it
+                    },
+                    items = cities
+                )
+            }
+
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             TextField(
                 value = description,
                 onValueChange = { description = it },
                 label = { Text(text = "Descripción") },
                 modifier = Modifier
-                    .fillMaxWidth(0.7f)
+                    .fillMaxWidth(0.8f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
 
-            TextField(
-                value = type,
-                onValueChange = { type = it },
-                label = { Text(text = "Tipo de Evento") },
-                modifier = Modifier
-                    .fillMaxWidth(0.7f)
-                    .padding(vertical = 8.dp),
-                singleLine = true
-            )
+            // para el tipo
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Tipo:",
+                    color = Color.Black,
+                    fontSize = 20.sp
+                )
+
+                Spacer(modifier = Modifier.width(30.dp))
+
+                DropdownMenu(
+                    value = type,
+                    onValeChange = {
+                        type = it
+                    },
+                    items = events
+                )
+            }
 
             TextField(
                 value = poster,
                 onValueChange = { poster = it },
                 label = { Text(text = "URL del Póster") },
                 modifier = Modifier
-                    .fillMaxWidth(0.7f)
+                    .fillMaxWidth(0.8f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
@@ -154,7 +203,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                 onValueChange = { locationImage = it },
                 label = { Text(text = "URL de la Imagen de Ubicación") },
                 modifier = Modifier
-                    .fillMaxWidth(0.7f)
+                    .fillMaxWidth(0.8f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
@@ -354,6 +403,8 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             )) {
                 Text(stringResource(id = R.string.cancel))
             }
+
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
