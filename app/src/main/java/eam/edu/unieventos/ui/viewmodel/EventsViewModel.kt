@@ -4,10 +4,15 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import eam.edu.unieventos.model.Event
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.time.LocalTime
 import java.util.Date
 
@@ -15,12 +20,18 @@ import java.util.Date
 
 class EventsViewModel(private val context: Context) : ViewModel() {
 
+    val db = Firebase.firestore
     private val _events = MutableStateFlow(emptyList<Event>())
     val events: StateFlow<List<Event>> = _events.asStateFlow()
 
     init {
-        _events.value = getEventsList(context)
-        Log.i("Prueba","${_events.value.size} y ${events.value.size}")
+        loadEvents()
+        //Log.i("Prueba","${_events.value.size} y ${events.value.size}")
+    }
+    fun loadEvents(){
+        viewModelScope.launch {
+            _events.value = getEventsList()
+        }
     }
 
 
@@ -158,8 +169,17 @@ class EventsViewModel(private val context: Context) : ViewModel() {
         }
     }
 
+     fun createEvent(event: Event) {
+         viewModelScope.launch {
+             db.collection("events")
+                 .add(event)
+                 .await()
+         }
 
-    fun createEvent(event: Event) {
+    }
+
+
+    /*fun createEvent(event: Event) {
         try {
             val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
             val editor = sharedPreferences.edit()
@@ -192,6 +212,8 @@ class EventsViewModel(private val context: Context) : ViewModel() {
             e.printStackTrace()
         }
     }
+
+     */
 
     fun editEvent(event: Event) {
         try {
@@ -227,14 +249,25 @@ class EventsViewModel(private val context: Context) : ViewModel() {
 
 
 
+    private suspend fun getEventsList(): List<Event>{
+        val snapshot = db.collection("events")
+            .get()
+            .await()
+        return snapshot.documents.mapNotNull {
+            val event = it.toObject(Event::class.java)
+            requireNotNull(event)
+            event.id = it.id
+            event
+
+        }
+    }
 
 
 
 
 
 
-
-    private fun getEventsList(context: Context): List<Event> {
+    /*private fun getEventsList(context: Context): List<Event> {
         val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
         val storedEvents = mutableListOf<Event>()
         val storedCodes = sharedPreferences.getStringSet("stored_code_events", emptySet()) ?: emptySet()
@@ -289,6 +322,9 @@ class EventsViewModel(private val context: Context) : ViewModel() {
         Log.i("Prueba","${storedEvents.size}")
         return storedEvents
     }
+
+
+     */
 
     fun logAllEvents() {
         // Obtener los eventos almacenados
