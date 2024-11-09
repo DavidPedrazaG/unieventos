@@ -105,7 +105,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             OutlinedTextField(
                 value = event?.code ?: "",
                 onValueChange = {}, // No se puede cambiar el código
-                label = { Text(text = "Código del Evento") },
+                label = { Text(text = stringResource(id = R.string.event_code_label)) },
                 readOnly = true, // Solo lectura
                 modifier = Modifier
                     .fillMaxWidth(0.4f)
@@ -117,7 +117,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             TextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text(text = "Nombre del Evento") },
+                label = { Text(text = stringResource(id = R.string.event_name)) },
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
                     .padding(vertical = 8.dp),
@@ -127,7 +127,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             TextField(
                 value = address,
                 onValueChange = { address = it },
-                label = { Text(text = "Sitio") },
+                label = { Text(text = stringResource(id = R.string.event_location))},
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
                     .padding(vertical = 8.dp),
@@ -140,7 +140,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             // para la ciudad
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Ciudad:",
+                    text = stringResource(id = R.string.city_label),
                     color = Color.Black,
                     fontSize = 20.sp
                 )
@@ -162,7 +162,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             TextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text(text = "Descripción") },
+                label = { Text(text = stringResource(id = R.string.event_description)) },
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
                     .padding(vertical = 8.dp),
@@ -172,7 +172,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             // para el tipo
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Tipo:",
+                    text = stringResource(id = R.string.type_label),
                     color = Color.Black,
                     fontSize = 20.sp
                 )
@@ -191,7 +191,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             TextField(
                 value = poster,
                 onValueChange = { poster = it },
-                label = { Text(text = "URL del Póster") },
+                label = { Text(text = stringResource(id = R.string.poster_url))},
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
                     .padding(vertical = 8.dp),
@@ -201,7 +201,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             TextField(
                 value = locationImage,
                 onValueChange = { locationImage = it },
-                label = { Text(text = "URL de la Imagen de Ubicación") },
+                label = { Text(text = stringResource(id = R.string.location_image_url)) },
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
                     .padding(vertical = 8.dp),
@@ -259,7 +259,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                 value = timeEvent?.toString() ?: "",
                 onValueChange = {},
                 readOnly = true,
-                placeholder = { Text(text = "Seleccionar Hora") },
+                placeholder = { Text(text = stringResource(id = R.string.select_time)) },
                 trailingIcon = {
                     IconButton(onClick = {
                         // Mostrar TimePickerDialog para seleccionar la hora
@@ -276,7 +276,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                     }) {
                         Icon(
                             imageVector = Icons.Rounded.DateRange,
-                            contentDescription = "Icon Time"
+                            contentDescription =  stringResource(id = R.string.icon_date)
                         )
                     }
                 },
@@ -311,7 +311,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                     locationPrices.add("")
                     locationMaxCapacity.add("")
                 }) {
-                    Icon(imageVector = Icons.Rounded.Add, contentDescription = "Increment")
+                    Icon(imageVector = Icons.Rounded.Add, contentDescription = stringResource(id = R.string.increment))
                 }
             }
 
@@ -387,12 +387,11 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                             locationViewModel.createLocation(location)
                         }
                     }
-
-                    Toast.makeText(context, "Evento actualizado correctamente", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.event_updated), Toast.LENGTH_SHORT).show()
                     onBack()
                 }
             }) {
-                Text(text = "Actualizar")
+                Text(text = stringResource(id = R.string.update_event))
             }
 
             Spacer(modifier = Modifier.height(16.dp))

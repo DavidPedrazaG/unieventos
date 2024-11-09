@@ -15,6 +15,9 @@ import eam.edu.unieventos.ui.components.CustomBottomNavigationBar
 import eam.edu.unieventos.ui.viewmodel.CouponsViewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.ui.res.stringResource
+import eam.edu.unieventos.R
+
 
 @Composable
 fun ActiveCouponsList(
@@ -53,7 +56,7 @@ fun ActiveCouponsList(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Cupones Activos",
+                text = stringResource(id = R.string.activeCoupons),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(8.dp)
             )
@@ -62,7 +65,7 @@ fun ActiveCouponsList(
 
             // Mostrar lista de cupones activos
             if (activeCoupons.isEmpty()) {
-                Text(text = "No hay cupones activos en este momento.")
+                Text(text = stringResource(id = R.string.noActiveCoupons))
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -76,7 +79,7 @@ fun ActiveCouponsList(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
-        }
+    }
 }
 
 @Composable
@@ -92,19 +95,19 @@ fun CouponItem(coupon: Coupon, onNavegateToEditCoupon: (String) -> Unit) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(text = "Código: ${coupon.code}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "${stringResource(id = R.string.code)}: ${coupon.code}", style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Descuento: ${coupon.discountPercentage}%", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "${stringResource(id = R.string.discount)}: ${coupon.discountPercentage}%", style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Expira el: ${dateFormat.format(coupon.expirationDate)}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "${stringResource(id = R.string.expiration)}: ${dateFormat.format(coupon.expirationDate)}", style = MaterialTheme.typography.bodyMedium)
 
             Spacer(modifier = Modifier.height(8.dp))
 
             // Mostrar el código del evento asociado o un mensaje si no está asociado
             if (coupon.eventCode != null) {
-                Text(text = "Evento Asociado: ${coupon.eventCode}", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "${stringResource(id = R.string.associatedEvent)}: ${coupon.eventCode}", style = MaterialTheme.typography.bodyMedium)
             } else {
-                Text(text = "No asociado a ningún evento", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+                Text(text = stringResource(id = R.string.notAssociated), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -114,7 +117,7 @@ fun CouponItem(coupon: Coupon, onNavegateToEditCoupon: (String) -> Unit) {
                 onClick = { onNavegateToEditCoupon(coupon.code) },
                 modifier = Modifier.align(Alignment.End)
             ) {
-                Text(text = "Editar")
+                Text(text = stringResource(id = R.string.edit))
             }
         }
     }

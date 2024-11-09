@@ -101,7 +101,7 @@ fun AddEvent(onBack: () -> Unit) {
             TextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text(text = "Nombre del Evento") },
+                label = { Text(text = stringResource(id = R.string.event_name)) },
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp),
@@ -111,7 +111,7 @@ fun AddEvent(onBack: () -> Unit) {
             TextField(
                 value = address,
                 onValueChange = { address = it },
-                label = { Text(text = "Sitio") },
+                label = { Text(text = stringResource(id = R.string.event_location)) },
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp),
@@ -147,7 +147,7 @@ fun AddEvent(onBack: () -> Unit) {
             TextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text(text = "Descripción") },
+                label = { Text(text = stringResource(id = R.string.event_description)) },
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp),
@@ -176,7 +176,7 @@ fun AddEvent(onBack: () -> Unit) {
             TextField(
                 value = poster,
                 onValueChange = { poster = it },
-                label = { Text(text = "URL del Póster") },
+                label = { Text(text = stringResource(id = R.string.poster_url)) },
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp),
@@ -186,7 +186,7 @@ fun AddEvent(onBack: () -> Unit) {
             TextField(
                 value = locationImage,
                 onValueChange = { locationImage = it },
-                label = { Text(text = "URL de la Imagen de Ubicación") },
+                label = { Text(text = stringResource(id = R.string.location_image_url)) },
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp),
@@ -198,7 +198,7 @@ fun AddEvent(onBack: () -> Unit) {
                 value = dateEvent?.let { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it) } ?: "",
                 onValueChange = {},
                 readOnly = true,
-                placeholder = { Text(text = "Fecha") },
+                placeholder = { Text(text = stringResource(id = R.string.date)) },
                 trailingIcon = {
                     IconButton(
                         onClick = { expandedDate = true }
@@ -245,7 +245,7 @@ fun AddEvent(onBack: () -> Unit) {
                 value = timeEvent?.toString() ?: "",
                 onValueChange = {},
                 readOnly = true,
-                placeholder = { Text(text = "Hora") },
+                placeholder = { Text(text = stringResource(id = R.string.hour)) },
                 trailingIcon = {
                     IconButton(onClick = {
                         // Mostrar TimePickerDialog para seleccionar la hora
