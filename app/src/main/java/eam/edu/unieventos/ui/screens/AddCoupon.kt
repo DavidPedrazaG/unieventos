@@ -13,12 +13,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eam.edu.unieventos.model.Coupon
 import eam.edu.unieventos.ui.viewmodel.CouponsViewModel
 import eam.edu.unieventos.ui.viewmodel.EventsViewModel
+import eam.edu.unieventos.R
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -55,7 +57,7 @@ fun AddCoupon(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(26.dp))
 
             Text(
-                text = "Crear Cupon",
+                text = stringResource(id = R.string.create_coupon),
                 style = MaterialTheme.typography.titleLarge,
                 fontSize = 24.sp,
                 color = Color.Black
@@ -67,7 +69,7 @@ fun AddCoupon(onBack: () -> Unit) {
             TextField(
                 value = discountPercentage,
                 onValueChange = { discountPercentage = it },
-                label = { Text(text = "Porcentaje de Descuento (%)") },
+                label = { Text(text = stringResource(id = R.string.discount_percentage)) },
                 modifier = Modifier
                     .fillMaxWidth(0.65f)
                     .padding(vertical = 8.dp),
@@ -79,7 +81,7 @@ fun AddCoupon(onBack: () -> Unit) {
             Column(
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
-                Text(text = "Tipo de Cupón:")
+                Text(text = stringResource(id = R.string.coupon_type))
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -92,7 +94,7 @@ fun AddCoupon(onBack: () -> Unit) {
                             expirationDate = null // Limpiar la fecha al cambiar a "Para Evento"
                         }
                     )
-                    Text(text = "Para Evento")
+                    Text(text = stringResource(id = R.string.for_event))
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
@@ -106,7 +108,7 @@ fun AddCoupon(onBack: () -> Unit) {
                             expirationDate = null // Limpiar la fecha al cambiar a "Por Fecha"
                         }
                     )
-                    Text(text = "Por Fecha")
+                    Text(text = stringResource(id = R.string.by_date))
                 }
             }
 
@@ -116,7 +118,7 @@ fun AddCoupon(onBack: () -> Unit) {
                 TextField(
                     value = eventCode,
                     onValueChange = { eventCode = it },
-                    label = { Text(text = "Código del Evento ") },
+                    label = { Text(text = stringResource(id = R.string.event_code)) },
                     modifier = Modifier
                         .fillMaxWidth(0.6f)
                         .padding(vertical = 8.dp),
@@ -136,12 +138,12 @@ fun AddCoupon(onBack: () -> Unit) {
                     } ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    placeholder = { Text(text = "Fecha de Expiración") },
+                    placeholder = { Text(text = stringResource(id = R.string.expiration_date)) },
                     trailingIcon = {
                         IconButton(onClick = { expandedDate = true }) {
                             Icon(
                                 imageVector = Icons.Rounded.DateRange,
-                                contentDescription = "Icono de Fecha"
+                                contentDescription = stringResource(id = R.string.date_icon)
                             )
                         }
                     },
@@ -164,12 +166,12 @@ fun AddCoupon(onBack: () -> Unit) {
                                     expandedDate = false
                                 }
                             ) {
-                                Text(text = "OK")
+                                Text(text = stringResource(id = R.string.ok))
                             }
                         },
                         dismissButton = {
                             TextButton(onClick = { expandedDate = false }) {
-                                Text(text = "Cancelar")
+                                Text(text = stringResource(id = R.string.cancel))
                             }
                         }
                     ) {
@@ -183,13 +185,10 @@ fun AddCoupon(onBack: () -> Unit) {
             // Botón para guardar el cupón
             Button(
                 onClick = {
-                    // Lógica de validación
-
-
                     if (discountPercentage.isEmpty()) {
                         Toast.makeText(
                             context,
-                            "Por favor, ingresa el porcentaje de descuento",
+                            context.getString(R.string.enter_discount_percentage),
                             Toast.LENGTH_SHORT
                         ).show()
                         return@Button
@@ -199,21 +198,19 @@ fun AddCoupon(onBack: () -> Unit) {
                         if (eventCode.isEmpty()) {
                             Toast.makeText(
                                 context,
-                                "Por favor, ingresa el código del evento",
+                                context.getString(R.string.enter_event_code),
                                 Toast.LENGTH_SHORT
                             ).show()
                             return@Button
                         }
 
-                        // Lógica para buscar el evento y verificar si está activo
                         val event = eventViewModel.getEventByCode(eventCode)
                         if (event != null) {
-                            // Si el evento está activo, asignar la fecha del evento al cupón
-                            expirationDate = event.dateEvent // Asignar la fecha del evento
+                            expirationDate = event.dateEvent
                         } else {
                             Toast.makeText(
                                 context,
-                                "No se encontró un evento activo con ese código",
+                                context.getString(R.string.event_not_found),
                                 Toast.LENGTH_SHORT
                             ).show()
                             return@Button
@@ -222,14 +219,13 @@ fun AddCoupon(onBack: () -> Unit) {
                         if (expirationDate == null) {
                             Toast.makeText(
                                 context,
-                                "Por favor, selecciona una fecha de expiración",
+                                context.getString(R.string.select_expiration_date),
                                 Toast.LENGTH_SHORT
                             ).show()
                             return@Button
                         }
                     }
 
-                    // Crear el nuevo cupón
                     val newCoupon = Coupon(
                         id = couponViewModel.generateCouponId(),
                         code = couponViewModel.generateCouponCode(),
@@ -239,21 +235,20 @@ fun AddCoupon(onBack: () -> Unit) {
                         type = 2,
                         isActive = isActive
                     )
-                    couponViewModel.createCoupon(newCoupon) // Guardar el cupón en el ViewModel
-                    Toast.makeText(context, "Cupón creado correctamente", Toast.LENGTH_SHORT).show()
+                    couponViewModel.createCoupon(newCoupon)
+                    Toast.makeText(context, context.getString(R.string.coupon_created), Toast.LENGTH_SHORT).show()
 
-                    // Limpiar el formulario
                     code = ""
                     discountPercentage = ""
                     expirationDate = null
                     eventCode = ""
-                    isCouponByEvent = true // Volver a la opción predeterminada
+                    isCouponByEvent = true
                     isActive = true
                     couponViewModel.printCoupons()
                 },
                 modifier = Modifier.fillMaxWidth(0.4f)
             ) {
-                Text(text = "Crear Cupón")
+                Text(text = stringResource(id = R.string.create_coupon))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -264,7 +259,7 @@ fun AddCoupon(onBack: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                 modifier = Modifier.fillMaxWidth(0.4f)
             ) {
-                Text(text = "Volver Atrás")
+                Text(text = stringResource(id = R.string.back))
             }
         }
     }

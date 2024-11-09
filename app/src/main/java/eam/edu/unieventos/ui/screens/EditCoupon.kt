@@ -12,6 +12,9 @@ import eam.edu.unieventos.ui.viewmodel.CouponsViewModel
 import eam.edu.unieventos.ui.viewmodel.EventsViewModel
 import eam.edu.unieventos.ui.viewmodel.LocationsViewModel
 import eam.edu.unieventos.ui.viewmodel.UsersViewModel
+import androidx.compose.ui.res.stringResource
+import eam.edu.unieventos.R
+
 
 @Composable
 fun EditCoupon(
@@ -48,12 +51,12 @@ fun EditCoupon(
     ) {
 
         Spacer(modifier = Modifier.height(40.dp))
-        Text(text = "Editar Cupón: ${coupon.code}", style = MaterialTheme.typography.titleLarge)
+        Text(text = "${stringResource(id = R.string.editCoupon)}${coupon.code}", style = MaterialTheme.typography.titleLarge)
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Mostrar el código del cupón
-        Text(text = "Código: ${coupon.code}")
+        Text(text = "${stringResource(id = R.string.code)} ${coupon.code}")
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -63,14 +66,14 @@ fun EditCoupon(
             onValueChange = { newValue ->
                 discountPercentage = newValue.toFloatOrNull() ?: 0f
             },
-            label = { Text("Porcentaje de Descuento") },
+            label = { Text(stringResource(id = R.string.discount_percentage)) },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Mostrar fecha de expiración (no editable si tiene evento)
-        Text(text = "Fecha de Expiración: ${coupon.expirationDate}")
+        Text(text = "${stringResource(id = R.string.expiration_date)} ${coupon.expirationDate}")
 
         if (!hasEvent) {
             // Campo para cambiar la fecha (editable solo si no tiene evento)
@@ -79,11 +82,11 @@ fun EditCoupon(
                 onValueChange = { newValue ->
                     // Aquí podrías parsear y validar la nueva fecha
                 },
-                label = { Text("Fecha de Expiración (editable)") },
+                label = { Text(stringResource(id = R.string.expirationdateeditable)) },
                 modifier = Modifier.fillMaxWidth()
             )
         } else {
-            Text(text = "No se puede cambiar la fecha, el cupón tiene un evento asociado.")
+            Text(text = stringResource(id = R.string.messageNoChangeDate))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -97,7 +100,7 @@ fun EditCoupon(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Desactivar Cupón")
+            Text(text = stringResource(id = R.string.deactivateCoupon))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -111,7 +114,7 @@ fun EditCoupon(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Guardar Cambios")
+            Text(text = stringResource(id = R.string.saveChange))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -121,7 +124,7 @@ fun EditCoupon(
             onClick = { onClose() },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Cancelar")
+            Text(text = stringResource(id = R.string.cancel))
         }
     }
 }

@@ -18,9 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
+import eam.edu.unieventos.R
 import eam.edu.unieventos.model.Cart
 import eam.edu.unieventos.model.Client
 import eam.edu.unieventos.model.Event
@@ -38,30 +40,25 @@ import java.util.*
 
 @Composable
 fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) {
-    // Obtener el contexto y los ViewModels
     val context = LocalContext.current
     val eventViewModel: EventsViewModel = remember { EventsViewModel(context) }
     val locationViewModel: LocationsViewModel = remember { LocationsViewModel(context) }
     val cartViewModel: CartViewModel = remember { CartViewModel(context) }
     val itemViewModel: ItemViewModel = remember { ItemViewModel(context) }
-    // Obtener el evento que se va a mostrar
     val event = eventViewModel.getEventByCode(eventCode)
-    val selectedTickets = remember { mutableStateListOf<Triple<String, Int, Location>>() } // Localidades y cantidad de entradas
+    val selectedTickets = remember { mutableStateListOf<Triple<String, Int, Location>>() }
     var userLogged = SharedPreferenceUtils.getCurrenUser(context)
     var user = userLogged?.let { ClientsViewModel(context).getByUserId(it.id) }
     var client = user as Client
-    var cartId = client.cartId;
+    var cartId = client.cartId
     var cart = cartId?.let { cartViewModel.getCartById(it) }
-    // Scroll state para permitir desplazamiento
     val scrollState = rememberScrollState()
 
-    // Si el evento es nulo, mostrar un mensaje
     if (event == null) {
-        Text(text = "Evento no encontrado", modifier = Modifier.padding(16.dp))
+        Text(text = stringResource(id = R.string.event_not_found), modifier = Modifier.padding(16.dp))
         return
     }
 
-    // Localidades disponibles
     val locations = event.locations.mapNotNull { locationViewModel.getLocationById(it) }
 
     Column(
@@ -71,18 +68,16 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Póster principal del evento o cuadro negro simulando un póster
         if (event.poster != null) {
             Image(
                 painter = rememberImagePainter(data = event.poster),
-                contentDescription = "Póster del evento",
+                contentDescription = stringResource(id = R.string.poster_description),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp),
                 contentScale = ContentScale.Crop
             )
         } else {
-            // Si no hay póster, mostramos un cuadro negro
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -91,7 +86,7 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Poster Placeholder",
+                    text = stringResource(id = R.string.poster_placeholder),
                     color = Color.White,
                     fontSize = 20.sp
                 )
@@ -100,7 +95,6 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Nombre del evento
         Text(
             text = event.name,
             style = MaterialTheme.typography.titleLarge,
@@ -119,7 +113,6 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Aquí agrego los detalles del evento (hora, fecha, lugar, ciudad) en columnas
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -128,7 +121,7 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = "Fecha:", fontSize = 16.sp, color = Color.Gray)
+                Text(text = stringResource(id = R.string.date_label), fontSize = 16.sp, color = Color.Gray)
                 Text(
                     text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(event.dateEvent),
                     fontSize = 18.sp
@@ -136,7 +129,7 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(text = "Ciudad:", fontSize = 16.sp, color = Color.Gray)
+                Text(text = stringResource(id = R.string.city_label), fontSize = 16.sp, color = Color.Gray)
                 Text(text = event.city, fontSize = 18.sp)
             }
 
@@ -144,21 +137,20 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
                 horizontalAlignment = Alignment.End,
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = "Hora:", fontSize = 16.sp, color = Color.Gray)
+                Text(text = stringResource(id = R.string.time_label), fontSize = 16.sp, color = Color.Gray)
                 Text(text = event.time.toString(), fontSize = 18.sp)
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(text = "Lugar:", fontSize = 16.sp, color = Color.Gray)
+                Text(text = stringResource(id = R.string.place_label), fontSize = 16.sp, color = Color.Gray)
                 Text(text = event.place, fontSize = 18.sp)
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Localidades disponibles
         Text(
-            text = "Selecciona tu localidad:",
+            text = stringResource(id = R.string.select_location),
             style = MaterialTheme.typography.titleMedium,
             fontSize = 20.sp,
             color = Color.Black
@@ -177,7 +169,6 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
             }
         }
         locations.forEach { location ->
-            // Inicializa ticketCount basándote en cartItems y la ubicación actual
             var ticketCount by remember {
                 mutableStateOf(cartItems.find { it.locationId == location.id }?.ticketQuantity ?: 0)
             }
@@ -189,69 +180,59 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
             ) {
                 Text(text = location.name, fontSize = 18.sp)
 
-                // Formateo del precio
                 val priceFormatted = NumberFormat.getCurrencyInstance(Locale.getDefault()).format(location.price)
                 Text(text = priceFormatted, fontSize = 16.sp, color = Color.Gray)
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Botón para restar
                     IconButton(onClick = { if (ticketCount > 0) ticketCount -= 1 }) {
-                        Icon(Icons.Default.Remove, contentDescription = "Decrementar")
+                        Icon(Icons.Default.Remove, contentDescription = stringResource(id = R.string.decrement))
                     }
 
                     Text(text = "$ticketCount")
 
-                    // Botón para sumar
                     IconButton(onClick = { ticketCount += 1 }) {
-                        Icon(Icons.Default.Add, contentDescription = "Incrementar")
+                        Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.increment))
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Almacenar la selección
             LaunchedEffect(ticketCount) {
                 if (ticketCount > 0) {
                     selectedTickets.add(Triple(location.name, ticketCount, location))
                 } else {
-                    // Remueve si el ticketCount es 0
                     selectedTickets.removeAll { it.first == location.name }
                 }
             }
         }
 
-
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para añadir al carrito
         Button(
             onClick = {
-                // Agregar al carrito
-                addItem(cart, cartItems,event, selectedTickets, context, itemViewModel, cartViewModel)
+                addItem(cart, cartItems, event, selectedTickets, context, itemViewModel, cartViewModel)
             }
         ) {
-            Text(text = "Añadir al carrito")
+            Text(text = stringResource(id = R.string.addCart))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para ver el carrito
         Button(
             onClick = onViewCart,
             colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
         ) {
-            Text(text = "Ver carrito")
+            Text(text = stringResource(id = R.string.view_cart))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para volver atrás
         Button(
             onClick = onBack,
             colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
         ) {
-            Text(text = "Volver atrás")
+            Text(text = stringResource(id = R.string.back))
         }
     }
 }
@@ -278,7 +259,7 @@ fun addItem(cart: Cart?, cartItems: MutableList<Item>, event: Event, selectedTic
                         )
                         itemViewModel.updateItem(newItemId, context)
                     }
-                    Toast.makeText(context, "Entradas actualizadas", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.tickets_updated), Toast.LENGTH_SHORT).show()
                 } else {
                     if(quantity > 0){
                         val newItemId = Item(
@@ -289,15 +270,14 @@ fun addItem(cart: Cart?, cartItems: MutableList<Item>, event: Event, selectedTic
                             totalPrice = totalPrice
                         )
                         cartViewModel.addItem(newItemId, context, cart)
-                        Toast.makeText(context, "Entradas añadidas al carrito", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.tickets_added), Toast.LENGTH_SHORT).show()
                     }else{
-                        Toast.makeText(context, "Selecciona al menos una entrada", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.select_min_ticket), Toast.LENGTH_SHORT).show()
                     }
                 }
-
             }
         }
     }else{
-        Toast.makeText(context, "No se ha podido añadir al carrito", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.cart_add_error), Toast.LENGTH_SHORT).show()
     }
 }
