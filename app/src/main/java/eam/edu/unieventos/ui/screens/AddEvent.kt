@@ -28,10 +28,17 @@ import java.sql.Date
 import java.text.SimpleDateFormat
 import java.time.LocalTime
 import java.util.*
+import java.time.format.DateTimeFormatter
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddEvent(onBack: () -> Unit) {
+fun AddEvent(
+        onBack: () -> Unit,
+        onNavegateToHome: (String) -> Unit
+
+) {
+
 
     var name by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
@@ -78,8 +85,8 @@ fun AddEvent(onBack: () -> Unit) {
     var datePickerState = rememberDatePickerState()
 
     val context = LocalContext.current
-    val eventViewModel: EventsViewModel = remember { EventsViewModel(context) }
-    val locationViewModel: LocationsViewModel = remember { LocationsViewModel(context) }
+    val eventViewModel: EventsViewModel = remember { EventsViewModel() }
+    val locationViewModel: LocationsViewModel = remember { LocationsViewModel() }
 
     // Scroll state para permitir desplazamiento
     val scrollState = rememberScrollState()
@@ -87,6 +94,8 @@ fun AddEvent(onBack: () -> Unit) {
     // Box para el diseño general de la pantalla
     Scaffold(
     ) {paddingValues ->
+
+
 
 
         Column(
@@ -331,7 +340,6 @@ fun AddEvent(onBack: () -> Unit) {
                     Toast.makeText(context, "Seleccione un tipo de evento", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
-                eventViewModel.logAllEvents()
                 val eventCode = eventViewModel.generateRandomCode(6);
                 val locations = mutableListOf<Location>()
 
@@ -339,7 +347,7 @@ fun AddEvent(onBack: () -> Unit) {
                     if (locationNames[i].isNotEmpty() && locationPrices[i].isNotEmpty() && locationMaxCapacity[i].isNotEmpty()) {
                         // Agregar la localidad a la lista solo si todos los campos no están vacíos
                         val location = Location(
-                            id = eventViewModel.generateRandomCode(5), // Generar un ID único para la ubicación
+                            id = "",
                             name = locationNames[i],
                             price = locationPrices[i].toFloat(),
                             eventCode = eventCode,
@@ -351,9 +359,11 @@ fun AddEvent(onBack: () -> Unit) {
                         locations.add(location)
                     }
                 }
+                val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+                val timeString = timeEvent?.format(timeFormatter) ?: LocalTime.now().format(timeFormatter)
                 val newEvent = dateEvent?.let {
                     Event(
-                        id = eventViewModel.generateRandomId(7),
+                        id = "",
                         code = eventCode ,
                         name = name,
                         place = address,
@@ -362,9 +372,9 @@ fun AddEvent(onBack: () -> Unit) {
                         type = type,
                         poster = poster,
                         locationImage = locationImage,
-                        locations = locations.map { it.id },
+                        //locations = locations.map { it.id },
                         dateEvent = it,
-                        time = timeEvent ?: LocalTime.now(), // Hora del evento
+                        time = timeString, // Hora del evento
                         isActive = isActive
                     )
                 }
@@ -395,7 +405,10 @@ fun AddEvent(onBack: () -> Unit) {
                     locationNames.add("")
                     locationPrices.add("")
                     locationMaxCapacity.add("")
-                    eventViewModel.logAllEvents()
+                    onNavegateToHome("Admin")
+
+
+
                 } else {
                     Toast.makeText(context, "Por favor selecciona una fecha", Toast.LENGTH_SHORT).show()
                 }

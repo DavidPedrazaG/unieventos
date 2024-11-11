@@ -154,9 +154,13 @@ fun Navigation(
         }
 
         composable<RouteScreen.AddEvent> {
-            AddEvent(onBack = {
-                navController.popBackStack()
-            }
+            AddEvent(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onNavegateToHome = {
+                    navController.navigate(RouteScreen.Home)
+                }
             )
         }
 
@@ -325,3 +329,4 @@ fun Navigation(
         }
     }
 }
+

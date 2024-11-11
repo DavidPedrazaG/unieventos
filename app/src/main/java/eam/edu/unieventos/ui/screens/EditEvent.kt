@@ -26,19 +26,21 @@ import eam.edu.unieventos.ui.viewmodel.LocationsViewModel
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.*
+import android.util.Log
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditEvent(eventCode: String, onBack: () -> Unit) {
-    // Obtener el contexto y los viewModels
     val context = LocalContext.current
-    val eventViewModel: EventsViewModel = remember { EventsViewModel(context) }
-    val locationViewModel: LocationsViewModel = remember { LocationsViewModel(context) }
+    val eventViewModel: EventsViewModel = remember { EventsViewModel() }
+    val locationViewModel: LocationsViewModel = remember { LocationsViewModel() }
 
-    // Obtener el evento que se va a editar
-    //eventViewModel.logAllEvents()
-    val event = eventViewModel.getEventByCode(eventCode)
+    var event by remember { mutableStateOf(Event()) }
+
+
     var name by remember { mutableStateOf(event?.name ?: "") }
     var address by remember { mutableStateOf(event?.place ?: "") }
     var city by remember { mutableStateOf(event?.city ?: "") }
@@ -49,8 +51,10 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
     var dateEvent by remember { mutableStateOf(event?.dateEvent) }
     var isActive by remember { mutableStateOf(event?.isActive ?: true) }
 
-    var timeEvent by remember { mutableStateOf<LocalTime?>(event?.time) } // Nueva variable para la hora del evento
-
+    //var timeEvent by remember { mutableStateOf<LocalTime?>(event?.time) } // Nueva variable para la hora del evento
+    var timeEvent by remember { mutableStateOf<LocalTime?>(
+        event?.time?.let { LocalTime.parse(it, DateTimeFormatter.ofPattern("HH:mm")) }
+    ) }
 
     var cities = listOf(
         "Arauca", "Armenia", "Barranquilla", "Bogotá",
@@ -63,7 +67,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
         "Tunja", "Valledupar", "Villavicencio", "Yopal"
     )
 
-    var events = listOf(
+    var eventsType = listOf(
         "Conferencia",
         "Festival",
         "Taller",
@@ -77,18 +81,56 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
     )
 
 
-    // Localidades del evento
-    val initialLocations = event?.locations?.mapNotNull { locationViewModel.getLocationById(it) } ?: emptyList()
-    var numberOfLocations by remember { mutableStateOf(initialLocations.size) }
+    var initialLocations by remember { mutableStateOf<List<Location>>(emptyList()) }
+
+    var numberOfLocations by remember { mutableStateOf(0) }
+
+
+
+
     var locationNames = remember { mutableStateListOf<String>().apply { addAll(initialLocations.map { it.name }) } }
     var locationPrices = remember { mutableStateListOf<String>().apply { addAll(initialLocations.map { it.price.toString() }) } }
     var locationMaxCapacity = remember { mutableStateListOf<String>().apply { addAll(initialLocations.map { it.maxCapacity.toString() }) } }
 
+    // Variables de UI adicionales
     var expandedDate by remember { mutableStateOf(false) }
     var datePickerState = rememberDatePickerState()
-
-    // Scroll state para permitir desplazamiento
     val scrollState = rememberScrollState()
+
+
+
+
+    LaunchedEffect(eventCode) {
+        event = eventViewModel.getEventByCode(eventCode)!!
+        name = event?.name ?: ""
+        address = event?.place   ?: ""
+        description = event?.description ?: ""
+        poster = event?.poster ?: ""
+        locationImage = event?.locationImage ?: ""
+        city = event?.city   ?: ""
+        type = event?.type ?: ""
+        dateEvent = event?.dateEvent ?: Date()
+        val timeString = event?.time ?: "00:00"
+        timeEvent = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm"))
+
+        // Cargar las localidades
+        initialLocations = locationViewModel.getLocationsByEventCode(eventCode)
+        numberOfLocations = initialLocations.size // Actualizar el número de localidades
+
+        // Limpiar y actualizar las listas con las localidades iniciales
+        locationNames.clear()
+        locationPrices.clear()
+        locationMaxCapacity.clear()
+
+        initialLocations.forEach { location ->
+            locationNames.add(location.name)
+            locationPrices.add(location.price.toString())
+            locationMaxCapacity.add(location.maxCapacity.toString())
+        }
+
+    }
+
+
 
     Scaffold(
     ) {paddingValues ->
@@ -184,7 +226,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                     onValeChange = {
                         type = it
                     },
-                    items = events
+                    items = eventsType
                 )
             }
 
@@ -325,12 +367,12 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                 for (i in 0 until numberOfLocations) {
                     LocationRow(
                         index = i + 1,
-                        locationName = locationNames[i] , // No se puede modificar
+                        locationName = locationNames[i],
                         onNameChange = {
                             if (i >= initialLocations.size) {
-                                locationNames[i] = it // Solo se puede editar si i es mayor o igual a initialLocation.size
+                                locationNames[i] = it // Solo se puede editar si i es mayor o igual a initialLocations.size
                             }
-                        }, // No se permite cambiar el nombre
+                        },
                         price = locationPrices[i],
                         onPriceChange = { locationPrices[i] = it },
                         maxCapacity = locationMaxCapacity[i],
@@ -360,7 +402,8 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                         }
                     }
 
-                    // Actualizar el evento
+                    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+                    val timeString = timeEvent?.format(timeFormatter) ?: LocalTime.now().format(timeFormatter)
                     val updatedEvent = Event(
                         id = event.id,
                         code = event.code,
@@ -371,9 +414,8 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                         type = type,
                         poster = poster,
                         locationImage = locationImage,
-                        locations = updatedLocations.map { it.id },
                         dateEvent = dateEvent ?: event.dateEvent,
-                        time =   timeEvent ?: LocalTime.now(),
+                        time =   timeString,
                         isActive = isActive
                     )
 
