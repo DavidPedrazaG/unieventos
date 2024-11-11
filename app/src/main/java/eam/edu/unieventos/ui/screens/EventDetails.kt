@@ -41,11 +41,12 @@ import java.util.*
 @Composable
 fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) {
     val context = LocalContext.current
-    val eventViewModel: EventsViewModel = remember { EventsViewModel(context) }
-    val locationViewModel: LocationsViewModel = remember { LocationsViewModel(context) }
+    val eventViewModel: EventsViewModel = remember { EventsViewModel() }
+    val locationViewModel: LocationsViewModel = remember { LocationsViewModel() }
     val cartViewModel: CartViewModel = remember { CartViewModel(context) }
     val itemViewModel: ItemViewModel = remember { ItemViewModel(context) }
-    val event = eventViewModel.getEventByCode(eventCode)
+    var event by remember { mutableStateOf(Event()) }
+
     val selectedTickets = remember { mutableStateListOf<Triple<String, Int, Location>>() }
     var userLogged = SharedPreferenceUtils.getCurrenUser(context)
     var user = userLogged?.let { ClientsViewModel(context).getByUserId(it.id) }
@@ -59,7 +60,12 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
         return
     }
 
-    val locations = event.locations.mapNotNull { locationViewModel.getLocationById(it) }
+    var locations by remember { mutableStateOf<List<Location>>(emptyList()) }
+    LaunchedEffect(eventCode) {
+        event = eventViewModel.getEventByCode(eventCode)!!
+        locations  = locationViewModel.getLocationsByEventCode(eventCode)
+
+    }
 
     Column(
         modifier = Modifier

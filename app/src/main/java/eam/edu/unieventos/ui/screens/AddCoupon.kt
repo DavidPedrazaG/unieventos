@@ -21,6 +21,7 @@ import eam.edu.unieventos.model.Coupon
 import eam.edu.unieventos.ui.viewmodel.CouponsViewModel
 import eam.edu.unieventos.ui.viewmodel.EventsViewModel
 import eam.edu.unieventos.R
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,7 +30,7 @@ import java.util.*
 fun AddCoupon(onBack: () -> Unit) {
     val context = LocalContext.current
     val couponViewModel: CouponsViewModel = remember { CouponsViewModel(context) }
-    val eventViewModel: EventsViewModel = remember { EventsViewModel(context) }
+    val eventViewModel: EventsViewModel = remember { EventsViewModel() }
 
     // Estado para los campos del formulario
     var code by remember { mutableStateOf("") }
@@ -40,6 +41,7 @@ fun AddCoupon(onBack: () -> Unit) {
     var isActive by remember { mutableStateOf(true) }
     var expandedDate by remember { mutableStateOf(false) }
     var datePickerState = rememberDatePickerState()
+    val scope = rememberCoroutineScope()
 
     // Scroll para el contenido
     val scrollState = rememberScrollState()
@@ -204,16 +206,39 @@ fun AddCoupon(onBack: () -> Unit) {
                             return@Button
                         }
 
-                        val event = eventViewModel.getEventByCode(eventCode)
-                        if (event != null) {
-                            expirationDate = event.dateEvent
-                        } else {
-                            Toast.makeText(
-                                context,
-                                context.getString(R.string.event_not_found),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            return@Button
+                        scope.launch {
+                            val event = eventViewModel.getEventByCode(eventCode)
+
+                            if (event != null) {
+                                expirationDate = event.dateEvent
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.event_not_found),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                return@launch
+                            }
+
+                            val newCoupon = Coupon(
+                                id = couponViewModel.generateCouponId(),
+                                code = couponViewModel.generateCouponCode(),
+                                discountPercentage = discountPercentage.toFloat(),
+                                expirationDate = expirationDate!!,
+                                eventCode = if (eventCode.isNotEmpty()) eventCode else null,
+                                type = 2,
+                                isActive = isActive
+                            )
+                            couponViewModel.createCoupon(newCoupon)
+                            Toast.makeText(context, context.getString(R.string.coupon_created), Toast.LENGTH_SHORT).show()
+
+                            code = ""
+                            discountPercentage = ""
+                            expirationDate = null
+                            eventCode = ""
+                            isCouponByEvent = true
+                            isActive = true
+                            couponViewModel.printCoupons()
                         }
                     } else {
                         if (expirationDate == null) {
@@ -224,27 +249,27 @@ fun AddCoupon(onBack: () -> Unit) {
                             ).show()
                             return@Button
                         }
+
+                        val newCoupon = Coupon(
+                            id = couponViewModel.generateCouponId(),
+                            code = couponViewModel.generateCouponCode(),
+                            discountPercentage = discountPercentage.toFloat(),
+                            expirationDate = expirationDate!!,
+                            eventCode = if (eventCode.isNotEmpty()) eventCode else null,
+                            type = 2,
+                            isActive = isActive
+                        )
+                        couponViewModel.createCoupon(newCoupon)
+                        Toast.makeText(context, context.getString(R.string.coupon_created), Toast.LENGTH_SHORT).show()
+
+                        code = ""
+                        discountPercentage = ""
+                        expirationDate = null
+                        eventCode = ""
+                        isCouponByEvent = true
+                        isActive = true
+                        couponViewModel.printCoupons()
                     }
-
-                    val newCoupon = Coupon(
-                        id = couponViewModel.generateCouponId(),
-                        code = couponViewModel.generateCouponCode(),
-                        discountPercentage = discountPercentage.toFloat(),
-                        expirationDate = expirationDate!!,
-                        eventCode = if (eventCode.isNotEmpty()) eventCode else null,
-                        type = 2,
-                        isActive = isActive
-                    )
-                    couponViewModel.createCoupon(newCoupon)
-                    Toast.makeText(context, context.getString(R.string.coupon_created), Toast.LENGTH_SHORT).show()
-
-                    code = ""
-                    discountPercentage = ""
-                    expirationDate = null
-                    eventCode = ""
-                    isCouponByEvent = true
-                    isActive = true
-                    couponViewModel.printCoupons()
                 },
                 modifier = Modifier.fillMaxWidth(0.4f)
             ) {

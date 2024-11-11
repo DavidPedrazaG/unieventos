@@ -46,7 +46,8 @@ fun HomeScreen(
     onNavegateToEventEdit: (String) -> Unit,
     onNavegateToPurchase: () -> Unit
 ) {
-    var eventViewModel = EventsViewModel(context)
+    val eventViewModel: EventsViewModel = remember { EventsViewModel() }
+    val events = eventViewModel.events.collectAsState().value
     var userLogged = SharedPreferenceUtils.getCurrenUser(context)
     var searchQuery by remember { mutableStateOf("") }
     var selectedLocation by remember { mutableStateOf("Armenia") }
@@ -189,7 +190,7 @@ fun HomeScreen(
 
 
             LazyColumn {
-                val events = eventViewModel.events.value
+//                val events = eventViewModel.events.value
                 events.forEach { event ->
                     item {
                         EventItem(
