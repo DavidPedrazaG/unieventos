@@ -17,7 +17,7 @@ import java.util.Calendar
 
 class ClientsViewModel(context: Context) : UsersViewModel(context) {
 
-    private val _couponViewModel = CouponsViewModel(context)
+    private val _couponViewModel = CouponsViewModel()
     private val _notificationViewModel = NotificationViewModel(context)
     private val _cartViewModel = CartViewModel(context)
 
@@ -52,13 +52,13 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
             editor.putString("${user.id}_cartId", cart.id)
             _cartViewModel.addCart(cart, context)
 
-            val couponId = _couponViewModel.generateCouponId()
+            //val couponId = _couponViewModel.generateCouponId()
             val couponCode = _couponViewModel.generateCouponCode()
             val expirationDate = Calendar.getInstance().apply {
                 add(Calendar.YEAR, 10)
             }.time
 
-            val coupon = Coupon(id = couponId, code = couponCode, discountPercentage = 15f, expirationDate = expirationDate, eventCode = null,1 , isActive = true)
+            val coupon = Coupon(id = "", code = couponCode, discountPercentage = 15f, expirationDate = expirationDate, eventCode = null,1 , isActive = true)
             _couponViewModel.createCoupon(coupon)
 
 

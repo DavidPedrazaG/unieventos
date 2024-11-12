@@ -29,7 +29,7 @@ import java.util.*
 @Composable
 fun AddCoupon(onBack: () -> Unit) {
     val context = LocalContext.current
-    val couponViewModel: CouponsViewModel = remember { CouponsViewModel(context) }
+    val couponViewModel: CouponsViewModel = remember { CouponsViewModel() }
     val eventViewModel: EventsViewModel = remember { EventsViewModel() }
 
     // Estado para los campos del formulario
@@ -221,7 +221,7 @@ fun AddCoupon(onBack: () -> Unit) {
                             }
 
                             val newCoupon = Coupon(
-                                id = couponViewModel.generateCouponId(),
+                                id = "",
                                 code = couponViewModel.generateCouponCode(),
                                 discountPercentage = discountPercentage.toFloat(),
                                 expirationDate = expirationDate!!,
@@ -238,7 +238,6 @@ fun AddCoupon(onBack: () -> Unit) {
                             eventCode = ""
                             isCouponByEvent = true
                             isActive = true
-                            couponViewModel.printCoupons()
                         }
                     } else {
                         if (expirationDate == null) {
@@ -251,7 +250,7 @@ fun AddCoupon(onBack: () -> Unit) {
                         }
 
                         val newCoupon = Coupon(
-                            id = couponViewModel.generateCouponId(),
+                            id = "",
                             code = couponViewModel.generateCouponCode(),
                             discountPercentage = discountPercentage.toFloat(),
                             expirationDate = expirationDate!!,
@@ -268,7 +267,6 @@ fun AddCoupon(onBack: () -> Unit) {
                         eventCode = ""
                         isCouponByEvent = true
                         isActive = true
-                        couponViewModel.printCoupons()
                     }
                 },
                 modifier = Modifier.fillMaxWidth(0.4f)

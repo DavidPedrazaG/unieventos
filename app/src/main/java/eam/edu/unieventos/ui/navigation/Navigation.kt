@@ -245,7 +245,11 @@ fun Navigation(
                 onClose = {
                     navController.popBackStack()
                 },
+                onNavegateToCoupons = {
+                    navController.navigate(RouteScreen.Coupons)
+                },
                 couponCode = coupon
+
             )
         }
 

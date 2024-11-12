@@ -31,10 +31,10 @@ fun ActiveCouponsList(
     onNavegateToEditCoupon: (String) -> Unit
 ) {
     val context = LocalContext.current
-    val couponsViewModel: CouponsViewModel = remember { CouponsViewModel(context) }
+    val couponsViewModel: CouponsViewModel = remember { CouponsViewModel() }
 
     // Obtener la lista de cupones activos
-    val activeCoupons = couponsViewModel.coupons.collectAsState().value.filter { it.isActive }
+    val activeCoupons = couponsViewModel.coupons.collectAsState().value
     Scaffold(
         bottomBar = {
             CustomBottomNavigationBar(
@@ -115,6 +115,7 @@ fun CouponItem(coupon: Coupon, onNavegateToEditCoupon: (String) -> Unit) {
             // Botón para editar el cupón
             Button(
                 onClick = { onNavegateToEditCoupon(coupon.code) },
+
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text(text = stringResource(id = R.string.edit))

@@ -96,6 +96,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
     var expandedDate by remember { mutableStateOf(false) }
     var datePickerState = rememberDatePickerState()
     val scrollState = rememberScrollState()
+    var showDeactivateDialog by remember { mutableStateOf(false) }
 
 
 
@@ -416,7 +417,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                         locationImage = locationImage,
                         dateEvent = dateEvent ?: event.dateEvent,
                         time =   timeString,
-                        isActive = isActive
+                        isActive = true
                     )
 
                     eventViewModel.editEvent(updatedEvent)
@@ -438,6 +439,15 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Botón para desactivar el cupón
+            Button(
+                onClick = { showDeactivateDialog = true }, // Activar el diálogo de confirmación
+                //modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = stringResource(id = R.string.deactivate))
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+
             // Botón para cancelar la edición
             Button(onClick = onBack, colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Red
@@ -446,6 +456,32 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             }
 
             Spacer(modifier = Modifier.height(20.dp))
+
+            if (showDeactivateDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDeactivateDialog = false },
+                    title = { Text(text = stringResource(id = R.string.confirm_deactivation)) },
+                    text = { Text(text = stringResource(id = R.string.deactivate_confirmation)) },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                eventViewModel.deactivateEvent(event)
+                                showDeactivateDialog = false
+                                onBack()
+                            }
+                        ) {
+                            Text(text = stringResource(id = R.string.confirm))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showDeactivateDialog = false }
+                        ) {
+                            Text(text = stringResource(id = R.string.cancel))
+                        }
+                    }
+                )
+            }
         }
     }
 }

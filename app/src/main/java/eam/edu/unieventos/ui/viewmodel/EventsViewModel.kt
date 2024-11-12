@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import eam.edu.unieventos.model.Coupon
 import eam.edu.unieventos.model.Event
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -98,6 +99,7 @@ class EventsViewModel() : ViewModel() {
 
     private suspend fun getEventsList(): List<Event> {
         val snapshot = db.collection("events")
+            .whereEqualTo("active", true)
             .get()
             .await()
         return snapshot.documents.mapNotNull {
@@ -106,6 +108,19 @@ class EventsViewModel() : ViewModel() {
             event.id = it.id
             event
 
+        }
+    }
+
+
+    fun deactivateEvent(event: Event) {
+        event.isActive = false
+        viewModelScope.launch {
+            db.collection("events")
+                .document(event.id)
+                .set(event)
+                .await()
+
+            _events.value = getEventsList()
         }
     }
 
