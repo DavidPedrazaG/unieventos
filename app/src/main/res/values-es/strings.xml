@@ -84,7 +84,7 @@
     <string name="editCoupon">Editar Cupón: </string>
     <string name="expirationdateeditable">Fecha de Expiración (editable)</string>
     <string name="messageNoChangeDate">No se puede cambiar la fecha, el cupón tiene un evento asociado.</string>
-    <string name="deactivateCoupon">Desactivar Cupón</string>
+    <string name="deactivate">Desactivar</string>
     <string name="event_code_label">Código del Evento</string>
     <string name="update_event">Actualizar</string>
     <string name="city_label">Ciudad:</string>
@@ -109,5 +109,8 @@
     <string name="location">Localidad</string>
     <string name="price">Precio</string>
     <string name="max_capacity">Capaxidad Máxima</string>
+    <string name="confirm_deactivation">Confirmar desactivación</string>
+    <string name="deactivate_confirmation">¿Estás seguro de lo  que deseas desactivar .</string>
+    <string name="confirm">Confirmar</string>
 
 </resources>

@@ -14,20 +14,22 @@ import eam.edu.unieventos.ui.viewmodel.LocationsViewModel
 import eam.edu.unieventos.ui.viewmodel.UsersViewModel
 import androidx.compose.ui.res.stringResource
 import eam.edu.unieventos.R
+import eam.edu.unieventos.model.Event
 
 
 @Composable
 fun EditCoupon(
 
     couponCode: String,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    onNavegateToCoupons: () -> Unit,
 ) {
     val context = LocalContext.current
 
-    val couponsViewModel: CouponsViewModel = remember { CouponsViewModel(context) }
+    val couponsViewModel: CouponsViewModel = remember { CouponsViewModel() }
     val usersViewModel: UsersViewModel = remember { UsersViewModel(context) }
     // Obtener el cupón por su código
-    val coupon = couponsViewModel.getCouponByCode(couponCode)
+    var coupon by remember { mutableStateOf(Coupon())}
 
     // Si el cupón no existe, mostrar un mensaje y cerrar la pantalla
     if (coupon == null) {
@@ -36,11 +38,18 @@ fun EditCoupon(
     }
 
     // Estado para los campos editables
-    var discountPercentage by remember { mutableStateOf(coupon.discountPercentage) }
+    var discountPercentage by remember { mutableStateOf(coupon?.discountPercentage ?: 0f) }
     var isActive by remember { mutableStateOf(coupon.isActive) }
 
     // Determinar si el cupón tiene evento
     val hasEvent = coupon.eventCode != null
+    var showDeactivateDialog by remember { mutableStateOf(false) }
+    LaunchedEffect(couponCode) {
+        coupon = couponsViewModel.getCouponByCode(couponCode)!!
+        discountPercentage = coupon?.discountPercentage ?: 0.0f
+
+
+    }
 
 
     Column(
@@ -93,15 +102,13 @@ fun EditCoupon(
 
         // Botón para desactivar el cupón
         Button(
-            onClick = {
-                couponsViewModel.deactivateCoupon(coupon.code , usersViewModel)
-                couponsViewModel.printCoupons()
-                //onClose() // Cerrar la pantalla después de desactivar
-            },
+            onClick = { showDeactivateDialog = true }, // Activar el diálogo de confirmación
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = stringResource(id = R.string.deactivateCoupon))
+            Text(text = stringResource(id = R.string.deactivate))
         }
+
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -109,7 +116,7 @@ fun EditCoupon(
         Button(
             onClick = {
                 // Guardar cambios en el porcentaje de descuento
-                couponsViewModel.updateCoupon(coupon.copy(discountPercentage = discountPercentage, isActive = isActive))
+                couponsViewModel.updateCoupon(coupon.copy(discountPercentage = discountPercentage, isActive = true))
                 onClose() // Cerrar la pantalla después de guardar
             },
             modifier = Modifier.fillMaxWidth()
@@ -125,6 +132,32 @@ fun EditCoupon(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = stringResource(id = R.string.cancel))
+        }
+
+        if (showDeactivateDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeactivateDialog = false },
+                title = { Text(text = stringResource(id = R.string.confirm_deactivation)) },
+                text = { Text(text = stringResource(id = R.string.deactivate_confirmation)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            couponsViewModel.deactivateCoupon(coupon)
+                            showDeactivateDialog = false
+                            onClose()
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showDeactivateDialog = false }
+                    ) {
+                        Text(text = stringResource(id = R.string.cancel))
+                    }
+                }
+            )
         }
     }
 }

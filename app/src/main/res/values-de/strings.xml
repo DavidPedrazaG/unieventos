@@ -84,7 +84,7 @@
     <string name="editCoupon">Gutschein bearbeiten: </string>
     <string name="expirationdateeditable">Ablaufdatum (bearbeitbar)</string>
     <string name="messageNoChangeDate">Datum kann nicht geändert werden, der Gutschein hat eine zugeordnete Veranstaltung.</string>
-    <string name="deactivateCoupon">Gutschein deaktivieren</string>
+    <string name="deactivate">deaktivieren</string>
     <string name="event_code_label">Event-Code</string>
     <string name="update_event">Event aktualisieren</string>
     <string name="city_label">Stadt:</string>
@@ -109,5 +109,9 @@
     <string name="location">Standort</string>
     <string name="price">Preis</string>
     <string name="max_capacity">Maximale Kapazität</string>
+    <string name="confirm_deactivation">Deaktivierung bestätigen</string>
+    <string name="deactivate_confirmation">Sind Sie sicher, dass Sie dies deaktivieren möchten?</string>
+    <string name="confirm">Bestätigen</string>
+
 
 </resources>
