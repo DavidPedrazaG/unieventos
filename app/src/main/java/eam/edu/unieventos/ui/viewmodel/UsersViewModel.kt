@@ -202,6 +202,8 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
             .get()
             .await()
 
+
+
         if (userSnapshot.documents.isNotEmpty()) {
             val userDocument = userSnapshot.documents.first()
             val user = userDocument.toObject(User::class.java)
@@ -216,10 +218,14 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
             .get()
             .await()
 
+
+
         if (clientSnapshot.documents.isNotEmpty()) {
             val clientDocument = clientSnapshot.documents.first()
             val client = clientDocument.toObject(Client::class.java)
             client?.id = clientDocument.id
+            client?.isValidated = clientDocument.getBoolean("isValidated") ?: false
+            client?.isActive = clientDocument.getBoolean("isActive") ?: false
             if (client?.isActive == true) {
                 return client
             }

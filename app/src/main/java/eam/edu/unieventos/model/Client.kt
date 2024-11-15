@@ -5,7 +5,7 @@ class Client(
     val purchaseHistory: List<String> = emptyList(),
     val friends: List<String> = emptyList(),
     val notifications: List<String> = emptyList(),
-    val cartId: String? = null,
+    val cartId: String = "",
     id: String = "",
     idCard: String = "",
     name: String = "",
@@ -13,10 +13,10 @@ class Client(
     address: String = "",
     email: String = "",
     password: String = "",
-    isActive: Boolean,
+    isActive: Boolean = true,
     role: String = "",
     userAppConfigId: String = "",
-    isValidated: Boolean
+    isValidated: Boolean = false
 ) : User(
     id = id,
     idCard = idCard,
@@ -29,14 +29,4 @@ class Client(
     role = role,
     userAppConfigId = userAppConfigId,
     isValidated = isValidated
-) {
-    constructor() : this(
-        availableCoupons = emptyList(),
-        purchaseHistory = emptyList(),
-        friends = emptyList(),
-        notifications = emptyList(),
-        cartId = null,
-        isActive = true,
-        isValidated = false
-    )
-}
+)
