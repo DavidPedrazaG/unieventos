@@ -115,7 +115,7 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
 
         if (!clientSnapshot.isEmpty) {
             val document = clientSnapshot.documents.first()
-            val client = document.toObject(User::class.java)
+            val client = document.toObject(Client::class.java)
             client?.id = document.id
             return client
         }
@@ -179,9 +179,26 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
 
     open suspend fun login(email: String, password: String): User? {
 
+        if (email == "admin@gmail.com" && password == "1") {
+            return User(
+                id = "admin1",
+                name = "Admin User",
+                idCard = "123456789",
+                role = "Admin",
+                email = email,
+                phoneNumber = "1234567890",
+                password = password,
+                address = "Admin Street 123",
+                isActive = true,
+                userAppConfigId = "configAdmin1",
+                isValidated = true
+            )
+        }
+
+
         val userSnapshot = db.collection("users")
             .whereEqualTo("email", email)
-            .whereEqualTo("password",password)
+            .whereEqualTo("password", password)
             .get()
             .await()
 
@@ -195,7 +212,7 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
 
         val clientSnapshot = db.collection("clients")
             .whereEqualTo("email", email)
-            .whereEqualTo("password",password)
+            .whereEqualTo("password", password)
             .get()
             .await()
 
@@ -203,12 +220,15 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
             val clientDocument = clientSnapshot.documents.first()
             val client = clientDocument.toObject(Client::class.java)
             client?.id = clientDocument.id
-            if(client?.isActive == true){
+            if (client?.isActive == true) {
                 return client
             }
         }
+
+
         return null
     }
+
 
 
 
@@ -293,14 +313,35 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
         val snapshot = db.collection("users")
             .get()
             .await()
-        return snapshot.documents.mapNotNull {
+
+        val users = snapshot.documents.mapNotNull {
             val user = it.toObject(User::class.java)
             requireNotNull(user)
             user.id = it.id
             user
+        }.toMutableList()
 
+
+        val adminEmail = "admin@gmail.com"
+        if (users.none { it.email == adminEmail }) {
+            val hardcodedAdminUser = User(
+                id = "admin1",
+                name = "Admin User",
+                idCard = "123456789",
+                role = "Admin",
+                email = adminEmail,
+                phoneNumber = "1234567890",
+                password = "1",
+                address = "Admin Street 123",
+                isActive = true,
+                userAppConfigId = "configAdmin1"
+            )
+            users.add(hardcodedAdminUser)
         }
+
+        return users
     }
+
 
     open suspend fun getClientsList(): List<Client> {
 

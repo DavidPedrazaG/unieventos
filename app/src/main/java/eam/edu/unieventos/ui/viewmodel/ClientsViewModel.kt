@@ -157,6 +157,7 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
             "phoneNumber" to user.phoneNumber,
             "password" to user.password,
             "address" to user.address,
+            "email" to user.email,
             "isActive" to user.isActive,
             "userAppConfigId" to user.userAppConfigId,
             "isValidated" to user.isValidated,
@@ -169,7 +170,7 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
         db.collection("clients").document(user.id).set(clientData)
             .addOnSuccessListener {
                 viewModelScope.launch {
-                    _users.value = getUserList()
+                    _clients.value = getClientsList()
                 }
 
             }
