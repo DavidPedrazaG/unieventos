@@ -52,7 +52,7 @@ fun RegisterScreen(
     val clientViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
 
     var showAlert by remember { mutableStateOf(false) }
-
+    var showSuccessDialog by remember { mutableStateOf(false) }
     var existingClient: Client? by remember { mutableStateOf(null) }
 
     Box(
@@ -155,6 +155,7 @@ fun RegisterScreen(
                             isValidated = isValidated
                         )
                         clientViewModel.createUser(newClient)
+                        showSuccessDialog = true
                         onNavigateToLogin()
                     }
                 },
@@ -234,6 +235,23 @@ fun RegisterScreen(
                     Text("Crear nueva")
                 }
             }
+        )
+    }
+
+    if(showSuccessDialog){
+        AlertDialog(
+            onDismissRequest = {showSuccessDialog = false},
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showSuccessDialog = false
+                        onNavigateToLogin()
+                    }
+                ) {
+                    Text(text = "OK")
+                }
+            },
+            text = { Text("Registro exitoso")}
         )
     }
 }

@@ -26,6 +26,7 @@ import eam.edu.unieventos.utils.SharedPreferenceUtils
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.res.stringResource
 import eam.edu.unieventos.services.EmailService
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -61,6 +62,8 @@ fun LoginForm(
     var password by remember { mutableStateOf("") }
     var loginError by remember { mutableStateOf(false) }
     val sharedPreferences = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+    val scope = rememberCoroutineScope()
+    var clientsExist by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -100,28 +103,35 @@ fun LoginForm(
         ) {
             Button(
                 onClick = {
-                    val user = usersViewModel.login(email, password)
-                    if (user != null) {
-                        val isValidated = user.isValidated
-                        SharedPreferenceUtils.savePreference(context, user.id, user.role)
-
-                        val generatedCode = (100000..999999).random().toString()
-
-                        val emailService = EmailService()
-                        emailService.sendEmail(
-                            to = email,
-                            subject = "Código de validación",
-                            body = "Tu código de validación es: $generatedCode"
-                        )
-
-                        if (isValidated || user.role == "Admin") {
-                            onNavigateToHome(user.role)
-
+                    scope.launch {
+                        clientsExist = usersViewModel.checkIfClientExist()
+                        if(clientsExist){
+                            println("Clientes encontrados en la colección")
                         } else {
-                            onNavigateToValidate(email,generatedCode)
+                            println("No hay clientes en la colección")
                         }
-                    } else {
-                        loginError = true
+                        val user = usersViewModel.login(email, password)
+                        if (user != null) {
+                            val isValidated = user.isValidated
+                            SharedPreferenceUtils.savePreference(context, user.id, user.role)
+
+                            val generatedCode = (100000..999999).random().toString()
+
+                            val emailService = EmailService()
+                            emailService.sendEmail(
+                                to = email,
+                                subject = "Código de validación",
+                                body = "Tu código de validación es: $generatedCode"
+                            )
+
+                            if (isValidated || user.role == "Admin") {
+                                onNavigateToHome(user.role)
+                            } else {
+                                onNavigateToValidate(email, generatedCode)
+                            }
+                        } else {
+                            loginError = true
+                        }
                     }
                 },
                 colors = ButtonDefaults.buttonColors(

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import eam.edu.unieventos.R
+import kotlinx.coroutines.launch
 
 @Composable
 fun RecoveryScreen(
@@ -38,6 +39,7 @@ fun RecoveryScreen(
     var timer by remember { mutableStateOf(60) }
     val context = LocalContext.current
     val clientViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = timer) {
         if (timer > 0) {
@@ -80,12 +82,13 @@ fun RecoveryScreen(
             Button(
                 onClick = {
 
-                    val client = clientViewModel.validateEmail(email)
+                    val client = clientViewModel.validateEmail(email){ client ->
                     if (client != null) {
                         temporalCode = (100000..999999).random().toString()
                         isEmailValid = true
                     } else {
 
+                        }
                     }
                 },
                 modifier = Modifier
@@ -139,11 +142,14 @@ fun RecoveryScreen(
 
             Button(
                 onClick = {
-                    if (code == temporalCode) {
+                    scope.launch{
+                        if (code == temporalCode) {
 
-                        updatePasswordClient(context,email, newPassword)
-                        onNavigateBack()
+                            updatePasswordClient(context,email, newPassword)
+                            onNavigateBack()
+                        }
                     }
+
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -163,12 +169,16 @@ fun RecoveryScreen(
     }
 }
 
-fun updatePasswordClient(context: Context, email:String, newPassword: String) {
+suspend fun updatePasswordClient(context: Context, email:String, newPassword: String) {
     val clientsViewModel: ClientsViewModel =  ClientsViewModel(context)
     val user = clientsViewModel.getUserByEmail(email)
-    val client = user as eam.edu.unieventos.model.Client
-    if (client != null) {
-        client.password = newPassword
+
+
+    if (user is Client) {
+        user.password = newPassword
+        clientsViewModel.updateClient(user)
+    } else {
+
+        println("El usuario no es un cliente")
     }
-    clientsViewModel.updateClient(client)
 }

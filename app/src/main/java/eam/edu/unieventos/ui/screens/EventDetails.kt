@@ -49,10 +49,19 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
 
     val selectedTickets = remember { mutableStateListOf<Triple<String, Int, Location>>() }
     var userLogged = SharedPreferenceUtils.getCurrenUser(context)
-    var user = userLogged?.let { ClientsViewModel(context).getByUserId(it.id) }
-    var client = user as Client
-    var cartId = client.cartId
-    var cart = cartId?.let { cartViewModel.getCartById(it) }
+
+    var user by remember { mutableStateOf<Client?>(null) }
+    var cart by remember { mutableStateOf<Cart?>(null) }
+
+    LaunchedEffect(userLogged) {
+        userLogged?.let {
+            user = ClientsViewModel(context).getByUserId(it.id) as Client?
+            user?.cartId?.let { cartId ->
+                cart = cartViewModel.getCartById(cartId)
+            }
+        }
+    }
+
     val scrollState = rememberScrollState()
 
     if (event == null) {

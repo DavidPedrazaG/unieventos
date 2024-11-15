@@ -1,22 +1,22 @@
 package eam.edu.unieventos.model
 
- class Client(
-    var availableCoupons: List<String>,  // List of coupon codes
-    val purchaseHistory: List<String>,   // List of order IDs
-    val friends: List<String>,           // List of client IDs (friend list)
-    val notifications: List<String>,     // List of notification IDs
-    val cartId: String?,
-    id: String,
-    idCard: String,
-    name: String,
-    phoneNumber: String,
-    address: String,
-    email: String,
-    password: String,
-    isActive: Boolean,
-    role: String,
-    userAppConfigId: String,
-    isValidated: Boolean
+class Client(
+    var availableCoupons: List<String> = emptyList(),
+    val purchaseHistory: List<String> = emptyList(),
+    val friends: List<String> = emptyList(),
+    val notifications: List<String> = emptyList(),
+    val cartId: String? = null,
+    id: String = "",
+    idCard: String = "",
+    name: String = "",
+    phoneNumber: String = "",
+    address: String = "",
+    email: String = "",
+    password: String = "",
+    isActive: Boolean,           // No tiene valor predeterminado
+    role: String = "",
+    userAppConfigId: String = "",
+    isValidated: Boolean         // No tiene valor predeterminado
 ) : User(
     id = id,
     idCard = idCard,
@@ -29,5 +29,14 @@ package eam.edu.unieventos.model
     role = role,
     userAppConfigId = userAppConfigId,
     isValidated = isValidated
-
-)
+) {
+    constructor() : this(
+        availableCoupons = emptyList(),
+        purchaseHistory = emptyList(),
+        friends = emptyList(),
+        notifications = emptyList(),
+        cartId = null,
+        isActive = true,          // Asigna valores explícitos solo aquí
+        isValidated = false
+    )
+}
