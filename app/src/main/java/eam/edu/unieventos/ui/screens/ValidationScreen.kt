@@ -95,13 +95,19 @@ fun ValidationScreen(
                 onClick = {
                     scope.launch {
                         if (code == generatedCode) {
-                            setValidationStatus(context,email)
-                            onValidationSuccess()
+
+                            val client = clientsViewModel.getUserByEmail(email)
+                            if (client is Client) {
+
+                                clientsViewModel.validateStatus(client)
+                                onValidationSuccess()
+                            } else {
+                                println("Usuario no es válido o no existe.")
+                            }
                         } else {
                             validationError = true
                         }
                     }
-
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -130,15 +136,4 @@ fun ValidationScreen(
 
 
 
-suspend fun setValidationStatus(context: Context,email: String) {
-    val clientsViewModel: ClientsViewModel =  ClientsViewModel(context)
-    val user = clientsViewModel.getUserByEmail(email)
 
-    if (user is Client) {
-        user.isValidated = true
-        clientsViewModel.updateClient(user)
-    }else{
-        println("El usuario no es un cliente valido o no existe.")
-    }
-
-}

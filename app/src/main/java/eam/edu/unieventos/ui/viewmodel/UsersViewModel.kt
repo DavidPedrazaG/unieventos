@@ -334,7 +334,8 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
                 password = "1",
                 address = "Admin Street 123",
                 isActive = true,
-                userAppConfigId = "configAdmin1"
+                userAppConfigId = "configAdmin1",
+                isValidated = true
             )
             users.add(hardcodedAdminUser)
         }

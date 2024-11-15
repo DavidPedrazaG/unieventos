@@ -11,7 +11,7 @@ open class User(
     var password: String,
     var isActive: Boolean,
     var userAppConfigId: String,
-    var isValidated: Boolean = false
+    var isValidated: Boolean
 ) {
     constructor() : this("", "", "", "", "", "", "", "", true, "", false)
 }

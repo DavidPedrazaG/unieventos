@@ -13,10 +13,10 @@ class Client(
     address: String = "",
     email: String = "",
     password: String = "",
-    isActive: Boolean,           // No tiene valor predeterminado
+    isActive: Boolean,
     role: String = "",
     userAppConfigId: String = "",
-    isValidated: Boolean         // No tiene valor predeterminado
+    isValidated: Boolean
 ) : User(
     id = id,
     idCard = idCard,
@@ -36,7 +36,7 @@ class Client(
         friends = emptyList(),
         notifications = emptyList(),
         cartId = null,
-        isActive = true,          // Asigna valores explícitos solo aquí
+        isActive = true,
         isValidated = false
     )
 }

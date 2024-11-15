@@ -112,24 +112,21 @@ fun LoginForm(
                         }
                         val user = usersViewModel.login(email, password)
                         if (user != null) {
-                            val isValidated = user.isValidated
                             SharedPreferenceUtils.savePreference(context, user.id, user.role)
-
-                            val generatedCode = (100000..999999).random().toString()
-
-                            val emailService = EmailService()
-                            emailService.sendEmail(
-                                to = email,
-                                subject = "Código de validación",
-                                body = "Tu código de validación es: $generatedCode"
-                            )
-
-                            if (isValidated || user.role == "Admin") {
+                            if(user.isValidated || user.role == "Admin"){
                                 onNavigateToHome(user.role)
-                            } else {
-                                onNavigateToValidate(email, generatedCode)
+                            }else{
+                                val generatedCode = (100000..999999).random().toString()
+
+                                val emailService = EmailService()
+                                emailService.sendEmail(
+                                    to = email,
+                                    subject = "Código de validación",
+                                    body = "Tu código de validación es: $generatedCode"
+                                )
+                                onNavigateToValidate(email,generatedCode)
                             }
-                        } else {
+                        } else{
                             loginError = true
                         }
                     }

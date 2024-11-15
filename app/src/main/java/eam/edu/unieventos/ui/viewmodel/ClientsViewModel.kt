@@ -3,6 +3,7 @@ package eam.edu.unieventos.ui.viewmodel
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import eam.edu.unieventos.model.Cart
@@ -177,18 +178,33 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
     }
 
 
+    fun validateStatus(client: Client) {
+        viewModelScope.launch {
+            db.collection("clients")
+                .document(client.id)
+                .update("isValidated", true)
+                .await()
 
-    fun deactivateClient(client: Client) {
-        if (client.isActive) {
-            client.isActive = false
-
-            updateClient(client)
+            _clients.value = getClientsList()
         }
     }
+
+
+    fun deactivateClient(client: Client) {
+        client.isActive = false
+        viewModelScope.launch {
+            db.collection("clients")
+                .document(client.id)
+                .set(client)
+                .await()
+
+            _clients.value = getClientsList()
+        }
+    }
+
     open fun getDeactivatedClientByEmail(email: String): Client? {
         return _clients.value.find { it.email == email && !it.isActive }
     }
-
 
 
     suspend fun getByPhone(phone: String): User? {
