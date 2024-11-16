@@ -8,7 +8,7 @@ data class Coupon (
     val discountPercentage: Float = 0.0f,
     val expirationDate: Date = Date(),
     val eventCode: String? = "",
-    val type : Int = 0,  // 1 si es para un solo usuario ó 2 si es para variuos usuarios
+    var type : Int = 1,  // 1 si es para un solo usuario ó 2 si es para variuos usuarios
     var isActive: Boolean = false
 
 ){

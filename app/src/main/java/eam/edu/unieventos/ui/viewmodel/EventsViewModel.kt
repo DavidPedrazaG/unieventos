@@ -30,6 +30,8 @@ class EventsViewModel() : ViewModel() {
     }
 
     fun loadEvents() {
+        deactivateEventByDate()
+        deactivateCouponsByExpirationDate()
         viewModelScope.launch {
             _events.value = getEventsList()
         }
@@ -115,14 +117,21 @@ class EventsViewModel() : ViewModel() {
     fun deactivateEvent(event: Event) {
         event.isActive = false
         viewModelScope.launch {
+            // Desactiva los cupones asociados a este evento
+            val couponsViewModel = CouponsViewModel() // Obtén una instancia del CouponsViewModel
+            couponsViewModel.deactivateCouponByEventCode(event.code)
+
+            // Desactiva el evento en la base de datos
             db.collection("events")
                 .document(event.id)
                 .set(event)
                 .await()
 
+            // Actualiza la lista de eventos activos
             _events.value = getEventsList()
         }
     }
+
 
     fun deleteEvent(eventId : String){
         viewModelScope.launch {
@@ -133,4 +142,62 @@ class EventsViewModel() : ViewModel() {
             _events.value = getEventsList()
         }
     }
+
+
+
+    fun deactivateEventByDate() {
+        viewModelScope.launch {
+            val currentDateTime = Date().toInstant()
+                .atZone(java.time.ZoneId.systemDefault())
+                .toLocalDateTime()
+
+            val snapshot = db.collection("events").get().await()
+
+            snapshot.documents.mapNotNull {
+                val event = it.toObject(Event::class.java)
+                event?.id = it.id
+                event
+            }.forEach { event ->
+                try {
+                    // Convertir la fecha del evento en LocalDate
+                    val eventDate = event.dateEvent.toInstant()
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDate()
+
+                    // Convertir la hora del evento en LocalTime
+                    val eventHour = LocalTime.parse(event.time) // Formato "HH:mm"
+
+                    // Crear la fecha y hora del evento (sin zona horaria)
+                    val eventDateTime = eventDate.atTime(eventHour)
+
+                    // Fecha 24 horas antes del evento
+                    val twentyFourHoursBeforeEvent = eventDateTime.minusHours(48)
+
+                    // Verificar si estamos dentro de las 24 horas previas al evento
+                    if (currentDateTime.isAfter(eventDateTime)) {
+                        // Si estamos después de la fecha y hora del evento, desactivar
+                        deactivateEvent(event)
+                        Log.d("EventsViewModel", "Evento desactivado: ${event.id}")
+                    } else if (currentDateTime.isAfter(twentyFourHoursBeforeEvent)) {
+                        // Si estamos dentro de las 24 horas previas al evento
+                        deactivateEvent(event)
+                        Log.d("EventsViewModel", "Evento desactivado: ${event.id}")
+                    }
+                } catch (e: Exception) {
+                    Log.e("EventsViewModel", "Error al procesar evento: ${e.message}")
+                }
+            }
+
+            // Actualizar la lista de eventos activos
+            _events.value = getEventsList()
+        }
+    }
+
+    fun deactivateCouponsByExpirationDate() {
+        val couponsViewModel = CouponsViewModel() // Obtén la instancia del CouponsViewModel
+        couponsViewModel.deactivateExpiredCoupons() // Desactiva los cupones expirados
+    }
+
+
+
 }
