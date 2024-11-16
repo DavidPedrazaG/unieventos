@@ -8,6 +8,6 @@ data class Location(
     val maxCapacity: Int = 0,
     val ticketsSold: Int = 0,
     var eventCode: String = "",
-    val isActive: Boolean = false
+    var isActive: Boolean = false
 ) {
 }

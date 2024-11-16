@@ -28,7 +28,7 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
 
     private val _couponViewModel = CouponsViewModel()
     private val _notificationViewModel = NotificationViewModel(context)
-    private val _cartViewModel = CartViewModel(context)
+    private val _cartViewModel = CartViewModel()
 
 
 
@@ -58,8 +58,8 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
                     val halfIdCardLength = user.idCard.length / 2
                     val halfIdCard = user.idCard.substring(0, halfIdCardLength)
                     val randomCode = "${user.id}$halfIdCard"
-                    val cart = Cart(id = randomCode, user.idCard)
-                    _cartViewModel.addCart(cart, context)
+                    val cart = Cart(id = randomCode, user.id)
+                    _cartViewModel.addCart(cart)
 
 
                     val couponCode = _couponViewModel.generateCouponCode()

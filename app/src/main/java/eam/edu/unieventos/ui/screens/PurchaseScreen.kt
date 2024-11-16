@@ -33,11 +33,13 @@ import eam.edu.unieventos.R
 import eam.edu.unieventos.dto.UserDTO
 import eam.edu.unieventos.model.Client
 import eam.edu.unieventos.model.Item
+import eam.edu.unieventos.model.Order
 import eam.edu.unieventos.ui.components.CustomBottomNavigationBar
-import eam.edu.unieventos.ui.viewmodel.CartViewModel
 import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
 import eam.edu.unieventos.ui.viewmodel.ItemViewModel
+import eam.edu.unieventos.ui.viewmodel.OrderViewModel
 import eam.edu.unieventos.utils.SharedPreferenceUtils
+import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -108,10 +110,10 @@ fun PurchaseScreen(
     onNavegateToCoupons: () -> Unit,
     onNavegateToEventDetail: (String) -> Unit
 ) {
-    val cartViewModel: CartViewModel = remember { CartViewModel(context) }
-    val itemViewModel: ItemViewModel = remember { ItemViewModel(context) }
+    val orderViewModel: OrderViewModel = remember { OrderViewModel() }
+    val itemViewModel: ItemViewModel = remember { ItemViewModel() }
     var userLogged = SharedPreferenceUtils.getCurrenUser(context)
-
+    var date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(java.util.Date()))
     var client: Client? by remember { mutableStateOf(null) }
 
 
@@ -140,7 +142,6 @@ fun PurchaseScreen(
 
     if (client != null) {
         val cartId = client?.cartId
-        val cart = cartId?.let { cartViewModel.getCartById(it) }
 
         Scaffold(
             bottomBar = {
@@ -163,27 +164,47 @@ fun PurchaseScreen(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val cartItemsCodes = cart?.let { cartViewModel.loadItems(cart = it) }
-                val cartItems = mutableListOf<Item>()
-                if (cartItemsCodes != null) {
-                    cartItemsCodes.forEach { itemId ->
-                        val item = itemViewModel.getItemById(itemId = itemId)
-                        if (item != null) {
-                            cartItems.add(item)
-                        }
-                    }
-                }
+                val cartItems = cartId?.let { itemViewModel.loadItemsByCart(it) }
                 Box {
                     Text(text = "Carrito de compras")
                 }
-                cartItems.forEach { item ->
-                    ItemCard(
-                        item = item,
-                        userLogged = userLogged,
-                        onNavegateToEventDetail = {
-                            onNavegateToEventDetail(item.eventId)
+                if (cartItems != null) {
+                    cartItems.forEach { item ->
+                        ItemCard(
+                            item = item,
+                            userLogged = userLogged,
+                            onNavegateToEventDetail = {
+                                onNavegateToEventDetail(item.eventId)
+                            }
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.weight(1f))
+
+                Box{
+                    Button(onClick = {
+                        if(cartItems != null){
+                            var totalAmount = 0.0f
+                            cartItems.forEach { item ->
+                                totalAmount += item.ticketQuantity * item.totalPrice
+                            }
+                            val order = Order(
+                                id = "",
+                                code = "",
+                                clientId = client?.id ?: "",
+                                usedCoupon = "",
+                                totalAmount = totalAmount,
+                                purchaseDate = date,
+                                paymentDay = date,
+                                isActive = true
+                            )
+                            order.id = orderViewModel.addOrder(order)
+                            itemViewModel.emptyCart(cartId, order.id)
+                            onNavegateToHome()
                         }
-                    )
+                    }){
+                        Text(text = "Comprar")
+                    }
                 }
             }
         }
