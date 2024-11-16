@@ -202,10 +202,18 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
             Spacer(modifier = Modifier.height(8.dp))
 
             LaunchedEffect(ticketCount) {
-                if(!firstRender){
-                    selectedTickets.add(Pair(ticketCount, location))
+                if (!firstRender) {
+                    // Eliminar si ya existe un par con esta ubicación
+                    selectedTickets.removeAll { it.second.id == location.id }
+
+                    // Solo agregar si ticketCount es mayor a 0
+                    if (ticketCount > 0) {
+                        selectedTickets.add(Pair(ticketCount, location))
+                    }
+
                 }
             }
+
         }
 
         if(firstRender){
@@ -248,23 +256,35 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
 }
 
 fun addItem(cart: Cart?, cartItems: List<Item>?, event: Event, selectedTickets: List<Pair<Int, Location>>, context: Context, itemViewModel: ItemViewModel) {
+    if (cart != null && cartItems != null) {
+        // Primero, identificamos las ubicaciones seleccionadas actualmente
+        val selectedLocationIds = selectedTickets.map { it.second.id }
 
-    if(cart != null) {
+        // Borramos los items que ya no están seleccionados (cantidad 0)
+        cartItems.forEach { cartItem ->
+            if (!selectedLocationIds.contains(cartItem.locationId)) {
+                // Si el item ya no está en selectedTickets, significa que se puso en 0
+                itemViewModel.removeItem(cartItem.id)
+            }
+        }
+
+        // Ahora procesamos los tickets seleccionados
         for (ticket in selectedTickets) {
             var founded = false
-            for (cartItem in cartItems!!) {
+
+            // Actualizamos los items existentes
+            for (cartItem in cartItems) {
                 if (cartItem.locationId == ticket.second.id) {
                     founded = true
-                    if(ticket.first == 0){
-                        itemViewModel.removeItem(cartItem.id)
-                    }else{
-                        cartItem.ticketQuantity = ticket.first
-                        cartItem.totalPrice = ticket.first * ticket.second.price
-                        itemViewModel.updateItem(cartItem)
-                    }
+                    cartItem.ticketQuantity = ticket.first
+                    cartItem.totalPrice = ticket.first * ticket.second.price
+                    itemViewModel.updateItem(cartItem)
+                    break
                 }
             }
-            if (!founded) {
+
+            // Agregamos nuevos items
+            if (!founded && ticket.first > 0) {
                 val item = Item(
                     id = "",
                     cartId = cart.id,
@@ -277,8 +297,7 @@ fun addItem(cart: Cart?, cartItems: List<Item>?, event: Event, selectedTickets: 
                 itemViewModel.addItem(item)
             }
         }
-
-    }else{
+    } else {
         Toast.makeText(context, context.getString(R.string.cart_add_error), Toast.LENGTH_SHORT).show()
     }
 }

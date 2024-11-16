@@ -46,6 +46,7 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
                 "isActive" to user.isActive,
                 "userAppConfigId" to user.userAppConfigId,
                 "isValidated" to user.isValidated,
+                "cartId" to user.cartId,
                 "friends" to user.friends,
                 "availableCoupons" to user.availableCoupons,
                 "purchaseHistory" to user.purchaseHistory,
