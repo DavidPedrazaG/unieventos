@@ -2,77 +2,94 @@ package eam.edu.unieventos.ui.viewmodel
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import eam.edu.unieventos.model.Cart
+import eam.edu.unieventos.model.Coupon
+import eam.edu.unieventos.model.Event
 import eam.edu.unieventos.model.Item
 import eam.edu.unieventos.model.Order
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class OrderViewModel(private val context: Context) : ViewModel() {
-    private val cartViewModel: CartViewModel = CartViewModel(context = context)
+class OrderViewModel() : ViewModel() {
+
+    val db = Firebase.firestore
     private val _orders = MutableStateFlow(emptyList<Order>())
     val carts: StateFlow<List<Order>> = _orders.asStateFlow()
     init {
-        _orders.value = getOrdersList(context)
+        loadOrders()
     }
 
-    fun addOrder(order: Order, context: Context, cart: Cart){
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val sharedPreferences = context.getSharedPreferences("OrderPrefs", Context.MODE_PRIVATE)
-        if (!sharedPreferences.contains("${order.id}_id")) {
-            val editor = sharedPreferences.edit()
-            editor.putString("${order.id}_id", order.id)
-            editor.putString("${order.id}_code", order.code)
-            editor.putString("${order.id}_clientId", order.clientId)
-            order.items=cartViewModel.loadItems(cart)
-            editor.putStringSet("${order.id}_items", order.items.toSet())
-            editor.putString("${order.id}_userCoupon", order.usedCoupon)
-            editor.putFloat("${order.id}_totalAmount", order.totalAmount)
-            editor.putLong("${order.id}_purchaseDate", order.purchaseDate.time)
-            editor.putLong("${order.id}_paymentDay", order.paymentDay.time)
-            editor.putBoolean("${order.code}_isActive", order.isActive)
-            editor.putStringSet("stored_orders", (sharedPreferences.getStringSet("stored_orders", emptySet()) ?: emptySet()).plus(cart.id))
-            editor.apply()
+    fun loadOrders() {
+        viewModelScope.launch {
+            _orders.value = getOrdersList()
         }
     }
 
-    private fun getOrdersList(context: Context): List<Order> {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("OrderPrefs", Context.MODE_PRIVATE)
-        val storedOrders = mutableListOf<Order>()
-        val storedIds = sharedPreferences.getStringSet("stored_orders", emptySet()) ?: emptySet()
+    fun generateRandomCode(length: Int): String {
+        val charset = ('A'..'Z') + ('0'..'9')
+        return List(length) { charset.random() }.joinToString("")
+    }
 
-        for (code in storedIds) {
-            val id = sharedPreferences.getString("${code}_id", "") ?: ""
-            val code = sharedPreferences.getString("${code}_code", "") ?: ""
-            val clientId = sharedPreferences.getString("${code}_clientId", "")?: ""
-            val itemsSet = sharedPreferences.getStringSet("${code}_items", emptySet()) ?: emptySet()
-            val items:MutableList<String> = mutableListOf()
-            items.addAll(itemsSet)
-            val usedCoupon = sharedPreferences.getString("${code}_userCoupon", "")
-            val totalAmount = sharedPreferences.getFloat("${code}_totalAmount", 0f)
-            val purchaseDate = sharedPreferences.getLong("${code}_purchaseDate", 0)
-            val paymentDay = sharedPreferences.getLong("${code}_paymentDay", 0)
-            val isActive = sharedPreferences.getBoolean("${code}_isActive", true)
-            val order = Order(
-                id = id,
-                code = code,
-                clientId = clientId,
-                items = items,
-                usedCoupon = usedCoupon ?: "",
-                totalAmount = totalAmount,
-                purchaseDate = Date(purchaseDate),
-                paymentDay = Date(paymentDay),
-                isActive = isActive
-            )
-            storedOrders.add(order)
+    fun addOrder(order: Order): String{
+        order.code = generateRandomCode(6)
+        viewModelScope.launch {
+            db.collection("orders")
+                .add(order)
+                .await()
+            loadOrders()
+        }
+        return order.code
+    }
+
+    fun validateCoupon(coupon: Coupon, clientId: String, cartItems: List<Item>, cart: Cart) : Cart{
+        var unused = true
+        var orders = getOrdersListByClient(clientId)
+        for(order in orders){
+            if(order.usedCoupon == coupon.code){
+                unused = false
+                break
+            }
+        }
+        if(unused){
+            if(coupon.eventCode != null){
+                var discountAmount = 0f
+                for(item in cartItems!!){
+                    if(item.eventCode == coupon.eventCode){
+                        discountAmount.plus(item.totalPrice)
+                    }
+                }
+                discountAmount = discountAmount.minus(discountAmount * (coupon.discountPercentage / 100))
+                cart.total = cart.total.minus(discountAmount)
+            }else{
+                cart.total = cart.total.minus(cart.total!! * (coupon.discountPercentage / 100))
+            }
         }
 
-        return storedOrders
+        return cart
+    }
+
+    private suspend fun getOrdersList(): List<Order> {
+        val snapshot = db.collection("orders")
+            .get()
+            .await()
+        return snapshot.documents.mapNotNull {
+            val order = it.toObject(Order::class.java)
+            requireNotNull(order)
+            order.id = it.id
+            order
+
+        }
     }
 
     fun getOrderByCode(code: String): Order {

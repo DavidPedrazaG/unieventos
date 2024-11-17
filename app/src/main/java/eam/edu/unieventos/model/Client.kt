@@ -5,7 +5,7 @@ class Client(
     val purchaseHistory: List<String> = emptyList(),
     val friends: List<String> = emptyList(),
     val notifications: List<String> = emptyList(),
-    val cartId: String = "",
+    var cartId: String = "",
     id: String = "",
     idCard: String = "",
     name: String = "",

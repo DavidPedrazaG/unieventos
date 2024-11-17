@@ -1,7 +1,6 @@
 package eam.edu.unieventos.ui.screens
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,13 +40,14 @@ import java.util.*
 @Composable
 fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) {
     val context = LocalContext.current
+    var firstRender = true
     val eventViewModel: EventsViewModel = remember { EventsViewModel() }
     val locationViewModel: LocationsViewModel = remember { LocationsViewModel() }
-    val cartViewModel: CartViewModel = remember { CartViewModel(context) }
-    val itemViewModel: ItemViewModel = remember { ItemViewModel(context) }
+    val cartViewModel: CartViewModel = remember { CartViewModel() }
+    val itemViewModel: ItemViewModel = remember { ItemViewModel() }
     var event by remember { mutableStateOf(Event()) }
 
-    val selectedTickets = remember { mutableStateListOf<Triple<String, Int, Location>>() }
+    val selectedTickets = remember { mutableStateListOf<Pair<Int, Location>>() }
     var userLogged = SharedPreferenceUtils.getCurrenUser(context)
 
     var user by remember { mutableStateOf<Client?>(null) }
@@ -56,9 +56,7 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
     LaunchedEffect(userLogged) {
         userLogged?.let {
             user = ClientsViewModel(context).getByUserId(it.id) as Client?
-            user?.cartId?.let { cartId ->
-                cart = cartViewModel.getCartById(cartId)
-            }
+            cart = user?.let { it1 -> cartViewModel.getCartByClient(it1.id) }
         }
     }
 
@@ -172,20 +170,10 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
         )
 
         Spacer(modifier = Modifier.height(8.dp))
-        itemViewModel.logItems()
-        val cartItemsCodes = cart?.let { cartViewModel.loadItems(cart = it) }
-        val cartItems = mutableListOf<Item>()
-        if (cartItemsCodes != null) {
-            cartItemsCodes.forEach{ itemId ->
-                val item = itemViewModel.getItemById(itemId = itemId)
-                if (item != null) {
-                    cartItems.add(item)
-                }
-            }
-        }
+        val cartItems = cart?.let { itemViewModel.loadItemsByCart(it.id) }
         locations.forEach { location ->
             var ticketCount by remember {
-                mutableStateOf(cartItems.find { it.locationId == location.id }?.ticketQuantity ?: 0)
+                mutableStateOf(cartItems?.find { it.locationId == location.id }?.ticketQuantity ?: 0)
             }
 
             Row(
@@ -214,12 +202,22 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
             Spacer(modifier = Modifier.height(8.dp))
 
             LaunchedEffect(ticketCount) {
-                if (ticketCount > 0) {
-                    selectedTickets.add(Triple(location.name, ticketCount, location))
-                } else {
-                    selectedTickets.removeAll { it.first == location.name }
+                if (!firstRender) {
+                    // Eliminar si ya existe un par con esta ubicación
+                    selectedTickets.removeAll { it.second.id == location.id }
+
+                    // Solo agregar si ticketCount es mayor a 0
+                    if (ticketCount > 0) {
+                        selectedTickets.add(Pair(ticketCount, location))
+                    }
+
                 }
             }
+
+        }
+
+        if(firstRender){
+            firstRender = false
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -227,6 +225,11 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
         Button(
             onClick = {
                 addItem(cart, cartItems, event, selectedTickets, context, itemViewModel, cartViewModel)
+//                for (ticket in selectedTickets) {
+//                    if (ticket.first == 0) {
+//                        selectedTickets.remove(ticket)
+//                    }
+//                }
             }
         ) {
             Text(text = stringResource(id = R.string.addCart))
@@ -252,47 +255,53 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
     }
 }
 
-fun addItem(cart: Cart?, cartItems: MutableList<Item>, event: Event, selectedTickets: List<Triple<String, Int, Location>>, context: Context, itemViewModel: ItemViewModel, cartViewModel: CartViewModel){
-
-    if(cart != null) {
-        for (ticket in selectedTickets) {
-            val quantity = ticket.second
-            val location = ticket.third
-            if (location != null) {
-                val totalPrice = location.price * quantity
-                val existingItem = cartItems.find { it.locationId == location.id }
-                if (existingItem != null) {
-                    if(quantity == 0){
-                        itemViewModel.removeItem(existingItem, context)
-                    }else{
-                        val newItemId = Item(
-                            id = existingItem.id,
-                            eventId = event.id,
-                            locationId = location.id,
-                            ticketQuantity = quantity,
-                            totalPrice = totalPrice
-                        )
-                        itemViewModel.updateItem(newItemId, context)
-                    }
-                    Toast.makeText(context, context.getString(R.string.tickets_updated), Toast.LENGTH_SHORT).show()
-                } else {
-                    if(quantity > 0){
-                        val newItemId = Item(
-                            id = UUID.randomUUID().toString(),
-                            eventId = event.id,
-                            locationId = location.id,
-                            ticketQuantity = quantity,
-                            totalPrice = totalPrice
-                        )
-                        cartViewModel.addItem(newItemId, context, cart)
-                        Toast.makeText(context, context.getString(R.string.tickets_added), Toast.LENGTH_SHORT).show()
-                    }else{
-                        Toast.makeText(context, context.getString(R.string.select_min_ticket), Toast.LENGTH_SHORT).show()
-                    }
-                }
+fun addItem(cart: Cart?, cartItems: List<Item>?, event: Event, selectedTickets: List<Pair<Int, Location>>, context: Context, itemViewModel: ItemViewModel, cartViewModel: CartViewModel) {
+    if (cart != null && cartItems != null) {
+        // Primero, identificamos las ubicaciones seleccionadas actualmente
+        val selectedLocationIds = selectedTickets.map { it.second.id }
+        var amount = 0f
+        // Borramos los items que ya no están seleccionados (cantidad 0)
+        cartItems.forEach { cartItem ->
+            if (!selectedLocationIds.contains(cartItem.locationId)) {
+                // Si el item ya no está en selectedTickets, significa que se puso en 0
+                itemViewModel.removeItem(cartItem.id)
             }
         }
-    }else{
+
+        // Ahora procesamos los tickets seleccionados
+        for (ticket in selectedTickets) {
+            var founded = false
+
+            // Actualizamos los items existentes
+            for (cartItem in cartItems) {
+                if (cartItem.locationId == ticket.second.id) {
+                    founded = true
+                    cartItem.ticketQuantity = ticket.first
+                    cartItem.totalPrice = ticket.first * ticket.second.price
+                    itemViewModel.updateItem(cartItem)
+                    amount = amount?.plus(cartItem.totalPrice)!!
+                    break
+                }
+            }
+
+            // Agregamos nuevos items
+            if (!founded && ticket.first > 0) {
+                val item = Item(
+                    id = "",
+                    cartId = cart.id,
+                    eventCode = event.code,
+                    locationId = ticket.second.id,
+                    ticketQuantity = ticket.first,
+                    totalPrice = ticket.first * ticket.second.price,
+                    orderCode = ""
+                )
+                itemViewModel.addItem(item)
+                amount = amount?.plus(item.totalPrice)!!
+            }
+        }
+        cart.total = amount
+        cartViewModel.updateCart(cart)
+    } else {
         Toast.makeText(context, context.getString(R.string.cart_add_error), Toast.LENGTH_SHORT).show()
     }
 }

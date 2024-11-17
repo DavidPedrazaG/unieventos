@@ -28,7 +28,7 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
 
     private val _couponViewModel = CouponsViewModel()
     private val _notificationViewModel = NotificationViewModel(context)
-    private val _cartViewModel = CartViewModel(context)
+    private val _cartViewModel = CartViewModel()
 
 
 
@@ -46,6 +46,7 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
                 "isActive" to user.isActive,
                 "userAppConfigId" to user.userAppConfigId,
                 "isValidated" to user.isValidated,
+                "cartId" to user.cartId,
                 "friends" to user.friends,
                 "availableCoupons" to user.availableCoupons,
                 "purchaseHistory" to user.purchaseHistory,
@@ -54,14 +55,8 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
 
             db.collection("clients").document(user.id).set(clientData)
                 .addOnSuccessListener {
-
-                    val halfIdCardLength = user.idCard.length / 2
-                    val halfIdCard = user.idCard.substring(0, halfIdCardLength)
-                    val randomCode = "${user.id}$halfIdCard"
-                    val cart = Cart(id = randomCode, user.idCard)
-                    _cartViewModel.addCart(cart, context)
-
-
+                    val cart = Cart("", user.id)
+                    _cartViewModel.addCart(cart)
                     val couponCode = _couponViewModel.generateCouponCode()
                     val expirationDate = Calendar.getInstance().apply {
                         add(Calendar.YEAR, 10)
@@ -179,12 +174,20 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
 
 
     fun validateStatus(client: Client) {
+        var cart = _cartViewModel.getCartByClient(client.id)
+        if (cart != null) {
+            _cartViewModel.addId(cart)
+        }
+        var cartId = _cartViewModel.getCartByClient(client.id)?.id
         viewModelScope.launch {
             db.collection("clients")
                 .document(client.id)
                 .update("isValidated", true)
                 .await()
-
+            db.collection("clients")
+                .document(client.id)
+                .update("cartId", cartId)
+                .await()
             _clients.value = getClientsList()
         }
     }
