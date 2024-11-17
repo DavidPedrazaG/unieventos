@@ -61,6 +61,21 @@ class CouponsViewModel() : ViewModel() {
         }
     }
 
+    fun redeemCoupon(couponCode: String){
+        var coupon = validateCoupon(couponCode)
+        if(coupon != null){
+            coupon.isActive = false
+            viewModelScope.launch {
+                db.collection("coupons")
+                    .document(coupon.id)
+
+                    .set(coupon)
+                    .await()
+
+                _coupons.value = getCouponsList()
+            }
+        }
+    }
 
     fun updateCoupon(coupon: Coupon) {
         viewModelScope.launch {

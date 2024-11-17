@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import eam.edu.unieventos.model.Item
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -41,6 +42,24 @@ class LocationsViewModel() : ViewModel() {
             location.id = it.id
             location
 
+        }
+    }
+
+    fun validateTicket(item: Item): Boolean {
+        var location = getLocationById(item.locationId)
+        if (location != null) {
+            if (location.ticketsSold.plus(item.ticketQuantity) <= location.maxCapacity) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun buyTicket(item: Item){
+        var location = getLocationById(item.locationId)
+        if (location != null) {
+            location.ticketsSold = location.ticketsSold.plus(item.ticketQuantity)
+            updateLocation(location)
         }
     }
 

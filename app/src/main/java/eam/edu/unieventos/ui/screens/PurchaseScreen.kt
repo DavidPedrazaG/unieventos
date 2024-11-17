@@ -2,6 +2,7 @@ package eam.edu.unieventos.ui.screens
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,15 +33,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eam.edu.unieventos.R
 import eam.edu.unieventos.dto.UserDTO
+import eam.edu.unieventos.model.Cart
 import eam.edu.unieventos.model.Client
+import eam.edu.unieventos.model.Coupon
 import eam.edu.unieventos.model.Item
 import eam.edu.unieventos.model.Order
 import eam.edu.unieventos.ui.components.CustomBottomNavigationBar
+import eam.edu.unieventos.ui.viewmodel.CartViewModel
 import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
+import eam.edu.unieventos.ui.viewmodel.CouponsViewModel
 import eam.edu.unieventos.ui.viewmodel.ItemViewModel
+import eam.edu.unieventos.ui.viewmodel.LocationsViewModel
 import eam.edu.unieventos.ui.viewmodel.OrderViewModel
 import eam.edu.unieventos.utils.SharedPreferenceUtils
-import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -74,7 +80,7 @@ fun ItemCard(item: Item, userLogged: UserDTO?, onNavegateToEventDetail: (String)
                 modifier = Modifier.weight(1f)
             ) {
                 if (item != null) {
-                    Text(text = "Event: ${item.eventId}", fontSize = 16.sp)
+                    Text(text = "Event: ${item.eventCode}", fontSize = 16.sp)
                     Text(text = "Location: ${item.locationId}", fontSize = 14.sp)
                     Text(text = "Cantidad de tiquets: ${item.ticketQuantity}", fontSize = 14.sp)
                 }
@@ -84,7 +90,7 @@ fun ItemCard(item: Item, userLogged: UserDTO?, onNavegateToEventDetail: (String)
             Button(onClick = {
                 if(userLogged != null) {
                     if(userLogged.rol == "Client"){
-                        onNavegateToEventDetail(item.eventId)
+                        onNavegateToEventDetail(item.eventCode)
                     }
                 }
             }) {
@@ -110,12 +116,18 @@ fun PurchaseScreen(
     onNavegateToCoupons: () -> Unit,
     onNavegateToEventDetail: (String) -> Unit
 ) {
+    var couponCode by remember { mutableStateOf("") }
     val orderViewModel: OrderViewModel = remember { OrderViewModel() }
+    val cartViewModel: CartViewModel = remember { CartViewModel() }
     val itemViewModel: ItemViewModel = remember { ItemViewModel() }
+    val locationViewModel: LocationsViewModel = remember { LocationsViewModel() }
+    val couponsVimodel: CouponsViewModel = remember { CouponsViewModel() }
     var userLogged = SharedPreferenceUtils.getCurrenUser(context)
     var date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(java.util.Date()))
     var client: Client? by remember { mutableStateOf(null) }
-
+    var cart: Cart? by remember { mutableStateOf(null) }
+    var coupon: Coupon? by remember { mutableStateOf(null) }
+    var amount: Float? by remember { mutableStateOf(0f) }
 
     if (userLogged != null) {
         LaunchedEffect(userLogged) {
@@ -142,7 +154,8 @@ fun PurchaseScreen(
 
     if (client != null) {
         val cartId = client?.cartId
-
+        cart = cartId?.let { cartViewModel.getCartById(it) }
+        amount = cart?.total
         Scaffold(
             bottomBar = {
                 CustomBottomNavigationBar(
@@ -169,12 +182,12 @@ fun PurchaseScreen(
                     Text(text = "Carrito de compras")
                 }
                 if (cartItems != null) {
-                    cartItems.forEach { item ->
+                    for(item in cartItems){
                         ItemCard(
                             item = item,
                             userLogged = userLogged,
                             onNavegateToEventDetail = {
-                                onNavegateToEventDetail(item.eventId)
+                                onNavegateToEventDetail(item.eventCode)
                             }
                         )
                     }
@@ -182,29 +195,98 @@ fun PurchaseScreen(
                 Spacer(modifier = Modifier.weight(1f))
 
                 Box{
-                    Button(onClick = {
-                        if(cartItems != null){
-                            var totalAmount = 0.0f
-                            cartItems.forEach { item ->
-                                totalAmount += item.ticketQuantity * item.totalPrice
+                    Row {
+                        TextField(
+                            value = couponCode,
+                            onValueChange = { couponCode = it },
+                            label = { Text(text = "Código de cupón") },
+                            modifier = Modifier
+                                .fillMaxWidth(0.5f)
+                                .padding(vertical = 8.dp),
+                            singleLine = true
+                        )
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth(0.5f)
+                                .padding(vertical = 8.dp),
+                            onClick = {
+                                if(couponCode != ""){
+                                    if(couponCode != coupon?.code){
+                                        coupon = couponsVimodel.validateCoupon(couponCode)
+                                        if(coupon != null) {
+                                            cart = cartItems?.let {
+                                                orderViewModel.validateCoupon(
+                                                    coupon!!, client?.id!!,
+                                                    it, cart!!
+                                                )
+                                            }
+                                            if (amount != cart?.total) {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Cupón aplicado",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                amount = cart?.total
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Cupón ya usado",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }else{
+                                            Toast.makeText(context, "El cupón no es valido", Toast.LENGTH_SHORT).show()
+                                            couponCode = ""
+                                        }
+                                    }else{
+                                        Toast.makeText(context, "El cupón ya fue aplicádo", Toast.LENGTH_SHORT).show()
+                                        couponCode = ""
+                                    }
+                                }else{
+                                    Toast.makeText(context, "Ingrese un cupón", Toast.LENGTH_SHORT).show()
+                                }
                             }
-                            val order = Order(
+                        ){
+                            Text(text = "Aplicar")
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = "Total a pagar: ${amount}")
+                Spacer(modifier = Modifier.weight(1f))
+                Button(onClick = {
+                    if(cartItems != null){
+                        cartItems.forEach { item ->
+                            var isValid = locationViewModel.validateTicket(item)
+                            if(!isValid){
+                                Toast.makeText(context, "No hay tickets disponibles para el evento ${item.eventCode} en la ubicación ${item.locationId}", Toast.LENGTH_SHORT).show()
+                                return@Button
+                            }
+                        }
+                        val order = amount?.let {
+                            Order(
                                 id = "",
                                 code = "",
                                 clientId = client?.id ?: "",
                                 usedCoupon = "",
-                                totalAmount = totalAmount,
+                                totalAmount = it,
                                 purchaseDate = date,
                                 paymentDay = date,
                                 isActive = true
                             )
-                            order.id = orderViewModel.addOrder(order)
-                            itemViewModel.emptyCart(cartId, order.id)
-                            onNavegateToHome()
                         }
-                    }){
-                        Text(text = "Comprar")
+                        if (order != null) {
+                            order.code = orderViewModel.addOrder(order)
+                        }
+                        couponsVimodel.redeemCoupon(couponCode)
+                        itemViewModel.emptyCart(cartId, order?.code!!)
+                        cartItems.forEach { item ->
+                            locationViewModel.buyTicket(item)
+                        }
+                        onNavegateToHome()
                     }
+                }){
+                    Text(text = "Comprar")
                 }
             }
         }

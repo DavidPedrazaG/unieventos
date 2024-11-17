@@ -224,7 +224,7 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
 
         Button(
             onClick = {
-                addItem(cart, cartItems, event, selectedTickets, context, itemViewModel)
+                addItem(cart, cartItems, event, selectedTickets, context, itemViewModel, cartViewModel)
 //                for (ticket in selectedTickets) {
 //                    if (ticket.first == 0) {
 //                        selectedTickets.remove(ticket)
@@ -255,11 +255,11 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
     }
 }
 
-fun addItem(cart: Cart?, cartItems: List<Item>?, event: Event, selectedTickets: List<Pair<Int, Location>>, context: Context, itemViewModel: ItemViewModel) {
+fun addItem(cart: Cart?, cartItems: List<Item>?, event: Event, selectedTickets: List<Pair<Int, Location>>, context: Context, itemViewModel: ItemViewModel, cartViewModel: CartViewModel) {
     if (cart != null && cartItems != null) {
         // Primero, identificamos las ubicaciones seleccionadas actualmente
         val selectedLocationIds = selectedTickets.map { it.second.id }
-
+        var amount = 0f
         // Borramos los items que ya no están seleccionados (cantidad 0)
         cartItems.forEach { cartItem ->
             if (!selectedLocationIds.contains(cartItem.locationId)) {
@@ -279,6 +279,7 @@ fun addItem(cart: Cart?, cartItems: List<Item>?, event: Event, selectedTickets: 
                     cartItem.ticketQuantity = ticket.first
                     cartItem.totalPrice = ticket.first * ticket.second.price
                     itemViewModel.updateItem(cartItem)
+                    amount = amount?.plus(cartItem.totalPrice)!!
                     break
                 }
             }
@@ -288,15 +289,18 @@ fun addItem(cart: Cart?, cartItems: List<Item>?, event: Event, selectedTickets: 
                 val item = Item(
                     id = "",
                     cartId = cart.id,
-                    eventId = event.id,
+                    eventCode = event.code,
                     locationId = ticket.second.id,
                     ticketQuantity = ticket.first,
                     totalPrice = ticket.first * ticket.second.price,
-                    orderId = ""
+                    orderCode = ""
                 )
                 itemViewModel.addItem(item)
+                amount = amount?.plus(item.totalPrice)!!
             }
         }
+        cart.total = amount
+        cartViewModel.updateCart(cart)
     } else {
         Toast.makeText(context, context.getString(R.string.cart_add_error), Toast.LENGTH_SHORT).show()
     }

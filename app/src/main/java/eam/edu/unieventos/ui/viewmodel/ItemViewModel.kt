@@ -33,7 +33,6 @@ class ItemViewModel() : ViewModel(){
     }
 
     fun addItem(item: Item) {
-        item.id = generateRandomCode(6)
         viewModelScope.launch {
             db.collection("items")
                 .add(item)
@@ -86,15 +85,15 @@ class ItemViewModel() : ViewModel(){
         return _items.value.filter { it.cartId == cartId }
     }
 
-    fun loadItemsByOrder(orderId: String): List<Item> {
-        return _items.value.filter { it.orderId == orderId }
+    fun loadItemsByOrder(orderCode: String): List<Item> {
+        return _items.value.filter { it.orderCode == orderCode }
     }
 
-    fun emptyCart(cartId: String, orderId: String){
+    fun emptyCart(cartId: String, orderCode: String){
         val items = loadItemsByCart(cartId)
         items.forEach { item ->
             item.cartId = ""
-            item.orderId = orderId
+            item.orderCode = orderCode
             updateItem(item)
         }
 

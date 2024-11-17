@@ -2,11 +2,13 @@ package eam.edu.unieventos.ui.viewmodel
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import eam.edu.unieventos.model.Cart
+import eam.edu.unieventos.model.Coupon
 import eam.edu.unieventos.model.Event
 import eam.edu.unieventos.model.Item
 import eam.edu.unieventos.model.Order
@@ -40,15 +42,41 @@ class OrderViewModel() : ViewModel() {
     }
 
     fun addOrder(order: Order): String{
-        order.id = generateRandomCode(6)
-        order.code = generateRandomCode(8)
+        order.code = generateRandomCode(6)
         viewModelScope.launch {
             db.collection("orders")
                 .add(order)
                 .await()
             loadOrders()
         }
-        return order.id
+        return order.code
+    }
+
+    fun validateCoupon(coupon: Coupon, clientId: String, cartItems: List<Item>, cart: Cart) : Cart{
+        var unused = true
+        var orders = getOrdersListByClient(clientId)
+        for(order in orders){
+            if(order.usedCoupon == coupon.code){
+                unused = false
+                break
+            }
+        }
+        if(unused){
+            if(coupon.eventCode != null){
+                var discountAmount = 0f
+                for(item in cartItems!!){
+                    if(item.eventCode == coupon.eventCode){
+                        discountAmount.plus(item.totalPrice)
+                    }
+                }
+                discountAmount = discountAmount.minus(discountAmount * (coupon.discountPercentage / 100))
+                cart.total = cart.total.minus(discountAmount)
+            }else{
+                cart.total = cart.total.minus(cart.total!! * (coupon.discountPercentage / 100))
+            }
+        }
+
+        return cart
     }
 
     private suspend fun getOrdersList(): List<Order> {

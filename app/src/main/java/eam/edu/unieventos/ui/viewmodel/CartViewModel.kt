@@ -1,11 +1,11 @@
 package eam.edu.unieventos.ui.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import eam.edu.unieventos.model.Cart
+import eam.edu.unieventos.model.Event
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,20 +28,13 @@ class CartViewModel() : ViewModel() {
         }
     }
 
-    fun generateRandomCode(length: Int): String {
-        val charset = ('A'..'Z') + ('0'..'9')
-        return List(length) { charset.random() }.joinToString("")
-    }
-
-    fun addCart(cart: Cart) : String {
-        cart.id = generateRandomCode(6)
+    fun addCart(cart: Cart) {
         viewModelScope.launch {
             db.collection("carts")
                 .add(cart)
                 .await()
             loadCarts()
         }
-        return cart.id
     }
 
     private suspend fun getCartsList(): List<Cart> {
@@ -53,6 +46,27 @@ class CartViewModel() : ViewModel() {
             requireNotNull(cart)
             cart.id = it.id
             cart
+        }
+    }
+
+    fun addId(cart: Cart) {
+        viewModelScope.launch {
+            db.collection("carts")
+                .document(cart.id)
+                .set(cart)
+                .await()
+            loadCarts()
+        }
+    }
+
+    fun updateCart(cart: Cart) {
+        viewModelScope.launch {
+            db.collection("carts")
+                .document(cart.id)
+                .set(cart)
+                .await()
+
+            _carts.value = getCartsList()
         }
     }
 
