@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
@@ -14,13 +15,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import eam.edu.unieventos.R
 import eam.edu.unieventos.model.Cart
 import eam.edu.unieventos.model.Client
@@ -52,12 +54,15 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
 
     var user by remember { mutableStateOf<Client?>(null) }
     var cart by remember { mutableStateOf<Cart?>(null) }
+    var locations by remember { mutableStateOf<List<Location>>(emptyList()) }
 
-    LaunchedEffect(userLogged) {
+    LaunchedEffect(userLogged , eventCode) {
         userLogged?.let {
             user = ClientsViewModel(context).getByUserId(it.id) as Client?
             cart = user?.let { it1 -> cartViewModel.getCartByClient(it1.id) }
         }
+        event = eventViewModel.getEventByCode(eventCode)!!
+        locations = locationViewModel.getLocationsByEventCode(eventCode)
     }
 
     val scrollState = rememberScrollState()
@@ -67,13 +72,6 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
         return
     }
 
-    var locations by remember { mutableStateOf<List<Location>>(emptyList()) }
-    LaunchedEffect(eventCode) {
-        event = eventViewModel.getEventByCode(eventCode)!!
-        locations  = locationViewModel.getLocationsByEventCode(eventCode)
-
-    }
-
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -81,13 +79,17 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        Spacer(modifier = Modifier.height(40.dp))
+        // Imagen del póster del evento
         if (event.poster != null) {
             Image(
-                painter = rememberImagePainter(data = event.poster),
+                painter = rememberAsyncImagePainter(event.poster),
                 contentDescription = stringResource(id = R.string.poster_description),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp),
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
         } else {
@@ -160,16 +162,51 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
 
+
+        Spacer(modifier = Modifier.height(25.dp))
         Text(
             text = stringResource(id = R.string.select_location),
             style = MaterialTheme.typography.titleMedium,
             fontSize = 20.sp,
             color = Color.Black
         )
+        Spacer(modifier = Modifier.height(25.dp))
 
-        Spacer(modifier = Modifier.height(8.dp))
+// Mostrar imagen única para event.locationImage
+        if (event.locationImage != null) {
+            Image(
+                painter = rememberAsyncImagePainter(event.locationImage),
+
+                contentDescription = "RECURSOS", // Cambia el texto de recurso si es necesario
+
+                //contentDescription = stringResource(id = R.string.location_image_description), // Cambia el texto de recurso si es necesario
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .background(Color.Gray),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "hOLAAAAAAAAAAAAAAAAAAA",
+                    //text = stringResource(id = R.string.no_location_image), // Cambia según los recursos de texto
+                    color = Color.White,
+                    fontSize = 16.sp
+                )
+            }
+        }
+
+
+
+        Spacer(modifier = Modifier.height(25.dp))
         val cartItems = cart?.let { itemViewModel.loadItemsByCart(it.id) }
         locations.forEach { location ->
             var ticketCount by remember {
@@ -181,10 +218,13 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = location.name, fontSize = 18.sp)
+                // Imagen de la ubicación ELIMINADA
 
-                val priceFormatted = NumberFormat.getCurrencyInstance(Locale.getDefault()).format(location.price)
-                Text(text = priceFormatted, fontSize = 16.sp, color = Color.Gray)
+                Column {
+                    Text(text = location.name, fontSize = 18.sp)
+                    val priceFormatted = NumberFormat.getCurrencyInstance(Locale.getDefault()).format(location.price)
+                    Text(text = priceFormatted, fontSize = 16.sp, color = Color.Gray)
+                }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { if (ticketCount > 0) ticketCount -= 1 }) {
@@ -210,13 +250,11 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
                     if (ticketCount > 0) {
                         selectedTickets.add(Pair(ticketCount, location))
                     }
-
                 }
             }
-
         }
 
-        if(firstRender){
+        if (firstRender) {
             firstRender = false
         }
 
@@ -225,11 +263,6 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
         Button(
             onClick = {
                 addItem(cart, cartItems, event, selectedTickets, context, itemViewModel, cartViewModel)
-//                for (ticket in selectedTickets) {
-//                    if (ticket.first == 0) {
-//                        selectedTickets.remove(ticket)
-//                    }
-//                }
             }
         ) {
             Text(text = stringResource(id = R.string.addCart))
@@ -255,39 +288,41 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
     }
 }
 
-fun addItem(cart: Cart?, cartItems: List<Item>?, event: Event, selectedTickets: List<Pair<Int, Location>>, context: Context, itemViewModel: ItemViewModel, cartViewModel: CartViewModel) {
+fun addItem(
+    cart: Cart?,
+    cartItems: List<Item>?,
+    event: Event,
+    selectedTickets: List<Pair<Int, Location>>,
+    context: Context,
+    itemViewModel: ItemViewModel,
+    cartViewModel: CartViewModel
+) {
     if (cart != null && cartItems != null) {
-        // Primero, identificamos las ubicaciones seleccionadas actualmente
+        // Lista de IDs de las ubicaciones seleccionadas actualmente
         val selectedLocationIds = selectedTickets.map { it.second.id }
         var amount = 0f
-        // Borramos los items que ya no están seleccionados (cantidad 0)
+
+        // Eliminar ítems que ya no están seleccionados (cantidad 0)
         cartItems.forEach { cartItem ->
             if (!selectedLocationIds.contains(cartItem.locationId)) {
-                // Si el item ya no está en selectedTickets, significa que se puso en 0
-                itemViewModel.removeItem(cartItem.id)
+                itemViewModel.removeItem(cartItem.id) // Eliminamos de Firestore
             }
         }
 
-        // Ahora procesamos los tickets seleccionados
+        // Procesar tickets seleccionados
         for (ticket in selectedTickets) {
-            var founded = false
-
-            // Actualizamos los items existentes
-            for (cartItem in cartItems) {
-                if (cartItem.locationId == ticket.second.id) {
-                    founded = true
-                    cartItem.ticketQuantity = ticket.first
-                    cartItem.totalPrice = ticket.first * ticket.second.price
-                    itemViewModel.updateItem(cartItem)
-                    amount = amount?.plus(cartItem.totalPrice)!!
-                    break
-                }
-            }
-
-            // Agregamos nuevos items
-            if (!founded && ticket.first > 0) {
-                val item = Item(
-                    id = "",
+            // Verificar si el ítem ya existe
+            val existingItem = cartItems.find { it.locationId == ticket.second.id }
+            if (existingItem != null) {
+                // Actualizamos el ítem existente
+                existingItem.ticketQuantity = ticket.first
+                existingItem.totalPrice = ticket.first * ticket.second.price
+                itemViewModel.updateItem(existingItem) // Actualizamos en Firestore
+                amount += existingItem.totalPrice
+            } else if (ticket.first > 0) {
+                // Creamos un nuevo ítem si no existe y la cantidad es mayor a 0
+                val newItem = Item(
+                    id = UUID.randomUUID().toString(), // ID único para evitar duplicados
                     cartId = cart.id,
                     eventCode = event.code,
                     locationId = ticket.second.id,
@@ -295,10 +330,12 @@ fun addItem(cart: Cart?, cartItems: List<Item>?, event: Event, selectedTickets: 
                     totalPrice = ticket.first * ticket.second.price,
                     orderCode = ""
                 )
-                itemViewModel.addItem(item)
-                amount = amount?.plus(item.totalPrice)!!
+                itemViewModel.addItem(newItem) // Agregamos a Firestore
+                amount += newItem.totalPrice
             }
         }
+
+        // Actualizamos el total del carrito
         cart.total = amount
         cartViewModel.updateCart(cart)
     } else {

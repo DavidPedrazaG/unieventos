@@ -1,6 +1,9 @@
 package eam.edu.unieventos.ui.screens
 
 import android.app.TimePickerDialog
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -29,6 +32,15 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.rounded.Upload
+import androidx.core.content.ContextCompat
+import com.cloudinary.Cloudinary
+import com.cloudinary.utils.ObjectUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,6 +58,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
     var city by remember { mutableStateOf(event?.city ?: "") }
     var description by remember { mutableStateOf(event?.description ?: "") }
     var type by remember { mutableStateOf(event?.type ?: "") }
+
     var poster by remember { mutableStateOf(event?.poster ?: "") }
     var locationImage by remember { mutableStateOf(event?.locationImage ?: "") }
     var dateEvent by remember { mutableStateOf(event?.dateEvent) }
@@ -98,6 +111,24 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
     val scrollState = rememberScrollState()
     var showDeactivateDialog by remember { mutableStateOf(false) }
 
+    val config = mapOf(
+        "cloud_name" to "deofyzexo",
+        "api_key" to "115375694432889",
+        "api_secret" to "CxeQ6T4qUK9Innz0lAQP9CCqjLg"
+    )
+
+    val cloudinary = Cloudinary(config)
+    val scope = rememberCoroutineScope()
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        if (it) {
+            Toast.makeText(context, "Permiso concedido", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Permiso denegado", Toast.LENGTH_SHORT).show()
+        }
+    }
 
 
 
@@ -130,6 +161,38 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
         }
 
     }
+
+    val fileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            Log.e("URI", uri.toString())
+
+            scope.launch(Dispatchers.IO) {
+                val imputStream = context.contentResolver.openInputStream(uri)
+                imputStream?.use { stream ->
+                    val result = cloudinary.uploader().upload(stream , ObjectUtils.emptyMap())
+                    Log.e("result", result.toString())
+                    locationImage = result["secure_url"].toString()  // Esta actualización no recompone la UI
+                }
+            }
+
+        }
+    }
+
+    val posterFileLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                Log.e("URI", uri.toString())
+
+                scope.launch(Dispatchers.IO) {
+                    val inputStream = context.contentResolver.openInputStream(uri)
+                    inputStream?.use { stream ->
+                        val result = cloudinary.uploader().upload(stream, ObjectUtils.emptyMap())
+                        Log.e("resultole", result.toString())
+                        poster = result["secure_url"].toString()  // Esta actualización no recompone la UI
+                    }
+                }
+            }
+        }
 
 
 
@@ -231,25 +294,88 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                 )
             }
 
-            TextField(
-                value = poster,
-                onValueChange = { poster = it },
-                label = { Text(text = stringResource(id = R.string.poster_url))},
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .padding(vertical = 8.dp),
-                singleLine = true
-            )
+            Row {
+                TextField(
+                    value = poster,
+                    onValueChange = { poster = it },
+                    label = { Text(text = stringResource(id = R.string.poster_url)) },
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .padding(vertical = 8.dp),
+                    singleLine = true
+                )
 
-            TextField(
-                value = locationImage,
-                onValueChange = { locationImage = it },
-                label = { Text(text = stringResource(id = R.string.location_image_url)) },
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .padding(vertical = 8.dp),
-                singleLine = true
-            )
+                Button(onClick = {
+                    val permissionCheckResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.READ_MEDIA_IMAGES
+                        )
+                    } else {
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.READ_EXTERNAL_STORAGE
+                        )
+                    }
+                    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                        posterFileLauncher.launch("image/*")
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            permissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
+                        } else {
+                            permissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                        }
+                    }
+                }) {
+                    Icon(
+                        contentDescription = null,
+                        imageVector = Icons.Rounded.Upload
+                    )
+                }
+            }
+
+            Row(){
+                TextField(
+                    value = locationImage,
+                    onValueChange = { locationImage = it },
+                    label = { Text(text = stringResource(id = R.string.location_image_url)) },
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .padding(vertical = 8.dp),
+                    singleLine = true
+                )
+
+                Button(onClick = {
+                    val permissionCheckResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.READ_MEDIA_IMAGES
+
+                        )
+                    } else {
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.READ_EXTERNAL_STORAGE
+
+                        )
+                    }
+                    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                        fileLauncher.launch("image/*")
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            permissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
+                        } else {
+                            permissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+
+                        }
+                    }
+                }) {
+                    Icon(
+                        contentDescription = null,
+                        imageVector = Icons.Rounded.Upload
+                    )
+                }
+            }
 
             // Fecha del evento
             OutlinedTextField(
