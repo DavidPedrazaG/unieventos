@@ -13,6 +13,7 @@ material = "1.7.1"
 kotlinxSerialization = "1.7.1"
 googleGmsGoogleServices = "4.4.2"
 firebaseFirestore = "25.1.1"
+cloudinary = "3.0.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,6 +34,7 @@ androidx-material-icons-extended = {module = "androidx.compose.material:material
 androidx-navigation-compose = {module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose"}
 kotlinx-serialization-json = {group = "org.jetbrains.kotlinx",name = "kotlinx-serialization-json",version.ref ="kotlinxSerialization"}
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
+cloudinary-android = { group = "com.cloudinary", name = "cloudinary-android", version.ref = "cloudinary" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
