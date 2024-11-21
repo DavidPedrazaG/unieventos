@@ -170,7 +170,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                 val imputStream = context.contentResolver.openInputStream(uri)
                 imputStream?.use { stream ->
                     val result = cloudinary.uploader().upload(stream , ObjectUtils.emptyMap())
-                    Log.e("result", result.toString())
+                    Log.e("resultt", result.toString())
                     locationImage = result["secure_url"].toString()  // Esta actualización no recompone la UI
                 }
             }
@@ -187,7 +187,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                     val inputStream = context.contentResolver.openInputStream(uri)
                     inputStream?.use { stream ->
                         val result = cloudinary.uploader().upload(stream, ObjectUtils.emptyMap())
-                        Log.e("resultole", result.toString())
+                        Log.e("resultolee", result.toString())
                         poster = result["secure_url"].toString()  // Esta actualización no recompone la UI
                     }
                 }
@@ -225,7 +225,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                 onValueChange = { name = it },
                 label = { Text(text = stringResource(id = R.string.event_name)) },
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
+                    .fillMaxWidth(0.7f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
@@ -235,7 +235,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                 onValueChange = { address = it },
                 label = { Text(text = stringResource(id = R.string.event_location))},
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
+                    .fillMaxWidth(0.7f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
@@ -270,10 +270,11 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                 onValueChange = { description = it },
                 label = { Text(text = stringResource(id = R.string.event_description)) },
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
+                    .fillMaxWidth(0.7f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
+            Spacer(modifier = Modifier.height(8.dp))
 
             // para el tipo
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -293,6 +294,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                     items = eventsType
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row {
                 TextField(
@@ -300,7 +302,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                     onValueChange = { poster = it },
                     label = { Text(text = stringResource(id = R.string.poster_url)) },
                     modifier = Modifier
-                        .fillMaxWidth(0.9f)
+                        .fillMaxWidth(0.5f)
                         .padding(vertical = 8.dp),
                     singleLine = true
                 )
@@ -326,7 +328,11 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                             permissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
                         }
                     }
-                }) {
+                },
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(horizontal = 8.dp)
+                        .wrapContentWidth()) {
                     Icon(
                         contentDescription = null,
                         imageVector = Icons.Rounded.Upload
@@ -340,7 +346,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                     onValueChange = { locationImage = it },
                     label = { Text(text = stringResource(id = R.string.location_image_url)) },
                     modifier = Modifier
-                        .fillMaxWidth(0.9f)
+                        .fillMaxWidth(0.5f)
                         .padding(vertical = 8.dp),
                     singleLine = true
                 )
@@ -369,13 +375,20 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
 
                         }
                     }
-                }) {
+                },
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(horizontal = 8.dp)
+                        .wrapContentWidth()
+
+                    ) {
                     Icon(
                         contentDescription = null,
                         imageVector = Icons.Rounded.Upload
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Fecha del evento
             OutlinedTextField(
@@ -407,7 +420,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                                     val calendar = Calendar.getInstance()
                                     calendar.timeInMillis = selectedDay
                                     // Añadir un día
-                                    calendar.add(Calendar.DAY_OF_MONTH, 1)
+                                    calendar.add(Calendar.DAY_OF_MONTH, 0)
                                     // Asignar la nueva fecha
                                     dateEvent = calendar.time
                                 }
@@ -494,7 +507,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
 
             // Componente dinámico para editar localidades
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(0.95f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 for (i in 0 until numberOfLocations) {
@@ -514,9 +527,14 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Botón para guardar los cambios
             Button(onClick = {
+                if (!areFieldsNotEmptyEdit(name, address, city, description, type, poster, locationImage ,dateEvent, timeEvent)) {
+                    Toast.makeText(context, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
                 if (event != null) {
                     // Actualizar las localidades
                     val updatedLocations = mutableListOf<Location>()
@@ -616,4 +634,29 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             }
         }
     }
+}
+
+
+
+
+fun areFieldsNotEmptyEdit(
+    name: String,
+    address: String,
+    city: String,
+    description: String,
+    type: String,
+    poster: String,
+    locationImage: String,
+    dateEvent: java.util.Date?,
+    timeEvent: LocalTime?
+): Boolean {
+    return name.isNotEmpty() &&
+            address.isNotEmpty() &&
+            city.isNotEmpty() &&
+            description.isNotEmpty() &&
+            type.isNotEmpty() &&
+            poster.isNotEmpty() &&
+            locationImage.isNotEmpty() &&
+            dateEvent != null &&
+            timeEvent != null
 }
