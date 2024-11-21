@@ -189,8 +189,8 @@ fun RegisterScreen(
     if (showAlert && existingClient != null) {
         AlertDialog(
             onDismissRequest = { showAlert = false },
-            title = { Text("Usuario existente") },
-            text = { Text("Se ha encontrado un usuario con el mismo correo. ¿Deseas reactivar la cuenta o crear una nueva?") },
+            title = { Text(text = stringResource(id = R.string.existing_user))},
+            text = { Text(text = stringResource(id = R.string.found_user))},
             confirmButton = {
                 Button(
                     onClick = {
@@ -202,7 +202,7 @@ fun RegisterScreen(
                         onNavigateToLogin()
                     }
                 ) {
-                    Text("Reactivar")
+                    Text(text = stringResource(id = R.string.reactivate))
                 }
             },
             dismissButton = {
@@ -232,7 +232,7 @@ fun RegisterScreen(
                         onNavigateToLogin()
                     }
                 ) {
-                    Text("Crear nueva")
+                    Text(text = stringResource(id = R.string.create_new))
                 }
             }
         )
@@ -248,10 +248,10 @@ fun RegisterScreen(
                         onNavigateToLogin()
                     }
                 ) {
-                    Text(text = "OK")
+                    Text(text = stringResource(id = R.string.ok))
                 }
             },
-            text = { Text("Registro exitoso")}
+            text = { Text(text = stringResource(id = R.string.successful_registration))}
         )
     }
 }

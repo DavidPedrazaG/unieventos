@@ -165,7 +165,7 @@ fun LoginForm(
 
         if (loginError) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Credenciales incorrectas", color = Color.Red)
+            Text(text = stringResource(id = R.string.incorrect_credentials), color = Color.Red)
         }
     }
 }
