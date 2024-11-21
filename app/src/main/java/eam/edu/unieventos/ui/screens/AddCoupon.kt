@@ -56,7 +56,7 @@ fun AddCoupon(onBack: () -> Unit) {
                 .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(26.dp))
+            Spacer(modifier = Modifier.height(200.dp))
 
             Text(
                 text = stringResource(id = R.string.create_coupon),
@@ -73,7 +73,7 @@ fun AddCoupon(onBack: () -> Unit) {
                 onValueChange = { discountPercentage = it },
                 label = { Text(text = stringResource(id = R.string.discount_percentage)) },
                 modifier = Modifier
-                    .fillMaxWidth(0.65f)
+                    .fillMaxWidth(0.5f)
                     .padding(vertical = 8.dp),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -91,8 +91,7 @@ fun AddCoupon(onBack: () -> Unit) {
                         selected = isCouponByEvent,
                         onClick = {
                             isCouponByEvent = true
-                            eventCode =
-                                ""  // Limpiar el código de evento al cambiar a "Para Evento"
+                            eventCode = ""  // Limpiar el código de evento al cambiar a "Para Evento"
                             expirationDate = null // Limpiar la fecha al cambiar a "Para Evento"
                         }
                     )
@@ -122,7 +121,7 @@ fun AddCoupon(onBack: () -> Unit) {
                     onValueChange = { eventCode = it },
                     label = { Text(text = stringResource(id = R.string.event_code)) },
                     modifier = Modifier
-                        .fillMaxWidth(0.6f)
+                        .fillMaxWidth(0.5f)
                         .padding(vertical = 8.dp),
                     singleLine = true
                 )
@@ -150,7 +149,7 @@ fun AddCoupon(onBack: () -> Unit) {
                         }
                     },
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(0.45f)
                         .padding(vertical = 8.dp)
                 )
 
@@ -280,7 +279,7 @@ fun AddCoupon(onBack: () -> Unit) {
             Button(
                 onClick = onBack,
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                modifier = Modifier.fillMaxWidth(0.4f)
+                modifier = Modifier.fillMaxWidth(0.2f)
             ) {
                 Text(text = stringResource(id = R.string.back))
             }

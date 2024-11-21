@@ -5,17 +5,21 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import eam.edu.unieventos.model.Client
 import eam.edu.unieventos.model.Coupon
 import eam.edu.unieventos.model.Event
 import eam.edu.unieventos.model.Location
+import eam.edu.unieventos.model.Notification
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -24,6 +28,8 @@ class CouponsViewModel() : ViewModel() {
     val db = Firebase.firestore
     private val _coupons = MutableStateFlow(emptyList<Coupon>())
     val coupons: StateFlow<List<Coupon>> = _coupons.asStateFlow()
+
+    private val _notificationViewModel = NotificationViewModel()
 
     init {
         loadCoupons()
@@ -52,14 +58,55 @@ class CouponsViewModel() : ViewModel() {
     }
 
 
+//    fun createCoupon(coupon: Coupon) {
+//        viewModelScope.launch {
+//            db.collection("coupons")
+//                .add(coupon)
+//                .await()
+//            loadCoupons()
+//        }
+//    }
+
     fun createCoupon(coupon: Coupon) {
         viewModelScope.launch {
-            db.collection("coupons")
-                .add(coupon)
-                .await()
-            loadCoupons()
+            try {
+                // Crear el cupón en Firestore
+                val couponRef = db.collection("coupons")
+                    .add(coupon)
+                    .await()
+
+                // Obtener todos los clientes de la colección "clients"
+                val clientsSnapshot = db.collection("clients")
+                    .get()
+                    .await()
+
+                // Crear notificación para cada cliente
+                val clients = clientsSnapshot.documents.mapNotNull { it.toObject(Client::class.java) }
+                clients.forEach { client ->
+                    val notification = Notification(
+                        id = "",
+                        from = "UniEventos",
+                        to = client.id,
+                        message = "¡Nuevo cupón disponible! Código: ${coupon.code}. Obtén un ${coupon.discountPercentage}% de descuento",
+                        eventId = "",
+                        sendDate = Calendar.getInstance().time,
+                        isRead = false
+                    )
+
+                    // Enviar la notificación utilizando el NotificationViewModel
+                    _notificationViewModel.createNotification(notification)
+                }
+
+                // Recargar la lista de cupones después de la creación
+                loadCoupons()
+
+            } catch (e: Exception) {
+                Log.e("CouponsViewModel", "Error al crear cupón: ${e.message}")
+            }
         }
     }
+
+
 
     fun redeemCoupon(couponCode: String){
         var coupon = validateCoupon(couponCode)

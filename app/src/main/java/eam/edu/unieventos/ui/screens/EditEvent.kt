@@ -81,16 +81,16 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
     )
 
     var eventsType = listOf(
-        "Conferencia",
-        "Festival",
-        "Taller",
-        "Exposición",
-        "Maratón",
-        "Torneo",
-        "Feria",
-        "Competencia",
-        "Seminario",
-        "Concierto"
+        stringResource(R.string.conference),
+        stringResource(R.string.festival),
+        stringResource(R.string.workshop),
+        stringResource(R.string.exhibition),
+        stringResource(R.string.marathon),
+        stringResource(R.string.tournament),
+        stringResource(R.string.fair),
+        stringResource(R.string.competition),
+        stringResource(R.string.seminar),
+        stringResource(R.string.concert)
     )
 
 
@@ -391,23 +391,37 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             // Fecha del evento
-            OutlinedTextField(
-                value = dateEvent?.let { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it) } ?: "",
-                onValueChange = {},
-                readOnly = true,
-                trailingIcon = {
-                    IconButton(
-                        onClick = { expandedDate = true }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.DateRange,
-                            contentDescription = "Icon Date"
-                        )
-                    }
-                },
-                modifier = Modifier.width(190.dp)
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(id = R.string.date),
+                    color = Color.Black,
+                    fontSize = 20.sp
+                )
 
+                Spacer(modifier = Modifier.width(50.dp))
+
+                OutlinedTextField(
+                    value = dateEvent?.let {
+                        SimpleDateFormat(
+                            "dd/MM/yyyy",
+                            Locale.getDefault()
+                        ).format(it)
+                    } ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { expandedDate = true }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.DateRange,
+                                contentDescription = "Icon Date"
+                            )
+                        }
+                    },
+                    modifier = Modifier.width(190.dp)
+                )
+            }
             if (expandedDate) {
                 DatePickerDialog(
                     onDismissRequest = { expandedDate = false },
@@ -443,34 +457,49 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Hora del evento
-            OutlinedTextField(
-                value = timeEvent?.toString() ?: "",
-                onValueChange = {},
-                readOnly = true,
-                placeholder = { Text(text = stringResource(id = R.string.select_time)) },
-                trailingIcon = {
-                    IconButton(onClick = {
-                        // Mostrar TimePickerDialog para seleccionar la hora
-                        val timePickerDialog = TimePickerDialog(
-                            context,
-                            { _, hourOfDay, minute ->
-                                timeEvent = LocalTime.of(hourOfDay, minute)
-                            },
-                            timeEvent?.hour ?: 0, // Hora por defecto
-                            timeEvent?.minute ?: 0, // Minutos por defecto
-                            true
-                        )
-                        timePickerDialog.show()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Rounded.DateRange,
-                            contentDescription =  stringResource(id = R.string.icon_date)
-                        )
-                    }
-                },
-                modifier = Modifier.width(190.dp)
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(id = R.string.hour),
+                    color = Color.Black,
+                    fontSize = 20.sp
+                )
 
+                Spacer(modifier = Modifier.width(50.dp))
+                OutlinedTextField(
+                    value = timeEvent?.toString() ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    placeholder = { Text(text = stringResource(id = R.string.select_time)) },
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            // Mostrar TimePickerDialog para seleccionar la hora
+                            val timePickerDialog = TimePickerDialog(
+                                context,
+                                { _, hourOfDay, minute ->
+                                    timeEvent = LocalTime.of(hourOfDay, minute)
+                                },
+                                timeEvent?.hour ?: 0, // Hora por defecto
+                                timeEvent?.minute ?: 0, // Minutos por defecto
+                                true
+                            )
+                            timePickerDialog.show()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Rounded.DateRange,
+                                contentDescription = stringResource(id = R.string.icon_date)
+                            )
+                        }
+                    },
+                    modifier = Modifier.width(190.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(50.dp))
+            Text(
+                text = stringResource(id = R.string.location),
+                color = Color.Black,
+                fontSize = 20.sp
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
             // Campo para seleccionar cuántas localidades se quieren

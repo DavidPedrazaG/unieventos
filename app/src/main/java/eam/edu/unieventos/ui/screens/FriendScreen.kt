@@ -31,18 +31,17 @@ fun FriendScreen(
     onNavegateToPurchaseHistory: () -> Unit,
     onNavegateToHome: () -> Unit,
     onNavegateToCoupons: () -> Unit,
-    onNavegateToFriendList: () -> Unit,
+    onNavegateToFriendList: () ->Unit,
     usersViewModel: UsersViewModel = viewModel(factory = UsersViewModelFactory(context))
 ) {
     val context = LocalContext.current
     val client_id = SharedPreferenceUtils.getCurrenUser(context)  // Cliente logueado
     var clients by remember { mutableStateOf<List<Client>>(emptyList()) }
     val clientsViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
-
+    val coroutineScope = rememberCoroutineScope() // Definimos un CoroutineScope
 
     LaunchedEffect(client_id?.id) {
         val loadedClients = clientsViewModel.getClientsList()
-
         clients = loadedClients.filter { it.id != client_id?.id }
     }
 
@@ -59,15 +58,16 @@ fun FriendScreen(
                 onNavegateToCoupons = onNavegateToCoupons
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onNavegateToFriendList() },
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text("Ver amigos")
-            }
-        },
-        floatingActionButtonPosition = FabPosition.End
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { onNavegateToFriendList() },
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text("Ver amigos")
+                }
+            },
+            floatingActionButtonPosition =FabPosition.End
+
     ) { paddingValues ->
         Column(
             modifier = modifier
@@ -84,7 +84,6 @@ fun FriendScreen(
                 LazyColumn {
                     items(clients) { client ->
                         val isFriend = client_id?.id?.let {
-
                             client.friends.contains(it) || it in client.friends
                         } ?: false
 
@@ -92,26 +91,26 @@ fun FriendScreen(
                             client = client,
                             onAddFriend = { friendId ->
                                 client_id?.id?.let { userId ->
-                                    if (isFriend) {
+                                    coroutineScope.launch { // Llamadas suspendidas dentro de la corutina
+                                        if (isFriend) {
+                                            clientsViewModel.removeFriend(userId, friendId)
 
-                                        clientsViewModel.removeFriend(userId, friendId)
-
-                                        clients = clients.map { client ->
-                                            if (client.id == friendId) {
-                                                client.copyWithUpdatedFriends(client.friends - userId)
-                                            } else {
-                                                client
+                                            clients = clients.map { client ->
+                                                if (client.id == friendId) {
+                                                    client.copyWithUpdatedFriends(client.friends - userId)
+                                                } else {
+                                                    client
+                                                }
                                             }
-                                        }
-                                    } else {
+                                        } else {
+                                            clientsViewModel.addFriend(userId, friendId)
 
-                                        clientsViewModel.addFriend(userId, friendId)
-
-                                        clients = clients.map { client ->
-                                            if (client.id == friendId) {
-                                                client.copyWithUpdatedFriends(client.friends + userId)
-                                            } else {
-                                                client
+                                            clients = clients.map { client ->
+                                                if (client.id == friendId) {
+                                                    client.copyWithUpdatedFriends(client.friends + userId)
+                                                } else {
+                                                    client
+                                                }
                                             }
                                         }
                                     }

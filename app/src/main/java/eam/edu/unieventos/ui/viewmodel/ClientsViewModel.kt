@@ -30,7 +30,7 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
 
 
     private val _couponViewModel = CouponsViewModel()
-    private val _notificationViewModel = NotificationViewModel(context)
+    private val _notificationViewModel = NotificationViewModel()
     private val _cartViewModel = CartViewModel()
     private val firestore = FirebaseFirestore.getInstance()
 
@@ -75,8 +75,10 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
 
                     val notification = Notification(
                         id = "", from = "UniEventos", to = user.id,
-                        message = "Recibiste un cupón del 15% de descuento", eventId = "",
-                        sendDate = Calendar.getInstance().time, isRead = false
+                        message = "Recibiste un cupón del 15% de descuento. Código: $couponCode",
+                        eventId = "",
+                        sendDate = Calendar.getInstance().time,
+                        isRead = false
                     )
                     _notificationViewModel.createNotification(notification)
                 }
@@ -88,21 +90,38 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
         }
     }
 
-    fun addFriend(userId: String, friendId: String) {
+    suspend fun addFriend(userId: String, friendId: String) {
+        val clientsViewModel = ClientsViewModel(context)
+
+        val client = clientsViewModel.getByUserId(userId)
+
         val clientDocRef: DocumentReference = firestore.collection("clients").document(userId)
 
         firestore.runTransaction { transaction ->
             val clientSnapshot = transaction.get(clientDocRef)
 
-            val client = clientSnapshot.toObject(Client::class.java)
+            val currentClient  = clientSnapshot.toObject(Client::class.java)
                 ?: throw Exception("Cliente no encontrado")
 
-            if (!client.friends.contains(friendId)) {
-                val updatedFriends = client.friends.toMutableList().apply { add(friendId) }
+            if (!currentClient .friends.contains(friendId)) {
+                val updatedFriends = currentClient .friends.toMutableList().apply { add(friendId) }
                 transaction.update(clientDocRef, "friends", updatedFriends)
             }
         }.addOnSuccessListener {
-            Log.d("addFriend", "Amigo añadido exitosamente.")
+            val notification = client?.let { it1 ->
+                Notification(
+                    id = "", from = it1.id, to = friendId,
+                    message = "Tu y ${client.name} son ahora amigos",
+                    eventId = "",
+                    sendDate = Calendar.getInstance().time,
+                    isRead = false
+                )
+            }
+            if (notification != null) {
+                _notificationViewModel.createNotification(notification)
+            }
+
+
         }.addOnFailureListener { e ->
             Log.e("addFriend", "Error al añadir amigo", e)
         }

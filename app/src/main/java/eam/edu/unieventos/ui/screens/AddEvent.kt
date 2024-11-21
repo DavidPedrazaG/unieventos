@@ -84,16 +84,16 @@ fun AddEvent(
     )
 
     var events = listOf(
-        "Conferencia",
-        "Festival",
-        "Taller",
-        "Exposición",
-        "Maratón",
-        "Torneo",
-        "Feria",
-        "Competencia",
-        "Seminario",
-        "Concierto"
+        stringResource(R.string.conference),
+        stringResource(R.string.festival),
+        stringResource(R.string.workshop),
+        stringResource(R.string.exhibition),
+        stringResource(R.string.marathon),
+        stringResource(R.string.tournament),
+        stringResource(R.string.fair),
+        stringResource(R.string.competition),
+        stringResource(R.string.seminar),
+        stringResource(R.string.concert)
     )
 
     // Variables para localidades dinámicas
@@ -338,92 +338,117 @@ fun AddEvent(
                 }
             }
 
-
-
-
             // Fecha del evento
-            OutlinedTextField(
-                value = dateEvent?.let { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it) } ?: "",
-                onValueChange = {},
-                readOnly = true,
-                placeholder = { Text(text = stringResource(id = R.string.date)) },
-                trailingIcon = {
-                    IconButton(
-                        onClick = { expandedDate = true }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.DateRange,
-                            contentDescription = "Icon Date"
-                        )
-                    }
-                },
-                modifier = Modifier.width(190.dp)
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(id = R.string.date),
+                    color = Color.Black,
+                    fontSize = 20.sp
+                )
 
-            if (expandedDate) {
-                DatePickerDialog(
-                    onDismissRequest = { expandedDate = false },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                val selectedDay = datePickerState.selectedDateMillis
-                                if (selectedDay != null) {
-                                    // Convertir a Calendar para manipular fácilmente
-                                    val calendar = Calendar.getInstance()
-                                    calendar.timeInMillis = selectedDay
-                                    // Añadir un día
-                                    calendar.add(Calendar.DAY_OF_MONTH, 0)
-                                    // Asignar la nueva fecha
-//                                    dateEvent = calendar.time
-                                     dateEvent = java.sql.Date(calendar.getTime().getTime());
-                                }
-                                expandedDate = false
-                            }
+                Spacer(modifier = Modifier.width(50.dp))
+                OutlinedTextField(
+                    value = dateEvent?.let {
+                        SimpleDateFormat(
+                            "dd/MM/yyyy",
+                            Locale.getDefault()
+                        ).format(it)
+                    } ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    placeholder = { Text(text = stringResource(id = R.string.date)) },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { expandedDate = true }
                         ) {
-                            Text(text = stringResource(id = R.string.ok))
+                            Icon(
+                                imageVector = Icons.Rounded.DateRange,
+                                contentDescription = "Icon Date"
+                            )
                         }
                     },
-                    dismissButton = {
-                        TextButton(onClick = { expandedDate = false }) {
-                            Text(text = stringResource(id = R.string.cancel))
+                    modifier = Modifier.width(190.dp)
+                )
+
+                if (expandedDate) {
+                    DatePickerDialog(
+                        onDismissRequest = { expandedDate = false },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    val selectedDay = datePickerState.selectedDateMillis
+                                    if (selectedDay != null) {
+                                        // Convertir a Calendar para manipular fácilmente
+                                        val calendar = Calendar.getInstance()
+                                        calendar.timeInMillis = selectedDay
+                                        // Añadir un día
+                                        calendar.add(Calendar.DAY_OF_MONTH, 0)
+                                        // Asignar la nueva fecha
+                                        //                                    dateEvent = calendar.time
+                                        dateEvent = java.sql.Date(calendar.getTime().getTime());
+                                    }
+                                    expandedDate = false
+                                }
+                            ) {
+                                Text(text = stringResource(id = R.string.ok))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { expandedDate = false }) {
+                                Text(text = stringResource(id = R.string.cancel))
+                            }
                         }
+                    ) {
+                        DatePicker(state = datePickerState)
                     }
-                ) {
-                    DatePicker(state = datePickerState)
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
 
             // Hora del evento
-            OutlinedTextField(
-                value = timeEvent?.toString() ?: "",
-                onValueChange = {},
-                readOnly = true,
-                placeholder = { Text(text = stringResource(id = R.string.hour)) },
-                trailingIcon = {
-                    IconButton(onClick = {
-                        // Mostrar TimePickerDialog para seleccionar la hora
-                        val timePickerDialog = TimePickerDialog(
-                            context,
-                            { _, hourOfDay, minute ->
-                                timeEvent = LocalTime.of(hourOfDay, minute)
-                            },
-                            timeEvent?.hour ?: 0, // Hora por defecto
-                            timeEvent?.minute ?: 0, // Minutos por defecto
-                            true
-                        )
-                        timePickerDialog.show()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Timer,
-                            contentDescription = "Icon Time"
-                        )
-                    }
-                },
-                modifier = Modifier.width(190.dp)
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(id = R.string.hour),
+                    color = Color.Black,
+                    fontSize = 20.sp
+                )
 
+                Spacer(modifier = Modifier.width(50.dp))
+                OutlinedTextField(
+                    value = timeEvent?.toString() ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    placeholder = { Text(text = stringResource(id = R.string.hour)) },
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            // Mostrar TimePickerDialog para seleccionar la hora
+                            val timePickerDialog = TimePickerDialog(
+                                context,
+                                { _, hourOfDay, minute ->
+                                    timeEvent = LocalTime.of(hourOfDay, minute)
+                                },
+                                timeEvent?.hour ?: 0, // Hora por defecto
+                                timeEvent?.minute ?: 0, // Minutos por defecto
+                                true
+                            )
+                            timePickerDialog.show()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Rounded.Timer,
+                                contentDescription = "Icon Time"
+                            )
+                        }
+                    },
+                    modifier = Modifier.width(190.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(50.dp))
+            Text(
+                text = stringResource(id = R.string.location),
+                color = Color.Black,
+                fontSize = 20.sp
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
             // Campo para seleccionar cuántas localidades se quieren

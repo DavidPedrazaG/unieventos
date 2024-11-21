@@ -14,10 +14,11 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import com.google.firebase.firestore.FirebaseFirestore
+import eam.edu.unieventos.model.Event
 import kotlinx.coroutines.tasks.await
 
 
-class NotificationViewModel(private val context: Context) : ViewModel() {
+class NotificationViewModel() : ViewModel() {
 
     val db = Firebase.firestore
     private val _notifications = MutableStateFlow(emptyList<Notification>())
@@ -44,32 +45,13 @@ class NotificationViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-    /*
-    fun createNotification(notification: Notification) {
-        val sharedPreferences = context.getSharedPreferences("NotificationsPrefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-
-        editor.putString("${notification.id}_message", notification.message)
-        editor.putString("${notification.id}_from", notification.from)
-        editor.putString("${notification.id}_to", notification.to)
-        editor.putString("${notification.id}_eventId", notification.eventId)
-        editor.putString("${notification.id}_sentDate", dateFormat.format(notification.sendDate))
-        editor.putBoolean("${notification.id}_isRead", notification.isRead)
-
-        editor.putStringSet(
-            "stored_notifications",
-            (sharedPreferences.getStringSet("stored_notifications", emptySet()) ?: emptySet()).plus(notification.id)
-        )
-        editor.apply()
-    }
-
-     */
 
     open suspend fun getNotificationsList(): List<Notification> {
 
         val snapshot = db.collection("notifications")
             .get()
             .await()
+
 
 
         val notifications = snapshot.documents.mapNotNull {
@@ -82,59 +64,11 @@ class NotificationViewModel(private val context: Context) : ViewModel() {
         return notifications
     }
 
-    /*
-    fun getNotificationsList(context: Context): List<Notification> {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("NotificationsPrefs", Context.MODE_PRIVATE)
-        val storedNotifications = mutableListOf<Notification>()
-        val storedNotificationIds = sharedPreferences.getStringSet("stored_notifications", emptySet()) ?: emptySet()
-
-        for (id in storedNotificationIds) {
-            val message = sharedPreferences.getString("${id}_message", "") ?: ""
-            val from = sharedPreferences.getString("${id}_from", "") ?: ""
-            val to = sharedPreferences.getString("${id}_to", "") ?: "" // Recupera 'to'
-            val eventId = sharedPreferences.getString("${id}_eventId", "") ?: ""
-            val sentDateString = sharedPreferences.getString("${id}_sentDate", "") ?: ""
-            val sentDate = if (sentDateString.isNotEmpty()) {
-                dateFormat.parse(sentDateString) ?: Date()
-            } else {
-                Date()
-            }
-            val isRead = sharedPreferences.getBoolean("${id}_isRead", false)
-
-            val notification = Notification(
-                id = id,
-                from = from,
-                to = to, // Establece 'to'
-                message = message,
-                eventId = eventId,
-                sendDate = sentDate,
-                isRead = isRead
-            )
-
-            storedNotifications.add(notification)
-        }
-
-        return storedNotifications
+    fun getNotificationsByClient(clientId: String): List<Notification> {
+        return _notifications.value.filter { it.to == clientId }
     }
 
-     */
 
-    /*
-    fun markAsRead(notificationId: String) {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("NotificationsPrefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-
-        editor.putBoolean("${notificationId}_isRead", true)
-        editor.apply()
-
-        _notifications.value = getNotificationsList(context)
-    }
-
-     */
-    fun generateNotificationId(): String {
-        val uniqueId = System.currentTimeMillis().toString() + (0..999).random().toString()
-        return uniqueId
-    }
 
 
     fun markAsRead(notificationId: String) {
