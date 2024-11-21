@@ -114,13 +114,13 @@ fun AddEvent(
 
     val fileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            Log.e("URI", uri.toString())
+            Log.e("URII", uri.toString())
 
             scope.launch(Dispatchers.IO) {
                 val imputStream = context.contentResolver.openInputStream(uri)
                 imputStream?.use { stream ->
                     val result = cloudinary.uploader().upload(stream , ObjectUtils.emptyMap())
-                    Log.e("result", result.toString())
+                    Log.e("resultoleeeeee", result.toString())
                     locationImage = result["secure_url"].toString()
 
 
@@ -138,7 +138,7 @@ fun AddEvent(
                 val inputStream = context.contentResolver.openInputStream(uri)
                 inputStream?.use { stream ->
                     val result = cloudinary.uploader().upload(stream, ObjectUtils.emptyMap())
-                    Log.e("result", result.toString())
+                    Log.e("resulttttt", result.toString())
                     poster = result["secure_url"].toString()
                 }
             }
@@ -176,7 +176,7 @@ fun AddEvent(
                 onValueChange = { name = it },
                 label = { Text(text = stringResource(id = R.string.event_name)) },
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.7f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
@@ -186,7 +186,7 @@ fun AddEvent(
                 onValueChange = { address = it },
                 label = { Text(text = stringResource(id = R.string.event_location)) },
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.7f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
@@ -222,11 +222,11 @@ fun AddEvent(
                 onValueChange = { description = it },
                 label = { Text(text = stringResource(id = R.string.event_description)) },
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.7f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
-
+            Spacer(modifier = Modifier.height(8.dp))
             // para el tipo
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -245,6 +245,7 @@ fun AddEvent(
                     items = events
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row {
                 TextField(
@@ -252,7 +253,7 @@ fun AddEvent(
                     onValueChange = { poster = it },
                     label = { Text(text = stringResource(id = R.string.poster_url)) },
                     modifier = Modifier
-                        .fillMaxWidth(0.9f)
+                        .fillMaxWidth(0.5f)
                         .padding(vertical = 8.dp),
                     singleLine = true
                 )
@@ -278,7 +279,11 @@ fun AddEvent(
                             permissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
                         }
                     }
-                }) {
+                },
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(horizontal = 8.dp)
+                        .wrapContentWidth()) {
                     Icon(
                         contentDescription = null,
                         imageVector = Icons.Rounded.Upload
@@ -292,7 +297,7 @@ fun AddEvent(
                     onValueChange = { locationImage = it },
                     label = { Text(text = stringResource(id = R.string.location_image_url)) },
                     modifier = Modifier
-                        .fillMaxWidth(0.9f)
+                        .fillMaxWidth(0.5f)
                         .padding(vertical = 8.dp),
                     singleLine = true
                 )
@@ -321,7 +326,11 @@ fun AddEvent(
 
                         }
                     }
-                }) {
+                },
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(horizontal = 8.dp)
+                        .wrapContentWidth()) {
                     Icon(
                         contentDescription = null,
                         imageVector = Icons.Rounded.Upload
@@ -359,7 +368,14 @@ fun AddEvent(
                             onClick = {
                                 val selectedDay = datePickerState.selectedDateMillis
                                 if (selectedDay != null) {
-                                    dateEvent = Date(selectedDay)
+                                    // Convertir a Calendar para manipular fácilmente
+                                    val calendar = Calendar.getInstance()
+                                    calendar.timeInMillis = selectedDay
+                                    // Añadir un día
+                                    calendar.add(Calendar.DAY_OF_MONTH, 0)
+                                    // Asignar la nueva fecha
+//                                    dateEvent = calendar.time
+                                     dateEvent = java.sql.Date(calendar.getTime().getTime());
                                 }
                                 expandedDate = false
                             }
@@ -447,7 +463,7 @@ fun AddEvent(
 
             // Componente dinámico que se genera según el número de localidades seleccionadas
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(0.95f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 for (i in 0 until numberOfLocations) {
@@ -466,6 +482,10 @@ fun AddEvent(
 
             // Botón para guardar el evento
             Button(onClick = {
+                if (!areFieldsNotEmpty(name, address, city, description, type, poster, locationImage,   dateEvent, timeEvent)) {
+                    Toast.makeText(context, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
                 if(type.equals("Select a Value")){
                     Toast.makeText(context, "Seleccione un tipo de evento", Toast.LENGTH_SHORT).show()
                     return@Button
@@ -545,7 +565,7 @@ fun AddEvent(
             }) {
                 Text(stringResource(id = R.string.labelCreateLocation))
             }
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             // Botón para cancelar la edición
             Button(onClick = onBack, colors = ButtonDefaults.buttonColors(
@@ -558,3 +578,26 @@ fun AddEvent(
         }
     }
 }
+
+fun areFieldsNotEmpty(
+    name: String,
+    address: String,
+    city: String,
+    description: String,
+    type: String,
+    poster: String,
+    locationImage: String,
+    dateEvent: Date?,
+    timeEvent: LocalTime?
+): Boolean {
+    return name.isNotEmpty() &&
+            address.isNotEmpty() &&
+            city.isNotEmpty() &&
+            description.isNotEmpty() &&
+            type.isNotEmpty() &&
+            poster.isNotEmpty() &&
+            locationImage.isNotEmpty() &&
+            dateEvent != null &&
+            timeEvent != null
+}
+
