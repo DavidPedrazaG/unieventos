@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eam.edu.unieventos.R
@@ -106,23 +107,15 @@ fun PurchaseHistoryScreen(
     if (userLogged != null) {
         LaunchedEffect(userLogged) {
             try {
-
-                Log.d("PurchaseScreen", "Obteniendo cliente para el usuario: ${userLogged.id}")
                 val userClient = ClientsViewModel(context).getByUserId(userLogged.id)
-
-
                 if (userClient is Client) {
                     client = userClient
-                    Log.d("PurchaseScreen", "Cliente encontrado: ${client?.id}")
                 } else {
-                    Log.e("PurchaseScreen", "El usuario no es un Client. Usuario: ${userLogged.id}")
                 }
             } catch (e: Exception) {
-                Log.e("PurchaseScreen", "Error al obtener el cliente: ${e.message}")
             }
         }
     } else {
-        Log.e("PurchaseScreen", "Usuario no está logueado.")
     }
     if (client != null) {
 
@@ -149,7 +142,7 @@ fun PurchaseHistoryScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box {
-                    Text(text = "Historial de compras")
+                    Text(text = stringResource(id = R.string.purchase_history))
                 }
                 if (orders != null) {
                     orders.forEach { order ->

@@ -113,5 +113,51 @@
     <string name="deactivate_confirmation">Sind Sie sicher, dass Sie dies deaktivieren möchten?</string>
     <string name="confirm">Bestätigen</string>
 
+    <string name="friends">Freunde</string>
+    <string name="add_friend">Freund hinzufügen</string>
+    <string name="delete_friend">Freund löschen</string>
+    <string name="incorrect_credentials">Falsche Anmeldedaten</string>
+    <string name="validation_code">Bestätigungscode</string>
+    <string name="your_validation_code">Ihr Bestätigungscode lautet:</string>
+    <string name="existing_user">Vorhandener Benutzer</string>
+    <string name="found_user">Ein Benutzer mit derselben E-Mail wurde gefunden. Möchten Sie das Konto reaktivieren oder ein neues erstellen?</string>
+    <string name="reactivate">Reaktivieren</string>
+    <string name="create_new">Neu erstellen</string>
+    <string name="successful_registration">Erfolgreiche Registrierung</string>
+
+    <string name="add">Hinzufügen</string>
+    <string name="events">Veranstaltungen</string>
+    <string name="coupons">Gutscheine</string>
+    <string name="search_event_placeholder">Veranstaltung suchen</string>
+    <string name="shopping_cart">Einkaufswagen</string>
+    <string name="event_type_label">Typ:</string>
+    <string name="event_date_label">Datum:</string>
+    <string name="event_time_label">Uhrzeit:</string>
+    <string name="edit_event">Bearbeiten</string>
+    <string name="conference">Konferenz</string>
+    <string name="festival">Festival</string>
+    <string name="workshop">Workshop</string>
+    <string name="exhibition">Ausstellung</string>
+    <string name="marathon">Marathon</string>
+    <string name="tournament">Turnier</string>
+    <string name="fair">Messe</string>
+    <string name="competition">Wettbewerb</string>
+    <string name="seminar">Seminar</string>
+    <string name="concert">Konzert</string>
+    <string name="event">Veranstaltung</string>
+    <string name="ticket_quantity">Ticketanzahl</string>
+    <string name="see_details">DETAILS ANSEHEN</string>
+    <string name="coupon_code">Gutscheincode</string>
+    <string name="apply">Anwenden</string>
+    <string name="coupon_applied">Gutschein angewendet</string>
+    <string name="coupon_already_used">Gutschein bereits verwendet</string>
+    <string name="invalid_coupon">Der Gutschein ist ungültig</string>
+    <string name="coupon_already_applied">Der Gutschein wurde bereits angewendet</string>
+    <string name="enter_coupon">Bitte geben Sie einen Gutschein ein</string>
+    <string name="total_to_pay">Zu zahlender Betrag</string>
+    <string name="buy">Kaufen</string>
+    <string name="ticket_unavailable">Keine Tickets verfügbar für die Veranstaltung %1$s am Standort %2$s</string>
+    <string name="loading_user_data">Benutzerdaten werden geladen...</string>
+    <string name="purchase_history">Kaufhistorie</string>
 
 </resources>

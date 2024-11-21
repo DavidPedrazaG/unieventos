@@ -36,7 +36,7 @@ import eam.edu.unieventos.ui.components.DropdownCmp
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onLogout: () -> Unit,
-    onNavegateToUserConfig:() -> Unit,
+    onNavegateToUserConfig: () -> Unit,
     context: Context,
     onNavegateToSettings: () -> Unit,
     onNavegateToNotifications: () -> Unit,
@@ -54,7 +54,9 @@ fun HomeScreen(
     var userLogged = SharedPreferenceUtils.getCurrenUser(context)
     var searchQuery by remember { mutableStateOf("") }
     var filterTypes = listOf(
-        "Nombre", "Tipo", "Ciudad"
+        stringResource(R.string.name),
+        stringResource(R.string.type_label),
+        stringResource(R.string.city_label)
     )
     var selectedFilterType by remember { mutableStateOf(filterTypes[0]) }
     var cities = listOf(
@@ -69,43 +71,38 @@ fun HomeScreen(
     )
     var selectedCity by remember { mutableStateOf("") }
     var eventTypes = listOf(
-        "Conferencia",
-        "Festival",
-        "Taller",
-        "Exposición",
-        "Maratón",
-        "Torneo",
-        "Feria",
-        "Competencia",
-        "Seminario",
-        "Concierto"
+        stringResource(R.string.conference),
+        stringResource(R.string.festival),
+        stringResource(R.string.workshop),
+        stringResource(R.string.exhibition),
+        stringResource(R.string.marathon),
+        stringResource(R.string.tournament),
+        stringResource(R.string.fair),
+        stringResource(R.string.competition),
+        stringResource(R.string.seminar),
+        stringResource(R.string.concert)
     )
     var selectedEventType by remember { mutableStateOf("") }
     var expandedMenuOptions by remember { mutableStateOf(false) }
 
     Scaffold(
-        floatingActionButton =
-        {
-            if(userLogged != null) {
-                if(userLogged.rol == "Admin"){
+        floatingActionButton = {
+            if (userLogged != null) {
+                if (userLogged.rol == "Admin") {
                     Box {
                         IconButton(onClick = { expandedMenuOptions = !expandedMenuOptions }) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = "Añadir")
+                            Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.add))
                         }
                         DropdownMenu(
                             expanded = expandedMenuOptions,
                             onDismissRequest = { expandedMenuOptions = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text(text = "Eventos") },
-                                onClick = {
-                                    onNavegateToAddEvent()
-                                })
-                            DropdownMenuItem(text = {
-                                Text(text = "Cupones") },
-                                onClick = {
-                                    onNavegateToAddCoupon()
-                                })
+                                text = { Text(text = stringResource(R.string.events)) },
+                                onClick = { onNavegateToAddEvent() })
+                            DropdownMenuItem(
+                                text = { Text(text = stringResource(R.string.coupons)) },
+                                onClick = { onNavegateToAddCoupon() })
                         }
                     }
                 }
@@ -114,7 +111,7 @@ fun HomeScreen(
         bottomBar = {
             CustomBottomNavigationBar(
                 modifier = Modifier,
-                selected = 0, // Indica cuál ítem está seleccionado inicialmente
+                selected = 0,
                 context = context,
                 onNavegateToSettings = onNavegateToSettings,
                 onNavegateToPurchaseHistory = onNavegateToPurchaseHistory,
@@ -133,28 +130,22 @@ fun HomeScreen(
         ) {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.largeTopAppBarColors(Color.Transparent),
-                title = {
-                    Text(text = stringResource(R.string.app_name))
-                },
+                title = { Text(text = stringResource(R.string.app_name)) },
                 navigationIcon = {
-                    if(userLogged != null) {
-                        if(userLogged.rol == "Client"){
-                            IconButton(onClick = { onNavegateToUserConfig() }) { // Al hacer clic, navega a la pantalla de configuración
-                                Icon(
-                                    imageVector =  Icons.Rounded.SupervisedUserCircle,
-                                    contentDescription = "Configuración de usuario"
-                                )
-                            }
+                    if (userLogged != null && userLogged.rol == "Client") {
+                        IconButton(onClick = { onNavegateToUserConfig() }) {
+                            Icon(
+                                imageVector = Icons.Rounded.SupervisedUserCircle,
+                                contentDescription = null
+                            )
                         }
                     }
                 },
                 actions = {
                     IconButton(onClick = { onLogout() }) {
-                        Icon(imageVector = Icons.Rounded.Logout,
-                            contentDescription = null)
+                        Icon(imageVector = Icons.Rounded.Logout, contentDescription = null)
                     }
                 }
-
             )
 
             Row(
@@ -163,58 +154,52 @@ fun HomeScreen(
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Selector de búsqueda según el filtro seleccionado
                 when (selectedFilterType) {
-                    "Nombre" -> {
+                    stringResource(R.string.name) -> {
                         OutlinedTextField(
                             value = searchQuery,
-                            onValueChange =
-                            {
+                            onValueChange = {
                                 searchQuery = it
                                 events = EventsByName(eventViewModel = eventViewModel, name = it)
                             },
-                            placeholder = { Text("Buscar evento") },
-                            leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar") },
-                            modifier = Modifier
-                                .weight(0.7f) // Más espacio a la izquierda
-                                .padding(end = 8.dp) // Espaciado entre elementos
+                            placeholder = { Text(stringResource(R.string.search_event_placeholder)) },
+                            leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
+                            modifier = Modifier.weight(0.7f).padding(end = 8.dp)
                         )
                     }
-                    "Tipo" -> {
+                    stringResource(R.string.type_label) -> {
                         DropdownCmp(
                             options = eventTypes,
                             selectedOption = selectedEventType,
                             onOptionSelected = {
                                 selectedEventType = it
-                                events = EventsByType(eventViewModel = eventViewModel, type = it)},
-                            modifier = Modifier
-                                .weight(0.7f)
-                                .padding(end = 8.dp)
+                                events = EventsByType(eventViewModel = eventViewModel, type = it)
+                            },
+                            modifier = Modifier.weight(0.7f).padding(end = 8.dp)
                         )
                     }
-                    "Ciudad" -> {
+                    stringResource(R.string.city_label) -> {
                         DropdownCmp(
                             options = cities,
                             selectedOption = selectedCity,
-                            onOptionSelected =
-                            {   selectedCity = it
-                                events = EventsByCity(eventViewModel = eventViewModel, city = it)},
-                            modifier = Modifier
-                                .weight(0.7f)
-                                .padding(end = 8.dp)
+                            onOptionSelected = {
+                                selectedCity = it
+                                events = EventsByCity(eventViewModel = eventViewModel, city = it)
+                            },
+                            modifier = Modifier.weight(0.7f).padding(end = 8.dp)
                         )
                     }
                 }
 
                 Box {
                     IconButton(onClick = { expandedMenuOptions = !expandedMenuOptions }) {
-                        Icon(imageVector = Icons.Default.FilterList, contentDescription = "Añadir")
+                        Icon(imageVector = Icons.Default.FilterList, contentDescription = null)
                     }
                     DropdownMenu(
                         expanded = expandedMenuOptions,
                         onDismissRequest = { expandedMenuOptions = false }
                     ) {
-                        for(type in filterTypes){
+                        for (type in filterTypes) {
                             DropdownMenuItem(
                                 text = { Text(text = type) },
                                 onClick = {
@@ -223,7 +208,8 @@ fun HomeScreen(
                                     selectedEventType = ""
                                     selectedCity = ""
                                     searchQuery = ""
-                                })
+                                }
+                            )
                         }
                     }
                 }
@@ -231,38 +217,104 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if(userLogged != null) {
-                if(userLogged.rol == "Client") {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        IconButton(onClick = { onNavegateToPurchase() }) {
-                            Icon(
-                                imageVector = Icons.Default.ShoppingCart,
-                                contentDescription = "Carrito de compras"
-                            )
-                        }
+            if (userLogged != null && userLogged.rol == "Client") {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    IconButton(onClick = { onNavegateToPurchase() }) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = stringResource(R.string.shopping_cart)
+                        )
                     }
                 }
             }
 
-
             LazyColumn {
-//                val events = eventViewModel.events.value
                 events.forEach { event ->
                     item {
                         EventItem(
-                            event=event,
-                            userLogged=userLogged,
+                            event = event,
+                            userLogged = userLogged,
                             onNavegateToEventDetail = onNavegateToEventDetail,
-                            onNavegateToEventEdit = onNavegateToEventEdit)
+                            onNavegateToEventEdit = onNavegateToEventEdit
+                        )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun EventItem(
+    event: Event?,
+    userLogged: UserDTO?,
+    onNavegateToEventDetail: (String) -> Unit,
+    onNavegateToEventEdit: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier.size(64.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (event?.poster != null && event.poster != "") {
+                    Image(
+                        painter = rememberAsyncImagePainter(event.poster),
+                        contentDescription = stringResource(R.string.poster_description),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(R.drawable.placeholder_image),
+                        contentDescription = stringResource(R.string.poster_description),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                event?.let {
+                    Text(text = it.name, fontSize = 18.sp)
+                    Text(text = "${stringResource(R.string.event_type_label)} ${it.type}", fontSize = 16.sp)
+                    Text(
+                        text = "${stringResource(R.string.event_date_label)} ${
+                            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it.dateEvent)
+                        }", fontSize = 14.sp
+                    )
+                    Text(text = "${stringResource(R.string.event_time_label)} ${it.time}", fontSize = 14.sp)
+                }
+            }
+
+            Button(onClick = {
+                if (userLogged != null) {
+                    when (userLogged.rol) {
+                        "Client" -> onNavegateToEventDetail(event!!.code)
+                        "Admin" -> onNavegateToEventEdit(event!!.code)
+                    }
+                }
+            }) {
+                Text(
+                    text = stringResource(
+                        if (userLogged?.rol == "Client") R.string.lookDetails else R.string.edit_event
+                    )
+                )
             }
         }
     }
@@ -282,80 +334,4 @@ fun EventsByCity(eventViewModel: EventsViewModel, city: String): List<Event> {
 
 fun EventsByName(eventViewModel: EventsViewModel, name: String): List<Event> {
     return eventViewModel.getEventsByName(name)
-}
-
-@Composable
-fun EventItem(
-    event: Event?,
-    userLogged: UserDTO?,
-    onNavegateToEventDetail: (String) -> Unit,
-    onNavegateToEventEdit: (String) -> Unit) {
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Box(
-                modifier = Modifier.size(64.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if(event?.poster != null && event.poster != ""){
-                    Image(
-                        painter = rememberAsyncImagePainter(event.poster),
-                        contentDescription = stringResource(id = R.string.poster_description),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                    )
-                }else{
-                    Image(
-                        painter = painterResource(id = R.drawable.placeholder_image),
-                        contentDescription = stringResource(id = R.string.poster_description),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                    )
-                }
-
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                if (event != null) {
-                    Text(text = event.name, fontSize = 18.sp)
-                    Text(text = "Tipo: ${event.type}", fontSize = 16.sp)
-                    Text(text = "Fecha: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(event.dateEvent)}", fontSize = 14.sp)
-                    Text(text = "Hora: ${event.time.toString()}", fontSize = 14.sp)
-                }
-            }
-
-
-            Button(onClick = {
-                if(userLogged != null) {
-                    if(userLogged.rol == "Client"){
-                        onNavegateToEventDetail(event!!.code)
-                    }
-                    else if(userLogged.rol == "Admin"){
-                        onNavegateToEventEdit(event!!.code)
-                    }
-                }
-            }) {
-                if(userLogged != null) {
-                    if(userLogged.rol == "Client"){
-                        Text(text = "VER DETALLES")
-                    }
-                    else if(userLogged.rol == "Admin"){
-                        Text(text = "EDITAR")
-                    }
-                }
-            }
-        }
-    }
 }

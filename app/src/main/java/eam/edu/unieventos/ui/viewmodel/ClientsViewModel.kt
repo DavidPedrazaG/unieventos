@@ -30,7 +30,7 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
 
 
     private val _couponViewModel = CouponsViewModel()
-    private val _notificationViewModel = NotificationViewModel()
+    private val _notificationViewModel = NotificationViewModel(context)
     private val _cartViewModel = CartViewModel()
     private val firestore = FirebaseFirestore.getInstance()
 

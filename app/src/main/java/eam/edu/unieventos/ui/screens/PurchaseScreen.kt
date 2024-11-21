@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eam.edu.unieventos.R
@@ -61,42 +62,48 @@ fun ItemCard(item: Item, userLogged: UserDTO?, onNavegateToEventDetail: (String)
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Box(
                 modifier = Modifier.size(64.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.placeholder_image),
-                    contentDescription = "Evento imagen",
+                    contentDescription = stringResource(id = R.string.poster_description),
                     contentScale = androidx.compose.ui.layout.ContentScale.Crop
                 )
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
-
             Column(
                 modifier = Modifier.weight(1f)
             ) {
                 if (item != null) {
-                    Text(text = "Event: ${item.eventCode}", fontSize = 16.sp)
-                    Text(text = "Location: ${item.locationId}", fontSize = 14.sp)
-                    Text(text = "Cantidad de tiquets: ${item.ticketQuantity}", fontSize = 14.sp)
+                    Text(
+                        text = "${stringResource(id = R.string.event)}: ${item.eventCode}",
+                        fontSize = 16.sp
+                    )
+                    Text(
+                        text = "${stringResource(id = R.string.location)}: ${item.locationId}",
+                        fontSize = 14.sp
+                    )
+                    Text(
+                        text = "${stringResource(id = R.string.ticket_quantity)}: ${item.ticketQuantity}",
+                        fontSize = 14.sp
+                    )
                 }
             }
 
-
             Button(onClick = {
-                if(userLogged != null) {
-                    if(userLogged.rol == "Client"){
+                if (userLogged != null) {
+                    if (userLogged.rol == "Client") {
                         onNavegateToEventDetail(item.eventCode)
                     }
                 }
             }) {
-                if(userLogged != null) {
-                    if(userLogged.rol == "Client"){
-                        Text(text = "VER DETALLES")
+                if (userLogged != null) {
+                    if (userLogged.rol == "Client") {
+                        Text(text = stringResource(id = R.string.see_details))
                     }
                 }
             }
@@ -132,25 +139,22 @@ fun PurchaseScreen(
     if (userLogged != null) {
         LaunchedEffect(userLogged) {
             try {
-
-                Log.d("PurchaseScreen", "Obteniendo cliente para el usuario: ${userLogged.id}")
+                Log.d("PurchaseScreen", "Fetching client for user: ${userLogged.id}")
                 val userClient = ClientsViewModel(context).getByUserId(userLogged.id)
-
 
                 if (userClient is Client) {
                     client = userClient
-                    Log.d("PurchaseScreen", "Cliente encontrado: ${client?.id}")
+                    Log.d("PurchaseScreen", "Client found: ${client?.id}")
                 } else {
-                    Log.e("PurchaseScreen", "El usuario no es un Client. Usuario: ${userLogged.id}")
+                    Log.e("PurchaseScreen", "The user is not a client. User: ${userLogged.id}")
                 }
             } catch (e: Exception) {
-                Log.e("PurchaseScreen", "Error al obtener el cliente: ${e.message}")
+                Log.e("PurchaseScreen", "Error fetching client: ${e.message}")
             }
         }
     } else {
-        Log.e("PurchaseScreen", "Usuario no está logueado.")
+        Log.e("PurchaseScreen", "User is not logged in.")
     }
-
 
     if (client != null) {
         val cartId = client?.cartId
@@ -179,10 +183,10 @@ fun PurchaseScreen(
             ) {
                 val cartItems = cartId?.let { itemViewModel.loadItemsByCart(it) }
                 Box {
-                    Text(text = "Carrito de compras")
+                    Text(text = stringResource(id = R.string.shopping_cart))
                 }
                 if (cartItems != null) {
-                    for(item in cartItems){
+                    for (item in cartItems) {
                         ItemCard(
                             item = item,
                             userLogged = userLogged,
@@ -194,12 +198,12 @@ fun PurchaseScreen(
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
-                Box{
+                Box {
                     Row {
                         TextField(
                             value = couponCode,
                             onValueChange = { couponCode = it },
-                            label = { Text(text = "Código de cupón") },
+                            label = { Text(text = stringResource(id = R.string.coupon_code)) },
                             modifier = Modifier
                                 .fillMaxWidth(0.5f)
                                 .padding(vertical = 8.dp),
@@ -210,10 +214,10 @@ fun PurchaseScreen(
                                 .fillMaxWidth(0.5f)
                                 .padding(vertical = 8.dp),
                             onClick = {
-                                if(couponCode != ""){
-                                    if(couponCode != coupon?.code){
+                                if (couponCode != "") {
+                                    if (couponCode != coupon?.code) {
                                         coupon = couponsVimodel.validateCoupon(couponCode)
-                                        if(coupon != null) {
+                                        if (coupon != null) {
                                             cart = cartItems?.let {
                                                 orderViewModel.validateCoupon(
                                                     coupon!!, client?.id!!,
@@ -223,43 +227,63 @@ fun PurchaseScreen(
                                             if (amount != cart?.total) {
                                                 Toast.makeText(
                                                     context,
-                                                    "Cupón aplicado",
+                                                    context.getString(R.string.coupon_applied),
                                                     Toast.LENGTH_SHORT
                                                 ).show()
                                                 amount = cart?.total
                                             } else {
                                                 Toast.makeText(
                                                     context,
-                                                    "Cupón ya usado",
+                                                    context.getString(R.string.coupon_already_used),
                                                     Toast.LENGTH_SHORT
                                                 ).show()
                                             }
-                                        }else{
-                                            Toast.makeText(context, "El cupón no es valido", Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(R.string.invalid_coupon),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                             couponCode = ""
                                         }
-                                    }else{
-                                        Toast.makeText(context, "El cupón ya fue aplicádo", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.coupon_already_applied),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         couponCode = ""
                                     }
-                                }else{
-                                    Toast.makeText(context, "Ingrese un cupón", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        context.getString(R.string.enter_coupon),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
-                        ){
-                            Text(text = "Aplicar")
+                        ) {
+                            Text(text = stringResource(id = R.string.apply))
                         }
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Text(text = "Total a pagar: ${amount}")
+                Text(text = "${stringResource(id = R.string.total_to_pay)}: $amount")
                 Spacer(modifier = Modifier.weight(1f))
                 Button(onClick = {
-                    if(cartItems != null){
+                    if (cartItems != null) {
                         cartItems.forEach { item ->
-                            var isValid = locationViewModel.validateTicket(item)
-                            if(!isValid){
-                                Toast.makeText(context, "No hay tickets disponibles para el evento ${item.eventCode} en la ubicación ${item.locationId}", Toast.LENGTH_SHORT).show()
+                            val isValid = locationViewModel.validateTicket(item)
+                            if (!isValid) {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(
+                                        R.string.ticket_unavailable,
+                                        item.eventCode,
+                                        item.locationId
+                                    ),
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 return@Button
                             }
                         }
@@ -285,15 +309,14 @@ fun PurchaseScreen(
                         }
                         onNavegateToHome()
                     }
-                }){
-                    Text(text = "Comprar")
+                }) {
+                    Text(text = stringResource(id = R.string.buy))
                 }
             }
         }
     } else {
-
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = "Cargando datos del usuario...")
+            Text(text = stringResource(id = R.string.loading_user_data))
         }
     }
 }
