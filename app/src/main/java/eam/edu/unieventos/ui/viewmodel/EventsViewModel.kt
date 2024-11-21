@@ -37,9 +37,20 @@ class EventsViewModel() : ViewModel() {
         }
     }
 
+    fun getEvents(): List<Event> {
+        return _events.value
+    }
 
     fun getEventsByType(type: String): List<Event> {
         return _events.value.filter { it.type == type }
+    }
+
+    fun getEventsByCity(city: String): List<Event> {
+        return _events.value.filter { it.city == city }
+    }
+
+    fun getEventsByName(name: String): List<Event> {
+        return _events.value.filter { it.name.contains(name, ignoreCase = true) }
     }
 
     fun generateRandomCode(length: Int): String {

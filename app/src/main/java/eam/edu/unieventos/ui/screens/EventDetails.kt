@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -82,7 +83,7 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
 
         Spacer(modifier = Modifier.height(40.dp))
         // Imagen del póster del evento
-        if (event.poster != null) {
+        if (event.poster != null && event.poster != "") {
             Image(
                 painter = rememberAsyncImagePainter(event.poster),
                 contentDescription = stringResource(id = R.string.poster_description),
@@ -93,19 +94,15 @@ fun EventDetails(eventCode: String, onBack: () -> Unit, onViewCart: () -> Unit) 
                 contentScale = ContentScale.Crop
             )
         } else {
-            Box(
+            Image(
+                painter = painterResource(id = R.drawable.placeholder_image),
+                contentDescription = stringResource(id = R.string.poster_description),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .background(Color.Black),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(id = R.string.poster_placeholder),
-                    color = Color.White,
-                    fontSize = 20.sp
-                )
-            }
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
