@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eam.edu.unieventos.model.Client
 import eam.edu.unieventos.ui.components.CustomBottomNavigationBar
@@ -18,6 +19,7 @@ import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
 import eam.edu.unieventos.utils.SharedPreferenceUtils
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
+import eam.edu.unieventos.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +66,7 @@ fun FriendScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Amigos", style = MaterialTheme.typography.titleLarge)
+            Text(text = stringResource(id = R.string.friends), style = MaterialTheme.typography.titleLarge)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -139,7 +141,7 @@ fun FriendCard(client: Client, onAddFriend: (String) -> Unit, isFriend: Boolean)
                 modifier = Modifier.fillMaxWidth()
             ) {
                 // Se debe mostrar "Eliminar amigo" si son amigos, sin importar quien lo haya agregado.
-                Text(text = if (isFriend) "Eliminar amigo" else "Añadir como amigo")
+                Text(text = if (isFriend) stringResource(id = R.string.delete_friend) else stringResource(id = R.string.add_friend))
             }
         }
     }

@@ -128,7 +128,25 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
         }
     }
 
+    fun getFriendList(userId: String, onSuccess: (List<String>) -> Unit, onFailure: (Exception) -> Unit) {
+        val clientDocRef: DocumentReference = firestore.collection("clients").document(userId)
 
+        firestore.runTransaction { transaction ->
+            val clientSnapshot = transaction.get(clientDocRef)
+
+            val client = clientSnapshot.toObject(Client::class.java)
+                ?: throw Exception("Cliente no encontrado")
+
+
+            return@runTransaction client.friends
+        }.addOnSuccessListener { friends ->
+
+            onSuccess(friends)
+        }.addOnFailureListener { e ->
+
+            onFailure(e)
+        }
+    }
 
 
     fun listFriends(userId: String): List<String> {
