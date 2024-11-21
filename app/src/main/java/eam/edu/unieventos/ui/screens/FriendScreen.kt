@@ -31,6 +31,7 @@ fun FriendScreen(
     onNavegateToPurchaseHistory: () -> Unit,
     onNavegateToHome: () -> Unit,
     onNavegateToCoupons: () -> Unit,
+    onNavegateToFriendList: () -> Unit,
     usersViewModel: UsersViewModel = viewModel(factory = UsersViewModelFactory(context))
 ) {
     val context = LocalContext.current
@@ -57,7 +58,16 @@ fun FriendScreen(
                 onNavegateToHome = onNavegateToHome,
                 onNavegateToCoupons = onNavegateToCoupons
             )
-        }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { onNavegateToFriendList() },
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text("Ver amigos")
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) { paddingValues ->
         Column(
             modifier = modifier

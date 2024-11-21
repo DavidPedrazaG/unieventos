@@ -21,6 +21,7 @@ import eam.edu.unieventos.ui.screens.EventDetails
 import eam.edu.unieventos.ui.screens.EditEvent
 import eam.edu.unieventos.ui.screens.PurchaseScreen
 import eam.edu.unieventos.ui.screens.EditCoupon
+import eam.edu.unieventos.ui.screens.FriendListScreen
 import eam.edu.unieventos.ui.screens.FriendScreen
 
 import eam.edu.unieventos.utils.SharedPreferenceUtils
@@ -357,10 +358,33 @@ fun Navigation(
                 },
                 onNavegateToCoupons = {
                     navController.navigate(RouteScreen.Coupons)
+                },
+                onNavegateToFriendList = {
+                    navController.navigate(RouteScreen.FriendList)
                 }
             )
         }
 
+        composable<RouteScreen.FriendList>{
+            FriendListScreen(
+                context = context,
+                onNavigateToSettings = {
+                    navController.navigate(RouteScreen.Settings)
+                },
+                onNavigateToNotifications = {
+                    navController.navigate(RouteScreen.Notifications)
+                },
+                onNavigateToPurchaseHistory = {
+                    navController.navigate(RouteScreen.PurchaseHistory)
+                },
+                onNavigateToHome = {
+                    navController.navigate(RouteScreen.Home)
+                },
+                onNavigateToCoupons = {
+                    navController.navigate(RouteScreen.Coupons)
+                }
+            )
+        }
     }
 }
 
