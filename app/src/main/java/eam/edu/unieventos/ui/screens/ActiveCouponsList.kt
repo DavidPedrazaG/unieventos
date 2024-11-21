@@ -30,7 +30,6 @@ fun ActiveCouponsList(
     onNavegateToCoupons: () -> Unit,
     onNavegateToEditCoupon: (String) -> Unit
 ) {
-    val context = LocalContext.current
     val couponsViewModel: CouponsViewModel = remember { CouponsViewModel() }
 
     // Obtener la lista de cupones activos
@@ -48,7 +47,11 @@ fun ActiveCouponsList(
                 onNavegateToCoupons = onNavegateToCoupons
             )
         }
-    ){ paddingValues ->
+    ) { paddingValues ->
+        // Se utiliza MaterialTheme para el tema y los colores
+        val backgroundColor = MaterialTheme.colorScheme.background
+        val textColor = MaterialTheme.colorScheme.onBackground
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -58,14 +61,18 @@ fun ActiveCouponsList(
             Text(
                 text = stringResource(id = R.string.activeCoupons),
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
+                color = textColor // Usamos el color de texto del tema
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Mostrar lista de cupones activos
             if (activeCoupons.isEmpty()) {
-                Text(text = stringResource(id = R.string.noActiveCoupons))
+                Text(
+                    text = stringResource(id = R.string.noActiveCoupons),
+                    color = textColor // Usamos el color de texto del tema
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -85,6 +92,7 @@ fun ActiveCouponsList(
 @Composable
 fun CouponItem(coupon: Coupon, onNavegateToEditCoupon: (String) -> Unit) {
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
+    val textColor = MaterialTheme.colorScheme.onBackground // Usamos el color de texto del tema
 
     Card(
         modifier = Modifier
@@ -95,19 +103,39 @@ fun CouponItem(coupon: Coupon, onNavegateToEditCoupon: (String) -> Unit) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(text = "${stringResource(id = R.string.code)}: ${coupon.code}", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = "${stringResource(id = R.string.code)}: ${coupon.code}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = textColor // Usamos el color de texto
+            )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "${stringResource(id = R.string.discount)}: ${coupon.discountPercentage}%", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = "${stringResource(id = R.string.discount)}: ${coupon.discountPercentage}%",
+                style = MaterialTheme.typography.bodyMedium,
+                color = textColor // Usamos el color de texto
+            )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "${stringResource(id = R.string.expiration)}: ${dateFormat.format(coupon.expirationDate)}", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = "${stringResource(id = R.string.expiration)}: ${dateFormat.format(coupon.expirationDate)}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = textColor // Usamos el color de texto
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             // Mostrar el código del evento asociado o un mensaje si no está asociado
             if (coupon.eventCode != null) {
-                Text(text = "${stringResource(id = R.string.associatedEvent)}: ${coupon.eventCode}", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = "${stringResource(id = R.string.associatedEvent)}: ${coupon.eventCode}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = textColor // Usamos el color de texto
+                )
             } else {
-                Text(text = stringResource(id = R.string.notAssociated), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+                Text(
+                    text = stringResource(id = R.string.notAssociated),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error // Usamos un color de error si no está asociado
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -115,7 +143,6 @@ fun CouponItem(coupon: Coupon, onNavegateToEditCoupon: (String) -> Unit) {
             // Botón para editar el cupón
             Button(
                 onClick = { onNavegateToEditCoupon(coupon.code) },
-
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text(text = stringResource(id = R.string.edit))

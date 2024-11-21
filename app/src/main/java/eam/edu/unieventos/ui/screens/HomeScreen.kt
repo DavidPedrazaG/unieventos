@@ -84,6 +84,8 @@ fun HomeScreen(
     )
     var selectedEventType by remember { mutableStateOf("") }
     var expandedMenuOptions by remember { mutableStateOf(false) }
+    var expandedFilterOptions by remember { mutableStateOf(false) }
+
 
     Scaffold(
         floatingActionButton = {
@@ -192,12 +194,12 @@ fun HomeScreen(
                 }
 
                 Box {
-                    IconButton(onClick = { expandedMenuOptions = !expandedMenuOptions }) {
+                    IconButton(onClick = { expandedFilterOptions = !expandedFilterOptions }) {
                         Icon(imageVector = Icons.Default.FilterList, contentDescription = null)
                     }
                     DropdownMenu(
-                        expanded = expandedMenuOptions,
-                        onDismissRequest = { expandedMenuOptions = false }
+                        expanded = expandedFilterOptions,
+                        onDismissRequest = { expandedFilterOptions = false }
                     ) {
                         for (type in filterTypes) {
                             DropdownMenuItem(
