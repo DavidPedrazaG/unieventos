@@ -33,7 +33,8 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
     onNavigateToValidate: (String, String) -> Unit,
-    onNavigateToHome: (String) -> Unit
+    onNavigateToHome: (String) -> Unit,
+    onNavigateToFriendScreen: () -> Unit
 ) {
     val context = LocalContext.current
     Scaffold { padding ->
@@ -43,7 +44,8 @@ fun LoginScreen(
             onNavigateToRegister = onNavigateToRegister,
             onNavigateToRecovery = onNavigateToRecovery,
             onNavigateToValidate = onNavigateToValidate,
-            onNavigateToHome = onNavigateToHome
+            onNavigateToHome = onNavigateToHome,
+            onNavigateToFriendScreen = onNavigateToFriendScreen
         )
     }
 }
@@ -55,7 +57,8 @@ fun LoginForm(
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
     onNavigateToValidate: (String, String) -> Unit,
-    onNavigateToHome: (String) -> Unit
+    onNavigateToHome: (String) -> Unit,
+    onNavigateToFriendScreen: () -> Unit
 ) {
     val usersViewModel: UsersViewModel = remember { UsersViewModel(context) }
     var email by remember { mutableStateOf("") }

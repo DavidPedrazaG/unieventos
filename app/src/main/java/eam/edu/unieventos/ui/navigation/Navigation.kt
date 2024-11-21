@@ -9,7 +9,7 @@ import eam.edu.unieventos.ui.screens.ActiveCouponsList
 import eam.edu.unieventos.ui.screens.AddCoupon
 import eam.edu.unieventos.ui.screens.HomeScreen
 import eam.edu.unieventos.ui.screens.LoginScreen
-import eam.edu.unieventos.ui.screens.NotificationssScreen
+import eam.edu.unieventos.ui.screens.NotificationsScreen
 import eam.edu.unieventos.ui.screens.PurchaseHistoryScreen
 import eam.edu.unieventos.ui.screens.RecoveryScreen
 import eam.edu.unieventos.ui.screens.RegisterScreen
@@ -21,6 +21,7 @@ import eam.edu.unieventos.ui.screens.EventDetails
 import eam.edu.unieventos.ui.screens.EditEvent
 import eam.edu.unieventos.ui.screens.PurchaseScreen
 import eam.edu.unieventos.ui.screens.EditCoupon
+import eam.edu.unieventos.ui.screens.FriendScreen
 
 import eam.edu.unieventos.utils.SharedPreferenceUtils
 
@@ -76,7 +77,11 @@ fun Navigation(
                 },
                 onNavigateToHome = { role ->
                     navController.navigate(RouteScreen.Home)
+                },
+                onNavigateToFriendScreen = {
+                    navController.navigate(RouteScreen.Friends)
                 }
+
             )
         }
         //OJO es necesario crear el composable de la interfaz a la que queremos ir, sin esto no nos llevara a ningun lado
@@ -300,7 +305,7 @@ fun Navigation(
         }
 
         composable<RouteScreen.Notifications> {
-            NotificationssScreen(
+            NotificationsScreen(
                 context = context,
                 onNavegateToSettings = {
                     navController.navigate(RouteScreen.Settings)
@@ -316,6 +321,9 @@ fun Navigation(
                 },
                 onNavegateToCoupons = {
                     navController.navigate(RouteScreen.Coupons)
+                },
+                onNavegateToFriendScreen = {
+                    navController.navigate(RouteScreen.Friends)
                 }
             )
         }
@@ -331,6 +339,28 @@ fun Navigation(
                 }
             )
         }
+
+        composable<RouteScreen.Friends> {
+            FriendScreen(
+                context = context,
+                onNavegateToSettings = {
+                    navController.navigate(RouteScreen.Settings)
+                },
+                onNavegateToNotifications = {
+                    navController.navigate(RouteScreen.Notifications)
+                },
+                onNavegateToPurchaseHistory = {
+                    navController.navigate(RouteScreen.PurchaseHistory)
+                },
+                onNavegateToHome = {
+                    navController.navigate(RouteScreen.Home)
+                },
+                onNavegateToCoupons = {
+                    navController.navigate(RouteScreen.Coupons)
+                }
+            )
+        }
+
     }
 }
 
