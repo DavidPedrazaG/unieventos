@@ -29,4 +29,27 @@ class Client(
     role = role,
     userAppConfigId = userAppConfigId,
     isValidated = isValidated
-)
+) {
+
+
+    fun copyWithUpdatedFriends(newFriends: List<String>): Client {
+        return Client(
+            availableCoupons = this.availableCoupons,
+            purchaseHistory = this.purchaseHistory,
+            friends = newFriends,
+            notifications = this.notifications,
+            cartId = this.cartId,
+            id = this.id,
+            idCard = this.idCard,
+            name = this.name,
+            phoneNumber = this.phoneNumber,
+            address = this.address,
+            email = this.email,
+            password = this.password,
+            isActive = this.isActive,
+            role = this.role,
+            userAppConfigId = this.userAppConfigId,
+            isValidated = this.isValidated
+        )
+    }
+}

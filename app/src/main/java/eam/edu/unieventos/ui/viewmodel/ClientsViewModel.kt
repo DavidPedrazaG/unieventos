@@ -2,6 +2,7 @@ package eam.edu.unieventos.ui.viewmodel
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.firestore.ktx.firestore
@@ -21,14 +22,17 @@ import eam.edu.unieventos.ui.viewmodel.NotificationViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Calendar
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.DocumentReference
 
 class ClientsViewModel(context: Context) : UsersViewModel(context) {
 
 
 
     private val _couponViewModel = CouponsViewModel()
-    private val _notificationViewModel = NotificationViewModel(context)
+    private val _notificationViewModel = NotificationViewModel()
     private val _cartViewModel = CartViewModel()
+    private val firestore = FirebaseFirestore.getInstance()
 
 
 
@@ -68,9 +72,9 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
                     _couponViewModel.createCoupon(coupon)
 
 
-                    val notificationId = _notificationViewModel.generateNotificationId()
+
                     val notification = Notification(
-                        id = notificationId, from = "UniEventos", to = user.id,
+                        id = "", from = "UniEventos", to = user.id,
                         message = "Recibiste un cupón del 15% de descuento", eventId = "",
                         sendDate = Calendar.getInstance().time, isRead = false
                     )
@@ -85,25 +89,46 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
     }
 
     fun addFriend(userId: String, friendId: String) {
-        val sharedPreferences = context.getSharedPreferences("ClientPrefs", Context.MODE_PRIVATE)
-        val currentFriends = sharedPreferences.getString("${userId}_friends", "")?.split(",")?.toMutableList() ?: mutableListOf()
+        val clientDocRef: DocumentReference = firestore.collection("clients").document(userId)
 
-        if (!currentFriends.contains(friendId)) {
-            currentFriends.add(friendId)
-            updateFriends(userId, currentFriends)
+        firestore.runTransaction { transaction ->
+            val clientSnapshot = transaction.get(clientDocRef)
+
+            val client = clientSnapshot.toObject(Client::class.java)
+                ?: throw Exception("Cliente no encontrado")
+
+            if (!client.friends.contains(friendId)) {
+                val updatedFriends = client.friends.toMutableList().apply { add(friendId) }
+                transaction.update(clientDocRef, "friends", updatedFriends)
+            }
+        }.addOnSuccessListener {
+            Log.d("addFriend", "Amigo añadido exitosamente.")
+        }.addOnFailureListener { e ->
+            Log.e("addFriend", "Error al añadir amigo", e)
         }
     }
-
 
     fun removeFriend(userId: String, friendId: String) {
-        val sharedPreferences = context.getSharedPreferences("ClientPrefs", Context.MODE_PRIVATE)
-        val currentFriends = sharedPreferences.getString("${userId}_friends", "")?.split(",")?.toMutableList() ?: mutableListOf()
+        val clientDocRef: DocumentReference = firestore.collection("clients").document(userId)
 
-        if (currentFriends.contains(friendId)) {
-            currentFriends.remove(friendId)
-            updateFriends(userId, currentFriends)
+        firestore.runTransaction { transaction ->
+            val clientSnapshot = transaction.get(clientDocRef)
+
+            val client = clientSnapshot.toObject(Client::class.java)
+                ?: throw Exception("Cliente no encontrado")
+
+            if (client.friends.contains(friendId)) {
+                val updatedFriends = client.friends.toMutableList().apply { remove(friendId) }
+                transaction.update(clientDocRef, "friends", updatedFriends)
+            }
+        }.addOnSuccessListener {
+            Log.d("removeFriend", "Amigo eliminado exitosamente.")
+        }.addOnFailureListener { e ->
+            Log.e("removeFriend", "Error al eliminar amigo", e)
         }
     }
+
+
 
 
     fun listFriends(userId: String): List<String> {

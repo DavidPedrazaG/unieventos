@@ -8,12 +8,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import eam.edu.unieventos.model.Client
 import eam.edu.unieventos.ui.components.CustomBottomNavigationBar
 import eam.edu.unieventos.ui.viewmodel.UsersViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import eam.edu.unieventos.ui.viewmodel.UsersViewModelFactory
+import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
+import eam.edu.unieventos.utils.SharedPreferenceUtils
 import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,19 +29,18 @@ fun FriendScreen(
     onNavegateToPurchaseHistory: () -> Unit,
     onNavegateToHome: () -> Unit,
     onNavegateToCoupons: () -> Unit,
-    usersViewModel: UsersViewModel = viewModel()
+    usersViewModel: UsersViewModel = viewModel(factory = UsersViewModelFactory(context))
 ) {
-
+    val context = LocalContext.current
+    val client_id = SharedPreferenceUtils.getCurrenUser(context)  // Cliente logueado
     var clients by remember { mutableStateOf<List<Client>>(emptyList()) }
-    val coroutineScope = rememberCoroutineScope()
+    val clientsViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
 
 
-    LaunchedEffect(Unit) {
-        coroutineScope.launch {
+    LaunchedEffect(client_id?.id) {
+        val loadedClients = clientsViewModel.getClientsList()
 
-            val loadedClients = usersViewModel.getClientsList()
-            clients = loadedClients
-        }
+        clients = loadedClients.filter { it.id != client_id?.id }
     }
 
     Scaffold(
@@ -68,7 +71,42 @@ fun FriendScreen(
             if (clients.isNotEmpty()) {
                 LazyColumn {
                     items(clients) { client ->
-                        FriendCard(client = client)
+                        val isFriend = client_id?.id?.let {
+
+                            client.friends.contains(it) || it in client.friends
+                        } ?: false
+
+                        FriendCard(
+                            client = client,
+                            onAddFriend = { friendId ->
+                                client_id?.id?.let { userId ->
+                                    if (isFriend) {
+
+                                        clientsViewModel.removeFriend(userId, friendId)
+
+                                        clients = clients.map { client ->
+                                            if (client.id == friendId) {
+                                                client.copyWithUpdatedFriends(client.friends - userId)
+                                            } else {
+                                                client
+                                            }
+                                        }
+                                    } else {
+
+                                        clientsViewModel.addFriend(userId, friendId)
+
+                                        clients = clients.map { client ->
+                                            if (client.id == friendId) {
+                                                client.copyWithUpdatedFriends(client.friends + userId)
+                                            } else {
+                                                client
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            isFriend = isFriend
+                        )
                     }
                 }
             } else {
@@ -79,7 +117,7 @@ fun FriendScreen(
 }
 
 @Composable
-fun FriendCard(client: Client) {
+fun FriendCard(client: Client, onAddFriend: (String) -> Unit, isFriend: Boolean) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -97,10 +135,11 @@ fun FriendCard(client: Client) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { /* Lógica para añadir como amigo */ },
+                onClick = { onAddFriend(client.id) },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Añadir como amigo")
+                // Se debe mostrar "Eliminar amigo" si son amigos, sin importar quien lo haya agregado.
+                Text(text = if (isFriend) "Eliminar amigo" else "Añadir como amigo")
             }
         }
     }
