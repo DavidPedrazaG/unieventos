@@ -179,7 +179,7 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
 
     open suspend fun login(email: String, password: String): User? {
 
-        if (email == "11" && password == "1") {
+        if (email == "admin@unieventos.com" && password == "admin") {
             return User(
                 id = "admin1",
                 name = "Admin User",
@@ -328,7 +328,7 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
         }.toMutableList()
 
 
-        val adminEmail = "11"
+        val adminEmail = "admin@unieventos.com"
         if (users.none { it.email == adminEmail }) {
             val hardcodedAdminUser = User(
                 id = "admin1",
@@ -337,7 +337,7 @@ open class UsersViewModel(protected val context: Context) : ViewModel() {
                 role = "Admin",
                 email = adminEmail,
                 phoneNumber = "1234567890",
-                password = "1",
+                password = "admin",
                 address = "Admin Street 123",
                 isActive = true,
                 userAppConfigId = "configAdmin1",

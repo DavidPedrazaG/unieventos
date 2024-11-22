@@ -279,7 +279,7 @@ fun AddCoupon(onBack: () -> Unit) {
             Button(
                 onClick = onBack,
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                modifier = Modifier.fillMaxWidth(0.2f)
+                modifier = Modifier.fillMaxWidth(0.4f)
             ) {
                 Text(text = stringResource(id = R.string.back))
             }

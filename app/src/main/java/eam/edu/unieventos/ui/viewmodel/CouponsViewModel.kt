@@ -58,14 +58,44 @@ class CouponsViewModel() : ViewModel() {
     }
 
 
-//    fun createCoupon(coupon: Coupon) {
-//        viewModelScope.launch {
-//            db.collection("coupons")
-//                .add(coupon)
-//                .await()
-//            loadCoupons()
-//        }
-//    }
+    fun createCouponJust(coupon: Coupon) {
+        viewModelScope.launch {
+            try {
+                // Crear el cupón en Firestore
+                val couponRef = db.collection("coupons")
+                    .add(coupon)
+                    .await()
+
+                // Obtener todos los clientes de la colección "clients"
+                val clientsSnapshot = db.collection("clients")
+                    .get()
+                    .await()
+
+                // Crear notificación para cada cliente
+                val clients = clientsSnapshot.documents.mapNotNull { it.toObject(Client::class.java) }
+                clients.forEach { client ->
+                    val notification = Notification(
+                        id = "",
+                        from = "UniEventos",
+                        to = client.id,
+                        message = "¡Nuevo cupón disponible! Código: ${coupon.code}. Obtén un ${coupon.discountPercentage}% de descuento",
+                        eventId = "",
+                        sendDate = Calendar.getInstance().time,
+                        isRead = false
+                    )
+
+                    // Enviar la notificación utilizando el NotificationViewModel
+                    _notificationViewModel.createNotification(notification)
+                }
+
+                // Recargar la lista de cupones después de la creación
+                loadCoupons()
+
+            } catch (e: Exception) {
+                Log.e("CouponsViewModel", "Error al crear cupón: ${e.message}")
+            }
+        }
+    }
 
     fun createCoupon(coupon: Coupon) {
         viewModelScope.launch {

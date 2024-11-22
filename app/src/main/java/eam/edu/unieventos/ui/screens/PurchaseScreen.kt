@@ -211,7 +211,7 @@ fun PurchaseScreen(
                         )
                         Button(
                             modifier = Modifier
-                                .fillMaxWidth(0.5f)
+                                .fillMaxWidth(0.6f)
                                 .padding(vertical = 8.dp),
                             onClick = {
                                 if (couponCode != "") {

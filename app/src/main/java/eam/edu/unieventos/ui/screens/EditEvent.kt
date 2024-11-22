@@ -434,7 +434,7 @@ fun EditEvent(eventCode: String, onBack: () -> Unit) {
                                     val calendar = Calendar.getInstance()
                                     calendar.timeInMillis = selectedDay
                                     // Añadir un día
-                                    calendar.add(Calendar.DAY_OF_MONTH, 0)
+                                    calendar.add(Calendar.DAY_OF_MONTH, 1)
                                     // Asignar la nueva fecha
                                     dateEvent = calendar.time
                                 }
