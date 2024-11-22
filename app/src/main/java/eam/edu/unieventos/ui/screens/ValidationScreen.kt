@@ -16,8 +16,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eam.edu.unieventos.R
+import eam.edu.unieventos.model.Client
 import eam.edu.unieventos.ui.viewmodel.ClientsViewModel
 import eam.edu.unieventos.ui.viewmodel.UsersViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun ValidationScreen(
@@ -31,6 +33,7 @@ fun ValidationScreen(
     var validationError by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val clientsViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
+    val scope = rememberCoroutineScope()
 
 
     LaunchedEffect(key1 = timer) {
@@ -90,11 +93,20 @@ fun ValidationScreen(
 
             Button(
                 onClick = {
-                    if (code == generatedCode) {
-                        setValidationStatus(context,email)
-                        onValidationSuccess()
-                    } else {
-                        validationError = true
+                    scope.launch {
+                        if (code == generatedCode) {
+
+                            val client = clientsViewModel.getUserByEmail(email)
+                            if (client is Client) {
+
+                                clientsViewModel.validateStatus(client)
+                                onValidationSuccess()
+                            } else {
+                                println("Usuario no es válido o no existe.")
+                            }
+                        } else {
+                            validationError = true
+                        }
                     }
                 },
                 modifier = Modifier
@@ -124,12 +136,4 @@ fun ValidationScreen(
 
 
 
-fun setValidationStatus(context: Context,email: String) {
-    val clientsViewModel: ClientsViewModel =  ClientsViewModel(context)
-    val user = clientsViewModel.getUserByEmail(email)
-    val client = user as eam.edu.unieventos.model.Client
-    if (client != null) {
-        client.isValidated = true
-    }
-    clientsViewModel.updateClient(client)
-}
+

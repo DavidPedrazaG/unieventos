@@ -10,6 +10,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Alignment
+import eam.edu.unieventos.R
+import androidx.compose.ui.res.stringResource
+
 
 @Composable
 fun LocationRow(
@@ -32,7 +35,7 @@ fun LocationRow(
             onValueChange = {},
             label = {
                 Text(
-                    text = "Localidad",
+                    stringResource(id = R.string.location),
                     fontSize = 10.sp
                 )
             },
@@ -52,7 +55,7 @@ fun LocationRow(
             OutlinedTextField(
                 value = locationName,
                 onValueChange = onNameChange,
-                label = { Text(text = "Nombre") },
+                label = { Text(stringResource(id = R.string.name)) },
                 modifier = Modifier
                     //.weight(1f)
                     .width(130.dp)
@@ -64,7 +67,7 @@ fun LocationRow(
             OutlinedTextField(
                 value = price,
                 onValueChange = onPriceChange,
-                label = { Text(text = "Precio") },
+                label = { Text(stringResource(id = R.string.price)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.width(95.dp)
             )
@@ -75,7 +78,7 @@ fun LocationRow(
             OutlinedTextField(
                 value = maxCapacity,
                 onValueChange = onMaxChange,
-                label = { Text(text = "Capacidad Maxima") },
+                label = { Text(stringResource(id = R.string.max_capacity)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier
                     .width(145.dp)

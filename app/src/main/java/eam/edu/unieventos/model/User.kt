@@ -1,7 +1,7 @@
 package eam.edu.unieventos.model
 
 open class User(
-    val id: String,
+    var id: String,
     var name: String,
     var idCard: String,
     val role: String,
@@ -9,9 +9,9 @@ open class User(
     var address: String,
     var phoneNumber: String,
     var password: String,
-    var isActive: Boolean ,
+    var isActive: Boolean,
     var userAppConfigId: String,
-    var isValidated: Boolean = false
+    var isValidated: Boolean
 ) {
-
+    constructor() : this("", "", "", "", "", "", "", "", true, "", false)
 }

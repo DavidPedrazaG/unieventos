@@ -57,4 +57,10 @@ sealed class RouteScreen {
     @Serializable
     data object Purchase: RouteScreen()
 
+    @Serializable
+    data object Friends: RouteScreen()
+
+    @Serializable
+    data object FriendList: RouteScreen()
+
 }

@@ -2,9 +2,15 @@ package eam.edu.unieventos.ui.viewmodel
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import eam.edu.unieventos.model.Cart
 import eam.edu.unieventos.model.Client
 import eam.edu.unieventos.model.Coupon
+import eam.edu.unieventos.model.Event
 import eam.edu.unieventos.model.Notification
 import eam.edu.unieventos.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,87 +19,151 @@ import kotlinx.coroutines.flow.asStateFlow
 import eam.edu.unieventos.ui.viewmodel.CartViewModel
 import eam.edu.unieventos.ui.viewmodel.CouponsViewModel
 import eam.edu.unieventos.ui.viewmodel.NotificationViewModel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.Calendar
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.DocumentReference
 
 class ClientsViewModel(context: Context) : UsersViewModel(context) {
 
-    private val _couponViewModel = CouponsViewModel(context)
-    private val _notificationViewModel = NotificationViewModel(context)
-    private val _cartViewModel = CartViewModel(context)
+
+
+    private val _couponViewModel = CouponsViewModel()
+    private val _notificationViewModel = NotificationViewModel()
+    private val _cartViewModel = CartViewModel()
+    private val firestore = FirebaseFirestore.getInstance()
 
 
 
     override fun createUser(user: User) {
         if (user is Client) {
-            val sharedPreferences = context.getSharedPreferences("ClientPrefs", Context.MODE_PRIVATE)
-            val editor = sharedPreferences.edit()
-
-            editor.putString("${user.id}_id", user.id)
-            editor.putString("${user.id}_name", user.name)
-            editor.putString("${user.id}_idCard", user.idCard)
-            editor.putString("${user.id}_role", "Client")
-            editor.putString("${user.id}_email", user.email)
-            editor.putString("${user.id}_address", user.address)
-            editor.putString("${user.id}_phoneNumber", user.phoneNumber)
-            editor.putString("${user.id}_password", user.password)
-            editor.putBoolean("${user.id}_isActive", user.isActive)
-            editor.putString("${user.id}_userAppConfigId", user.userAppConfigId)
-            editor.putBoolean("${user.id}_isValidated", user.isValidated)
-            editor.putString("${user.id}_friends", user.friends.joinToString(","))
-            editor.putString("${user.id}_availableCoupons", user.availableCoupons.joinToString(","))
-            editor.putString("${user.id}_purchaseHistory", user.purchaseHistory.joinToString(","))
-            editor.putString("${user.id}_notifications", user.notifications.joinToString(","))
-
-            val halfIdCardLength = user.idCard.length / 2
-            val halfIdCard = user.idCard.substring(0, halfIdCardLength)
-            val randomCode = "${user.id}$halfIdCard"
-
-            val cart = Cart(id = randomCode, user.idCard)
-            editor.putString("${user.id}_cartId", cart.id)
-            _cartViewModel.addCart(cart, context)
-
-            val couponId = _couponViewModel.generateCouponId()
-            val couponCode = _couponViewModel.generateCouponCode()
-            val expirationDate = Calendar.getInstance().apply {
-                add(Calendar.YEAR, 10)
-            }.time
-
-            val coupon = Coupon(id = couponId, code = couponCode, discountPercentage = 15f, expirationDate = expirationDate, eventCode = null,1 , isActive = true)
-            _couponViewModel.createCoupon(coupon)
-
-
-            val notificationId = _notificationViewModel.generateNotificationId()
-            val notification = Notification(id = notificationId, from = "UniEventos", to = user.id, message = "Recibiste un cupon del 15% de descuento", eventId = "", sendDate = Calendar.getInstance().time, isRead = false)
-            _notificationViewModel.createNotification(notification)
-            editor.putStringSet(
-                "stored_client_ids",
-                (sharedPreferences.getStringSet("stored_client_ids", emptySet()) ?: emptySet()).plus(user.id)
+            val clientData = hashMapOf(
+                "id" to user.id,
+                "name" to user.name,
+                "idCard" to user.idCard,
+                "role" to "Client",
+                "email" to user.email,
+                "address" to user.address,
+                "phoneNumber" to user.phoneNumber,
+                "password" to user.password,
+                "isActive" to user.isActive,
+                "userAppConfigId" to user.userAppConfigId,
+                "isValidated" to user.isValidated,
+                "cartId" to user.cartId,
+                "friends" to user.friends,
+                "availableCoupons" to user.availableCoupons,
+                "purchaseHistory" to user.purchaseHistory,
+                "notifications" to user.notifications
             )
-            editor.apply()
+
+            db.collection("clients").document(user.id).set(clientData)
+                .addOnSuccessListener {
+                    val cart = Cart("", user.id)
+                    _cartViewModel.addCart(cart)
+                    val couponCode = _couponViewModel.generateCouponCode()
+                    val expirationDate = Calendar.getInstance().apply {
+                        add(Calendar.YEAR, 10)
+                    }.time
+                    val coupon = Coupon(
+                        id = "", code = couponCode, discountPercentage = 15f,
+                        expirationDate = expirationDate, eventCode = null, isActive = true
+                    )
+                    _couponViewModel.createCoupon(coupon)
+
+
+
+                    val notification = Notification(
+                        id = "", from = "UniEventos", to = user.id,
+                        message = "Recibiste un cupón del 15% de descuento. Código: $couponCode",
+                        eventId = "",
+                        sendDate = Calendar.getInstance().time,
+                        isRead = false
+                    )
+                    _notificationViewModel.createNotification(notification)
+                }
+                .addOnFailureListener {
+
+                }
         } else {
             super.createUser(user)
         }
     }
 
+    suspend fun addFriend(userId: String, friendId: String) {
+        val clientsViewModel = ClientsViewModel(context)
 
-    fun addFriend(userId: String, friendId: String) {
-        val sharedPreferences = context.getSharedPreferences("ClientPrefs", Context.MODE_PRIVATE)
-        val currentFriends = sharedPreferences.getString("${userId}_friends", "")?.split(",")?.toMutableList() ?: mutableListOf()
+        val client = clientsViewModel.getByUserId(userId)
 
-        if (!currentFriends.contains(friendId)) {
-            currentFriends.add(friendId)
-            updateFriends(userId, currentFriends)
+        val clientDocRef: DocumentReference = firestore.collection("clients").document(userId)
+
+        firestore.runTransaction { transaction ->
+            val clientSnapshot = transaction.get(clientDocRef)
+
+            val currentClient  = clientSnapshot.toObject(Client::class.java)
+                ?: throw Exception("Cliente no encontrado")
+
+            if (!currentClient .friends.contains(friendId)) {
+                val updatedFriends = currentClient .friends.toMutableList().apply { add(friendId) }
+                transaction.update(clientDocRef, "friends", updatedFriends)
+            }
+        }.addOnSuccessListener {
+            val notification = client?.let { it1 ->
+                Notification(
+                    id = "", from = it1.id, to = friendId,
+                    message = "Tu y ${client.name} son ahora amigos",
+                    eventId = "",
+                    sendDate = Calendar.getInstance().time,
+                    isRead = false
+                )
+            }
+            if (notification != null) {
+                _notificationViewModel.createNotification(notification)
+            }
+
+
+        }.addOnFailureListener { e ->
+            Log.e("addFriend", "Error al añadir amigo", e)
         }
     }
 
-
     fun removeFriend(userId: String, friendId: String) {
-        val sharedPreferences = context.getSharedPreferences("ClientPrefs", Context.MODE_PRIVATE)
-        val currentFriends = sharedPreferences.getString("${userId}_friends", "")?.split(",")?.toMutableList() ?: mutableListOf()
+        val clientDocRef: DocumentReference = firestore.collection("clients").document(userId)
 
-        if (currentFriends.contains(friendId)) {
-            currentFriends.remove(friendId)
-            updateFriends(userId, currentFriends)
+        firestore.runTransaction { transaction ->
+            val clientSnapshot = transaction.get(clientDocRef)
+
+            val client = clientSnapshot.toObject(Client::class.java)
+                ?: throw Exception("Cliente no encontrado")
+
+            if (client.friends.contains(friendId)) {
+                val updatedFriends = client.friends.toMutableList().apply { remove(friendId) }
+                transaction.update(clientDocRef, "friends", updatedFriends)
+            }
+        }.addOnSuccessListener {
+            Log.d("removeFriend", "Amigo eliminado exitosamente.")
+        }.addOnFailureListener { e ->
+            Log.e("removeFriend", "Error al eliminar amigo", e)
+        }
+    }
+
+    fun getFriendList(userId: String, onSuccess: (List<String>) -> Unit, onFailure: (Exception) -> Unit) {
+        val clientDocRef: DocumentReference = firestore.collection("clients").document(userId)
+
+        firestore.runTransaction { transaction ->
+            val clientSnapshot = transaction.get(clientDocRef)
+
+            val client = clientSnapshot.toObject(Client::class.java)
+                ?: throw Exception("Cliente no encontrado")
+
+
+            return@runTransaction client.friends
+        }.addOnSuccessListener { friends ->
+
+            onSuccess(friends)
+        }.addOnFailureListener { e ->
+
+            onFailure(e)
         }
     }
 
@@ -105,70 +175,151 @@ class ClientsViewModel(context: Context) : UsersViewModel(context) {
 
 
     private fun updateFriends(userId: String, updatedFriends: List<String>) {
-        val sharedPreferences = context.getSharedPreferences("ClientPrefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("${userId}_friends", updatedFriends.joinToString(","))
-        editor.apply()
+        val userRef = db.collection("clients").document(userId)
 
 
-        _clients.value = getClientsList(context)
+        userRef.update("friends", updatedFriends)
+            .addOnSuccessListener {
+
+                viewModelScope.launch {
+                    _users.value = getUserList()
+                }
+            }
     }
 
-    override fun getUsersList(context: Context): List<User> {
-        return getClientsList(context)
+    override suspend fun getUserList(): List<User> {
+        return getClientsList()
     }
 
-    fun getByUserId(userId: String): User? {
-        return _clients.value.find { it.id == userId }
+    suspend fun getByUserId(userId: String): User? {
+        val clientSnapshot = db.collection("clients")
+            .document(userId)
+            .get()
+            .await()
+
+        val client = clientSnapshot.toObject(Client::class.java)
+        if (client != null) {
+            client.id = clientSnapshot.id
+            return client
+        }
+
+        return null
     }
 
     fun updateClient(user: Client) {
-        val sharedPreferences = context.getSharedPreferences("ClientPrefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
+        val clientData = hashMapOf(
+            "id" to user.id,
+            "name" to user.name,
+            "idCard" to user.idCard,
+            "role" to user.role,
+            "phoneNumber" to user.phoneNumber,
+            "password" to user.password,
+            "address" to user.address,
+            "email" to user.email,
+            "isActive" to user.isActive,
+            "userAppConfigId" to user.userAppConfigId,
+            "isValidated" to user.isValidated,
+            "friends" to user.friends,
+            "availableCoupons" to user.availableCoupons,
+            "purchaseHistory" to user.purchaseHistory,
+            "notifications" to user.notifications
+        )
 
-        val existingUser = getUserById(user.id)
-        if (existingUser != null) {
-            editor.putString("${user.id}_id", user.id)
-            editor.putString("${user.id}_name", user.name)
-            editor.putString("${user.id}_idCard", user.idCard)
-            editor.putString("${user.id}_role", user.role)
-            editor.putString("${user.id}_phoneNumber", user.phoneNumber)
-            editor.putString("${user.id}_password", user.password)
-            editor.putString("${user.id}_address", user.address)
-            editor.putBoolean("${user.id}_isActive", user.isActive)
-            editor.putString("${user.id}_userAppConfigId", user.userAppConfigId)
-            editor.putBoolean("${user.id}_isValidated", user.isValidated)
-            editor.putString("${user.id}_friends", user.friends.joinToString(","))
-            editor.putString("${user.id}_availableCoupons", user.availableCoupons.joinToString(","))
-            editor.putString("${user.id}_purchaseHistory", user.purchaseHistory.joinToString(","))
-            editor.putString("${user.id}_notifications", user.notifications.joinToString(","))
-            editor.apply()
+        db.collection("clients").document(user.id).set(clientData)
+            .addOnSuccessListener {
+                viewModelScope.launch {
+                    _clients.value = getClientsList()
+                }
 
-            _users.value = getUsersList(context)
+            }
+    }
+
+
+    fun validateStatus(client: Client) {
+        var cart = _cartViewModel.getCartByClient(client.id)
+        if (cart != null) {
+            _cartViewModel.addId(cart)
+        }
+        var cartId = _cartViewModel.getCartByClient(client.id)?.id
+        viewModelScope.launch {
+            db.collection("clients")
+                .document(client.id)
+                .update("isValidated", true)
+                .await()
+            db.collection("clients")
+                .document(client.id)
+                .update("cartId", cartId)
+                .await()
+            _clients.value = getClientsList()
         }
     }
+
 
     fun deactivateClient(client: Client) {
-        if (client.isActive) {
-            client.isActive = false
+        client.isActive = false
+        viewModelScope.launch {
+            db.collection("clients")
+                .document(client.id)
+                .set(client)
+                .await()
 
-            updateClient(client)
+            _clients.value = getClientsList()
         }
     }
+
     open fun getDeactivatedClientByEmail(email: String): Client? {
         return _clients.value.find { it.email == email && !it.isActive }
     }
 
 
-    fun getByPhone(phone: String): User? {
-        return _clients.value.find { it.phoneNumber == phone }
+    suspend fun getByPhone(phone: String): User? {
+        val clientSnapshot = db.collection("clients")
+            .whereEqualTo("phoneNumber",phone)
+            .get()
+            .await()
+
+        return if (!clientSnapshot.isEmpty) {
+            val document = clientSnapshot.documents.first()
+            val user = document.toObject(User::class.java)
+            user?.id = document.id
+            user
+        } else {
+            null
+        }
     }
-    fun getByIdCard(idCard: String): User? {
-        return _clients.value.find { it.idCard == idCard }
+    suspend fun getByIdCard(idCard: String): User? {
+        val clientSnapshot = db.collection("clients")
+            .whereEqualTo("idCard",idCard)
+            .get()
+            .await()
+
+        return if (!clientSnapshot.isEmpty) {
+            val document = clientSnapshot.documents.first()
+            val user = document.toObject(User::class.java)
+            user?.id = document.id
+            user
+        } else {
+            null
+        }
     }
 
-    override fun validateEmail(email: String): User? {
-        return _clients.value.find { it.email == email }
+    override fun validateEmail(email: String, callback: (User?) -> Unit) {
+        viewModelScope.launch {
+            val clientSnapshot = db.collection("clients")
+                .whereEqualTo("email", email)
+                .get()
+                .await()
+            if (!clientSnapshot.isEmpty) {
+                val document = clientSnapshot.documents.first()
+                val client = document.toObject(Client::class.java)
+                client?.id = document.id
+                callback(client)
+                return@launch
+            }
+
+
+            callback(null)
+        }
     }
 
     fun updatePasswordClient(client:Client, newPassword: String) {

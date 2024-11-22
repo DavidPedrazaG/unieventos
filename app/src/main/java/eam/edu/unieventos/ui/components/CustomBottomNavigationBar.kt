@@ -1,8 +1,6 @@
 package eam.edu.unieventos.ui.components
 
 import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,10 +13,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import eam.edu.unieventos.MainActivity
 import eam.edu.unieventos.R
-import androidx.navigation.compose.rememberNavController
-import java.util.*
 import eam.edu.unieventos.ui.navigation.RouteScreen
 import eam.edu.unieventos.utils.SharedPreferenceUtils
 
@@ -48,30 +43,30 @@ fun CustomBottomNavigationBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0x6200ee)),
+            .background(MaterialTheme.colorScheme.background), // Usamos colorScheme.background para fondo
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
         items.forEachIndexed { index, item ->
-            if(userLogged != null){
-                if(userLogged.rol == "Client" && index == 3){
+            if (userLogged != null) {
+                if (userLogged.rol == "Client" && index == 3) {
                     return@forEachIndexed
-                }else if(userLogged.rol == "Admin" && index == 2){
+                } else if (userLogged.rol == "Admin" && index == 2) {
                     return@forEachIndexed
                 }
                 BottomNavigationItemView(
                     item = item,
                     onClick = {
                         selectedItem = index
-                        if (index == 0) { // Si el ítem seleccionado es "Settings"
+                        if (index == 0) { // Si el ítem seleccionado es "Home"
                             onNavegateToHome()
-                        }else if (index == 1) {
+                        } else if (index == 1) {
                             onNavegateToPurchaseHistory()
-                        }else if (index == 2) {
+                        } else if (index == 2) {
                             onNavegateToNotifications()
-                        }else if (index == 3) {
+                        } else if (index == 3) {
                             onNavegateToCoupons()
-                        }else if (index == 4) {
+                        } else if (index == 4) {
                             onNavegateToSettings()
                         }
                     },
@@ -82,7 +77,7 @@ fun CustomBottomNavigationBar(
     }
 }
 
-// BottomNavigationItemView como antes
+// BottomNavigationItemView como antes, ajustado a los colores del tema
 @Composable
 fun BottomNavigationItemView(
     item: BottomNavItem,
@@ -100,12 +95,12 @@ fun BottomNavigationItemView(
             painter = painterResource(id = item.icon),
             contentDescription = item.label,
             modifier = Modifier.size(24.dp),
-            tint = if (isSelected) Color.White else Color.LightGray
+            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) // Colores ajustados al tema
         )
         Text(
             text = item.label,
             fontSize = 12.sp,
-            color = if (isSelected) Color.White else Color.LightGray
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) // Colores ajustados al tema
         )
     }
 }

@@ -1,472 +1,212 @@
 package eam.edu.unieventos.ui.viewmodel
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import eam.edu.unieventos.model.Coupon
 import eam.edu.unieventos.model.Event
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.time.LocalTime
 import java.util.Date
 
 
 
-class EventsViewModel(private val context: Context) : ViewModel() {
+class EventsViewModel() : ViewModel() {
 
+    val db = Firebase.firestore
     private val _events = MutableStateFlow(emptyList<Event>())
     val events: StateFlow<List<Event>> = _events.asStateFlow()
 
+
     init {
-        _events.value = getEventsList(context)
-        Log.i("Prueba","${_events.value.size} y ${events.value.size}")
+        loadEvents()
     }
 
+    fun loadEvents() {
+        deactivateEventByDate()
+        deactivateCouponsByExpirationDate()
+        viewModelScope.launch {
+            _events.value = getEventsList()
+        }
+    }
 
+    fun getEvents(): List<Event> {
+        return _events.value
+    }
 
     fun getEventsByType(type: String): List<Event> {
         return _events.value.filter { it.type == type }
+    }
+
+    fun getEventsByCity(city: String): List<Event> {
+        return _events.value.filter { it.city == city }
+    }
+
+    fun getEventsByName(name: String): List<Event> {
+        return _events.value.filter { it.name.contains(name, ignoreCase = true) }
     }
 
     fun generateRandomCode(length: Int): String {
         val charset = ('A'..'Z') + ('0'..'9')
         return List(length) { charset.random() }.joinToString("")
     }
-    fun generateRandomId(length: Int): String {
-        val charset = ('A'..'Z') + ('0'..'9')
-        return List(length) { charset.random() }.joinToString("")
+
+
+    suspend fun getEventById(eventId: String): Event? {
+        val snapshot = db.collection("events")
+            .document(eventId)
+            .get()
+            .await()
+
+        val event =snapshot.toObject(Event::class.java)
+        event?.id = snapshot.id
+        return  event
+
     }
 
-    fun getEventById(eventId: String): Event? {
-        return try {
-            val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
+    suspend fun getEventByCode(eventCode: String): Event? {
+        val snapshot = db.collection("events")
+            .whereEqualTo("code", eventCode)
+            .get()
+            .await()
 
-            // Verificar si existe el evento con el ID proporcionado
-            if (sharedPreferences.contains("${eventId}_id")) {
-                val id = sharedPreferences.getString("${eventId}_id", null)
-                val code = sharedPreferences.getString("${eventId}_code", null)
-                val name = sharedPreferences.getString("${eventId}_name", null)
-                val address = sharedPreferences.getString("${eventId}_address", null)
-                val city = sharedPreferences.getString("${eventId}_city", null)
-                val description = sharedPreferences.getString("${eventId}_description", null)
-                val type = sharedPreferences.getString("${eventId}_type", null)
-                val poster = sharedPreferences.getString("${eventId}_poster", null)
-                val locationImage = sharedPreferences.getString("${eventId}_locationImage", null)
-                val dateEventMillis = sharedPreferences.getLong("${eventId}_dateEvent", 0L)
-                val timeMillis = sharedPreferences.getLong("${eventId}_timeEvent", -1L)
-                val isActive = sharedPreferences.getBoolean("${eventId}_isActive", false)
-                val locations = sharedPreferences.getStringSet("${eventId}_locations", emptySet())?.toList() ?: emptyList()
-
-                // Verificar que los datos no sean nulos
-
-                // Convertir el tiempo a LocalTime si es válido
-                val time = if (timeMillis != -1L) {
-                    val hour = (timeMillis / 60).toInt()
-                    val minute = (timeMillis % 60).toInt()
-                    LocalTime.of(hour, minute)
-                } else {
-                    LocalTime.MIN // O el valor por defecto que prefieras
-                }
-                if (id != null && code != null && name != null && address != null && city != null && description != null && type != null && poster != null && locationImage != null && dateEventMillis != 0L) {
-                    // Crear el objeto Event con los datos obtenidos
-                    Event(
-                        id = id,
-                        code = code,
-                        name = name,
-                        place = address,
-                        city = city,
-                        description = description,
-                        type = type,
-                        poster = poster,
-                        locationImage = locationImage,
-                        locations = locations,
-                        dateEvent = Date(dateEventMillis),
-                        time = time,
-                        isActive = isActive
-                    )
-                } else {
-                    null // Alguno de los campos no se encontró, retornar null
-                }
-            } else {
-                null // El evento no existe
-            }
-        } catch (e: Exception) {
-            Log.e("getEventById", "Error al obtener el evento: ${e.message}")
-            e.printStackTrace()
-            null // En caso de error, retornar null
+        return if (!snapshot.isEmpty) {
+            val document = snapshot.documents.first()
+            val event = document.toObject(Event::class.java)
+            event?.id = document.id
+            event
+        } else {
+            null
         }
     }
-
-    fun getEventByCode(eventCode: String): Event? {
-        return try {
-            val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
-
-            // Verificar si existe el evento con el ID proporcionado
-            if (sharedPreferences.contains("${eventCode}_code")) {
-                val id = sharedPreferences.getString("${eventCode}_id", null)
-                val code = sharedPreferences.getString("${eventCode}_code", null)
-                val name = sharedPreferences.getString("${eventCode}_name", null)
-                val address = sharedPreferences.getString("${eventCode}_address", null)
-                val city = sharedPreferences.getString("${eventCode}_city", null)
-                val description = sharedPreferences.getString("${eventCode}_description", null)
-                val type = sharedPreferences.getString("${eventCode}_type", null)
-                val poster = sharedPreferences.getString("${eventCode}_poster", null)
-                val locationImage = sharedPreferences.getString("${eventCode}_locationImage", null)
-                val dateEventMillis = sharedPreferences.getLong("${eventCode}_dateEvent", 0L)
-                val timeMillis = sharedPreferences.getLong("${eventCode}_timeEvent", -1L)
-                val isActive = sharedPreferences.getBoolean("${eventCode}_isActive", false)
-                val locations = sharedPreferences.getStringSet("${eventCode}_locations", emptySet())?.toList() ?: emptyList()
-
-                // Verificar que los datos no sean nulos
-
-                // Convertir el tiempo a LocalTime si es válido
-                val time = if (timeMillis != -1L) {
-                    val hour = (timeMillis / 60).toInt()
-                    val minute = (timeMillis % 60).toInt()
-                    LocalTime.of(hour, minute)
-                } else {
-                    LocalTime.MIN // O el valor por defecto que prefieras
-                }
-                if (id != null && code != null && name != null && address != null && city != null && description != null && type != null && poster != null && locationImage != null && dateEventMillis != 0L) {
-                    // Crear el objeto Event con los datos obtenidos
-                    Event(
-                        id = id,
-                        code = code,
-                        name = name,
-                        place = address,
-                        city = city,
-                        description = description,
-                        type = type,
-                        poster = poster,
-                        locationImage = locationImage,
-                        locations = locations,
-                        dateEvent = Date(dateEventMillis),
-                        time = time,
-                        isActive = isActive
-                    )
-                } else {
-                    null // Alguno de los campos no se encontró, retornar null
-                }
-            } else {
-                null // El evento no existe
-            }
-        } catch (e: Exception) {
-            Log.e("getEventById", "Error al obtener el evento: ${e.message}")
-            e.printStackTrace()
-            null // En caso de error, retornar null
-        }
-    }
-
 
     fun createEvent(event: Event) {
-        try {
-            val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
-            val editor = sharedPreferences.edit()
-
-
-            editor.putString("${event.id}_id", event.id)
-            editor.putString("${event.id}_code", event.code)
-            editor.putString("${event.id}_name", event.name)
-            editor.putString("${event.id}_address", event.place)
-            editor.putString("${event.id}_city", event.city)
-            editor.putString("${event.id}_description", event.description)
-            editor.putString("${event.id}_type", event.type)
-            editor.putString("${event.id}_poster", event.poster)
-            editor.putString("${event.id}_locationImage", event.locationImage)
-            editor.putLong("${event.id}_dateEvent", event.dateEvent.time)
-            val minutesSinceMidnight = event.time.hour * 60 + event.time.minute
-            editor.putLong("${event.id}_timeEvent", minutesSinceMidnight.toLong())
-            editor.putBoolean("${event.id}_isActive", event.isActive)
-
-            editor.putStringSet("${event.id}_locations", event.locations.toSet())
-
-            editor.putStringSet(
-                "stored_code_events",
-                (sharedPreferences.getStringSet("stored_code_events+", emptySet()) ?: emptySet()).plus(event.id)
-            )
-            editor.apply()
-            Log.i("createEvent", "Evento guardado correctamente con ID: ${event.id} y código: ${event.code}")
-        } catch (e: Exception) {
-            Log.e("createEvent", "Error al guardar el evento: ${e.message}")
-            e.printStackTrace()
+        viewModelScope.launch {
+            db.collection("events")
+                .add(event)
+                .await()
+            loadEvents()
         }
+
     }
+
 
     fun editEvent(event: Event) {
-        try {
-            val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
-            val editor = sharedPreferences.edit()
+        viewModelScope.launch {
+            db.collection("events")
+                .document(event.id)
+                .set(event)
+                .await()
 
-            editor.putString("${event.id}_name", event.name)
-            editor.putString("${event.id}_address", event.place)
-            editor.putString("${event.id}_city", event.city)
-            editor.putString("${event.id}_description", event.description)
-            editor.putString("${event.id}_type", event.type)
-            editor.putString("${event.id}_poster", event.poster)
-            editor.putString("${event.id}_locationImage", event.locationImage)
-            editor.putLong("${event.id}_dateEvent", event.dateEvent.time)
+            _events.value = getEventsList()
+        }
+    }
 
-            val newTimeEvent = event.time // Asumiendo que event.time es la nueva hora (LocalTime)
-            val newMinutesSinceMidnight = newTimeEvent.hour * 60 + newTimeEvent.minute
-            editor.putLong("${event.id}_timeEvent", newMinutesSinceMidnight.toLong())
 
-            editor.putBoolean("${event.id}_isActive", event.isActive)
-            editor.putStringSet("${event.id}_locations", event.locations.toSet())
+    private suspend fun getEventsList(): List<Event> {
+        val snapshot = db.collection("events")
+            .whereEqualTo("active", true)
+            .get()
+            .await()
+        return snapshot.documents.mapNotNull {
+            val event = it.toObject(Event::class.java)
+            requireNotNull(event)
+            event.id = it.id
+            event
 
-            editor.apply()
-            Log.d("EditEvent", "Evento editado con ID: ${event.id}, nueva hora: $newTimeEvent")
-        } catch (e: Exception) {
-            Log.e("EditEvent", "Error al editar el evento: ${e.message}")
-            e.printStackTrace()
+        }
+    }
+
+
+    fun deactivateEvent(event: Event) {
+        event.isActive = false
+        viewModelScope.launch {
+            // Desactiva los cupones asociados a este evento
+            val couponsViewModel = CouponsViewModel() // Obtén una instancia del CouponsViewModel
+            couponsViewModel.deactivateCouponByEventCode(event.code)
+
+            // Desactiva el evento en la base de datos
+            db.collection("events")
+                .document(event.id)
+                .set(event)
+                .await()
+
+            // Actualiza la lista de eventos activos
+            _events.value = getEventsList()
+        }
+    }
+
+
+    fun deleteEvent(eventId : String){
+        viewModelScope.launch {
+            db.collection("events")
+                .document(eventId)
+                .delete()
+                .await()
+            _events.value = getEventsList()
         }
     }
 
 
 
+    fun deactivateEventByDate() {
+        viewModelScope.launch {
+            val currentDateTime = Date().toInstant()
+                .atZone(java.time.ZoneId.systemDefault())
+                .toLocalDateTime()
 
+            val snapshot = db.collection("events").get().await()
 
+            snapshot.documents.mapNotNull {
+                val event = it.toObject(Event::class.java)
+                event?.id = it.id
+                event
+            }.forEach { event ->
+                try {
+                    // Convertir la fecha del evento en LocalDate
+                    val eventDate = event.dateEvent.toInstant()
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDate()
 
+                    // Convertir la hora del evento en LocalTime
+                    val eventHour = LocalTime.parse(event.time) // Formato "HH:mm"
 
+                    // Crear la fecha y hora del evento (sin zona horaria)
+                    val eventDateTime = eventDate.atTime(eventHour)
 
+                    // Fecha 24 horas antes del evento
+                    val twentyFourHoursBeforeEvent = eventDateTime.minusHours(48)
 
-
-
-
-
-    private fun getEventsList(context: Context): List<Event> {
-        val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
-        val storedEvents = mutableListOf<Event>()
-        val storedCodes = sharedPreferences.getStringSet("stored_code_events", emptySet()) ?: emptySet()
-        Log.i("camilo","Antes del For")
-        for (code in storedCodes) {
-            val id = sharedPreferences.getString("${code}_id", "") ?: ""
-            val name = sharedPreferences.getString("${code}_name", "") ?: ""
-            val address = sharedPreferences.getString("${code}_address", "") ?: ""
-            val city = sharedPreferences.getString("${code}_city", "") ?: ""
-            val description = sharedPreferences.getString("${code}_description", "") ?: ""
-            val type = sharedPreferences.getString("${code}_type", "") ?: ""
-            val poster = sharedPreferences.getString("${code}_poster", "") ?: ""
-            val locationImage = sharedPreferences.getString("${code}_locationImage", "") ?: ""
-            val isActive = sharedPreferences.getBoolean("${code}_isActive", true)
-
-            val dateEventMillis = sharedPreferences.getLong("${code}_dateEvent", 0L)
-            val timeMillis = sharedPreferences.getLong("${code}_timeEvent", -1L)
-
-            // Convertir el tiempo a LocalTime si es válido
-            val time = if (timeMillis != -1L) {
-                val hour = (timeMillis / 60).toInt()
-                val minute = (timeMillis % 60).toInt()
-                LocalTime.of(hour, minute)
-            } else {
-                LocalTime.MIN // O el valor por defecto que prefieras
-            }
-
-
-            val locationsSet = sharedPreferences.getStringSet("${code}_locations", emptySet()) ?: emptySet()
-            val locations = locationsSet.toList()
-
-            val event = Event(
-                id = id,
-                code = code,
-                name = name,
-                place = address,
-                city = city,
-                description = description,
-                type = type,
-                poster = poster,
-                locationImage = locationImage,
-                locations = locations,
-                dateEvent = Date(dateEventMillis),
-                time = time,
-                isActive = isActive
-            )
-            Log.i("camilo",event.name)
-            storedEvents.add(event)
-
-        }
-
-        Log.i("Prueba","${storedEvents.size}")
-        return storedEvents
-    }
-
-    fun logAllEvents() {
-        // Obtener los eventos almacenados
-        val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
-        val storedCodes = sharedPreferences.getStringSet("stored_code_events", emptySet()) ?: emptySet()
-
-        // Verifica si hay eventos almacenados
-        if (storedCodes.isEmpty()) {
-            Log.i("logAllEvents", "No hay eventos almacenados.")
-            return
-        }
-
-        // Itera sobre cada código de evento y recupera los datos
-        for (code in storedCodes) {
-            val id = sharedPreferences.getString("${code}_id", "") ?: ""
-            val name = sharedPreferences.getString("${code}_name", "") ?: ""
-            val address = sharedPreferences.getString("${code}_address", "") ?: ""
-            val city = sharedPreferences.getString("${code}_city", "") ?: ""
-            val description = sharedPreferences.getString("${code}_description", "") ?: ""
-            val type = sharedPreferences.getString("${code}_type", "") ?: ""
-            val poster = sharedPreferences.getString("${code}_poster", "") ?: ""
-            val locationImage = sharedPreferences.getString("${code}_locationImage", "") ?: ""
-            val dateEventMillis = sharedPreferences.getLong("${code}_dateEvent", 0L)
-            val timeMillis = sharedPreferences.getLong("${code}_timeEvent", -1L)
-
-            // Convertir el tiempo a LocalTime si es válido
-            val time = if (timeMillis != -1L) {
-                val hour = (timeMillis / 60).toInt()
-                val minute = (timeMillis % 60).toInt()
-                LocalTime.of(hour, minute)
-            } else {
-                LocalTime.MIN // O el valor por defecto que prefieras
-            }
-
-
-            // Convierte el timestamp a una fecha legible
-            val dateEvent = if (dateEventMillis != 0L) {
-                Date(dateEventMillis)
-            } else {
-                null
-            }
-
-            val locationsSet = sharedPreferences.getStringSet("${code}_locations", emptySet()) ?: emptySet()
-            val locations = locationsSet.toList()
-
-            // Imprime los detalles del evento en el log
-            Log.i("logAllEvents", "----------------------------------")
-            Log.i("logAllEvents", "ID: $id")
-            Log.i("logAllEvents", "Código: $code")
-            Log.i("logAllEvents", "Nombre: $name")
-            Log.i("logAllEvents", "Dirección: $address")
-            Log.i("logAllEvents", "Ciudad: $city")
-            Log.i("logAllEvents", "Descripción: $description")
-            Log.i("logAllEvents", "Tipo: $type")
-            Log.i("logAllEvents", "Póster URL: $poster")
-            Log.i("logAllEvents", "Imagen de Ubicación URL: $locationImage")
-            Log.i("logAllEvents", "Fecha del Evento: ${dateEvent?.toString() ?: "No especificada"}")
-            Log.i("logAllEvents", "Hora del Evento: ${time?.toString() ?: "No especificada"}")
-            Log.i("logAllEvents", "Ubicaciones: ${locations.joinToString()}")
-            Log.i("logAllEvents", "----------------------------------")
-        }
-    }
-
-    fun deleteAllEvents() {
-        try {
-            // Inicializa SharedPreferences
-            val sharedPreferences: SharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
-            val editor: SharedPreferences.Editor = sharedPreferences.edit()
-
-            // Obtener la lista de códigos de eventos almacenados
-            val storedEvents: Set<String>? = sharedPreferences.getStringSet("stored_events", emptySet())
-
-            // Si la lista no está vacía, eliminar todos los eventos
-            storedEvents?.forEach { eventCode ->
-                // Para cada código, obtener el ID y eliminar todas las entradas asociadas
-                val eventId = sharedPreferences.getString("${eventCode}_id", null)
-                if (eventId != null) {
-                    editor.remove("${eventId}_id")
-                    editor.remove("${eventId}_code")
-                    editor.remove("${eventId}_name")
-                    editor.remove("${eventId}_address")
-                    editor.remove("${eventId}_city")
-                    editor.remove("${eventId}_description")
-                    editor.remove("${eventId}_type")
-                    editor.remove("${eventId}_poster")
-                    editor.remove("${eventId}_locationImage")
-                    editor.remove("${eventId}_dateEvent")
-                    editor.remove("${eventId}_time")
-                    editor.remove("${eventId}_locations")
+                    // Verificar si estamos dentro de las 24 horas previas al evento
+                    if (currentDateTime.isAfter(eventDateTime)) {
+                        // Si estamos después de la fecha y hora del evento, desactivar
+                        deactivateEvent(event)
+                        Log.d("EventsViewModel", "Evento desactivado: ${event.id}")
+                    } else if (currentDateTime.isAfter(twentyFourHoursBeforeEvent)) {
+                        // Si estamos dentro de las 24 horas previas al evento
+                        deactivateEvent(event)
+                        Log.d("EventsViewModel", "Evento desactivado: ${event.id}")
+                    }
+                } catch (e: Exception) {
+                    Log.e("EventsViewModel", "Error al procesar evento: ${e.message}")
                 }
             }
 
-            // Limpiar la lista general de eventos
-            editor.remove("stored_events")
-
-            // Aplicar los cambios
-            editor.apply()
-
-            Log.i("deleteAllEvents", "Todos los eventos han sido eliminados correctamente.")
-        } catch (e: Exception) {
-            Log.e("deleteAllEvents", "Error al eliminar los eventos: ${e.message}")
-            e.printStackTrace()
+            // Actualizar la lista de eventos activos
+            _events.value = getEventsList()
         }
     }
 
-
-    fun getEventByName(name: String): Event? {
-        val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
-        val storedCodes = sharedPreferences.getStringSet("stored_code_events", emptySet()) ?: emptySet()
-
-        for (code in storedCodes) {
-            val eventName = sharedPreferences.getString("${code}_name", "") ?: ""
-            if (eventName.equals(name, ignoreCase = true)) {
-                return getEventByCode(code) // Utiliza getEventByCode para obtener el evento completo
-            }
-        }
-        return null
-    }
-
-
-    fun deactivateEvent(eventCode: String, locationsViewModel: LocationsViewModel) {
-        val event = getEventByCode(eventCode)
-        event?.let {
-            it.isActive = false
-            editEvent(it) // Actualiza el evento en SharedPreferences
-
-            // Desactiva las locations asociadas
-            val locations = locationsViewModel.getLocationsByEvent(eventCode)
-            locations.forEach { location ->
-                locationsViewModel.deactivateLocation(location.id) // Desactiva la location
-                Log.i("deactivateEvent", "Location desactivada: ${location.name}")
-            }
-
-            Log.i("deactivateEvent", "Evento desactivado: ${it.name}")
-        } ?: Log.e("deactivateEvent", "Evento no encontrado con ID: $eventCode")
-    }
-
-    fun activateEvent(eventCode: String , locationsViewModel: LocationsViewModel) {
-        val event = getEventByCode(eventCode)
-        event?.let {
-            it.isActive = true
-            editEvent(it) // Actualiza el evento en SharedPreferences
-
-            // Activa las locations asociadas
-            val locations = locationsViewModel.getLocationsByEvent(eventCode)
-            locations.forEach { location ->
-                locationsViewModel.activateLocation(location.id) // Activa la location
-                Log.i("activateEvent", "Location activada: ${location.name}")
-            }
-
-            Log.i("activateEvent", "Evento activado: ${it.name}")
-        } ?: Log.e("activateEvent", "Evento no encontrado con ID: $eventCode")
-    }
-
-
-
-    fun deactivatePastEventsAndLocations(locationViewModel: LocationsViewModel) {
-        val currentDate = Date() // Obtiene la fecha actual
-        val sharedPreferences = context.getSharedPreferences("EventPrefs", Context.MODE_PRIVATE)
-        val storedCodes = sharedPreferences.getStringSet("stored_code_events", emptySet()) ?: emptySet()
-
-        for (code in storedCodes) {
-            val dateEventMillis = sharedPreferences.getLong("${code}_dateEvent", 0L)
-            val eventDate = Date(dateEventMillis)
-
-            // Verifica si el evento es pasado y está activo
-            if (eventDate.before(currentDate) && sharedPreferences.getBoolean("${code}_isActive", true)) {
-                deactivateEvent(code ,locationViewModel) // Desactiva el evento
-
-                // Desactiva las ubicaciones asociadas
-                val locationsSet = sharedPreferences.getStringSet("${code}_locations", emptySet()) ?: emptySet()
-                locationsSet.forEach { locationCode ->
-                    locationViewModel.deactivateLocation(locationCode) // Desactiva la ubicación
-                }
-
-                Log.i("deactivatePastEvents", "Evento desactivado por fecha pasada: ${sharedPreferences.getString("${code}_name", "")}")
-            }
-        }
+    fun deactivateCouponsByExpirationDate() {
+        val couponsViewModel = CouponsViewModel() // Obtén la instancia del CouponsViewModel
+        couponsViewModel.deactivateExpiredCoupons() // Desactiva los cupones expirados
     }
 
 

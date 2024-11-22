@@ -26,13 +26,15 @@ import eam.edu.unieventos.utils.SharedPreferenceUtils
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.res.stringResource
 import eam.edu.unieventos.services.EmailService
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
     onNavigateToValidate: (String, String) -> Unit,
-    onNavigateToHome: (String) -> Unit
+    onNavigateToHome: (String) -> Unit,
+    onNavigateToFriendScreen: () -> Unit
 ) {
     val context = LocalContext.current
     Scaffold { padding ->
@@ -42,7 +44,8 @@ fun LoginScreen(
             onNavigateToRegister = onNavigateToRegister,
             onNavigateToRecovery = onNavigateToRecovery,
             onNavigateToValidate = onNavigateToValidate,
-            onNavigateToHome = onNavigateToHome
+            onNavigateToHome = onNavigateToHome,
+            onNavigateToFriendScreen = onNavigateToFriendScreen
         )
     }
 }
@@ -54,13 +57,16 @@ fun LoginForm(
     onNavigateToRegister: () -> Unit,
     onNavigateToRecovery: () -> Unit,
     onNavigateToValidate: (String, String) -> Unit,
-    onNavigateToHome: (String) -> Unit
+    onNavigateToHome: (String) -> Unit,
+    onNavigateToFriendScreen: () -> Unit
 ) {
     val usersViewModel: UsersViewModel = remember { UsersViewModel(context) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var loginError by remember { mutableStateOf(false) }
     val sharedPreferences = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+    val scope = rememberCoroutineScope()
+    var clientsExist by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -100,28 +106,32 @@ fun LoginForm(
         ) {
             Button(
                 onClick = {
-                    val user = usersViewModel.login(email, password)
-                    if (user != null) {
-                        val isValidated = user.isValidated
-                        SharedPreferenceUtils.savePreference(context, user.id, user.role)
-
-                        val generatedCode = (100000..999999).random().toString()
-
-                        val emailService = EmailService()
-                        emailService.sendEmail(
-                            to = email,
-                            subject = "Código de validación",
-                            body = "Tu código de validación es: $generatedCode"
-                        )
-
-                        if (isValidated || user.role == "Admin") {
-                            onNavigateToHome(user.role)
-
+                    scope.launch {
+                        clientsExist = usersViewModel.checkIfClientExist()
+                        if(clientsExist){
+                            println("Clientes encontrados en la colección")
                         } else {
-                            onNavigateToValidate(email,generatedCode)
+                            println("No hay clientes en la colección")
                         }
-                    } else {
-                        loginError = true
+                        val user = usersViewModel.login(email, password)
+                        if (user != null) {
+                            SharedPreferenceUtils.savePreference(context, user.id, user.role)
+                            if(user.isValidated || user.role == "Admin"){
+                                onNavigateToHome(user.role)
+                            }else{
+                                val generatedCode = (100000..999999).random().toString()
+
+                                val emailService = EmailService()
+                                emailService.sendEmail(
+                                    to = email,
+                                    subject = "Código de validación",
+                                    body = "Tu código de validación es: $generatedCode"
+                                )
+                                onNavigateToValidate(email,generatedCode)
+                            }
+                        } else{
+                            loginError = true
+                        }
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -155,7 +165,7 @@ fun LoginForm(
 
         if (loginError) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Credenciales incorrectas", color = Color.Red)
+            Text(text = stringResource(id = R.string.incorrect_credentials), color = Color.Red)
         }
     }
 }

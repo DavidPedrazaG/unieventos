@@ -1,7 +1,13 @@
 package eam.edu.unieventos.ui.screens
 
 import android.app.TimePickerDialog
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,6 +16,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.Timer
+import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,19 +26,31 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import com.cloudinary.Cloudinary
+import com.cloudinary.utils.ObjectUtils
 import eam.edu.unieventos.R
 import eam.edu.unieventos.model.Event
 import eam.edu.unieventos.model.Location
 import eam.edu.unieventos.ui.viewmodel.EventsViewModel
 import eam.edu.unieventos.ui.viewmodel.LocationsViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.time.LocalTime
 import java.util.*
+import java.time.format.DateTimeFormatter
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddEvent(onBack: () -> Unit) {
+fun AddEvent(
+        onBack: () -> Unit,
+        onNavegateToHome: (String) -> Unit
+
+) {
+
 
     var name by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
@@ -43,6 +62,15 @@ fun AddEvent(onBack: () -> Unit) {
     var dateEvent by remember { mutableStateOf<Date?>(null) }
     var timeEvent by remember { mutableStateOf<LocalTime?>(null) } // Nueva variable para la hora del evento
     val isActive = true
+
+    val config = mapOf(
+        "cloud_name" to "deofyzexo",
+        "api_key" to "115375694432889",
+        "api_secret" to "CxeQ6T4qUK9Innz0lAQP9CCqjLg"
+    )
+
+    val cloudinary = Cloudinary(config)
+    val scope = rememberCoroutineScope()
 
     var cities = listOf(
         "Arauca", "Armenia", "Barranquilla", "Bogotá",
@@ -56,16 +84,16 @@ fun AddEvent(onBack: () -> Unit) {
     )
 
     var events = listOf(
-        "Conferencia",
-        "Festival",
-        "Taller",
-        "Exposición",
-        "Maratón",
-        "Torneo",
-        "Feria",
-        "Competencia",
-        "Seminario",
-        "Concierto"
+        stringResource(R.string.conference),
+        stringResource(R.string.festival),
+        stringResource(R.string.workshop),
+        stringResource(R.string.exhibition),
+        stringResource(R.string.marathon),
+        stringResource(R.string.tournament),
+        stringResource(R.string.fair),
+        stringResource(R.string.competition),
+        stringResource(R.string.seminar),
+        stringResource(R.string.concert)
     )
 
     // Variables para localidades dinámicas
@@ -78,15 +106,60 @@ fun AddEvent(onBack: () -> Unit) {
     var datePickerState = rememberDatePickerState()
 
     val context = LocalContext.current
-    val eventViewModel: EventsViewModel = remember { EventsViewModel(context) }
-    val locationViewModel: LocationsViewModel = remember { LocationsViewModel(context) }
+    val eventViewModel: EventsViewModel = remember { EventsViewModel() }
+    val locationViewModel: LocationsViewModel = remember { LocationsViewModel() }
 
     // Scroll state para permitir desplazamiento
     val scrollState = rememberScrollState()
 
+    val fileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            Log.e("URII", uri.toString())
+
+            scope.launch(Dispatchers.IO) {
+                val imputStream = context.contentResolver.openInputStream(uri)
+                imputStream?.use { stream ->
+                    val result = cloudinary.uploader().upload(stream , ObjectUtils.emptyMap())
+                    Log.e("resultoleeeeee", result.toString())
+                    locationImage = result["secure_url"].toString()
+
+
+                }
+            }
+
+        }
+    }
+
+    val posterFileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            Log.e("URI", uri.toString())
+
+            scope.launch(Dispatchers.IO) {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                inputStream?.use { stream ->
+                    val result = cloudinary.uploader().upload(stream, ObjectUtils.emptyMap())
+                    Log.e("resulttttt", result.toString())
+                    poster = result["secure_url"].toString()
+                }
+            }
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        if (it) {
+            Toast.makeText(context, "Permiso concedido", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Permiso denegado", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     // Box para el diseño general de la pantalla
     Scaffold(
     ) {paddingValues ->
+
+
 
 
         Column(
@@ -101,9 +174,9 @@ fun AddEvent(onBack: () -> Unit) {
             TextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text(text = "Nombre del Evento") },
+                label = { Text(text = stringResource(id = R.string.event_name)) },
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.7f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
@@ -111,9 +184,9 @@ fun AddEvent(onBack: () -> Unit) {
             TextField(
                 value = address,
                 onValueChange = { address = it },
-                label = { Text(text = "Sitio") },
+                label = { Text(text = stringResource(id = R.string.event_location)) },
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.7f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
@@ -147,13 +220,13 @@ fun AddEvent(onBack: () -> Unit) {
             TextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text(text = "Descripción") },
+                label = { Text(text = stringResource(id = R.string.event_description)) },
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.7f)
                     .padding(vertical = 8.dp),
                 singleLine = true
             )
-
+            Spacer(modifier = Modifier.height(8.dp))
             // para el tipo
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -172,103 +245,210 @@ fun AddEvent(onBack: () -> Unit) {
                     items = events
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
 
-            TextField(
-                value = poster,
-                onValueChange = { poster = it },
-                label = { Text(text = "URL del Póster") },
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .padding(vertical = 8.dp),
-                singleLine = true
-            )
+            Row {
+                TextField(
+                    value = poster,
+                    onValueChange = { poster = it },
+                    label = { Text(text = stringResource(id = R.string.poster_url)) },
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .padding(vertical = 8.dp),
+                    singleLine = true
+                )
 
-            TextField(
-                value = locationImage,
-                onValueChange = { locationImage = it },
-                label = { Text(text = "URL de la Imagen de Ubicación") },
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .padding(vertical = 8.dp),
-                singleLine = true
-            )
-
-            // Fecha del evento
-            OutlinedTextField(
-                value = dateEvent?.let { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it) } ?: "",
-                onValueChange = {},
-                readOnly = true,
-                placeholder = { Text(text = "Fecha") },
-                trailingIcon = {
-                    IconButton(
-                        onClick = { expandedDate = true }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.DateRange,
-                            contentDescription = "Icon Date"
+                Button(onClick = {
+                    val permissionCheckResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.READ_MEDIA_IMAGES
+                        )
+                    } else {
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.READ_EXTERNAL_STORAGE
                         )
                     }
-                },
-                modifier = Modifier.width(190.dp)
-            )
-
-            if (expandedDate) {
-                DatePickerDialog(
-                    onDismissRequest = { expandedDate = false },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                val selectedDay = datePickerState.selectedDateMillis
-                                if (selectedDay != null) {
-                                    dateEvent = Date(selectedDay)
-                                }
-                                expandedDate = false
-                            }
-                        ) {
-                            Text(text = stringResource(id = R.string.ok))
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { expandedDate = false }) {
-                            Text(text = stringResource(id = R.string.cancel))
+                    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                        posterFileLauncher.launch("image/*")
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            permissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
+                        } else {
+                            permissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
                         }
                     }
-                ) {
-                    DatePicker(state = datePickerState)
+                },
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(horizontal = 8.dp)
+                        .wrapContentWidth()) {
+                    Icon(
+                        contentDescription = null,
+                        imageVector = Icons.Rounded.Upload
+                    )
                 }
             }
 
+            Row(){
+                TextField(
+                    value = locationImage,
+                    onValueChange = { locationImage = it },
+                    label = { Text(text = stringResource(id = R.string.location_image_url)) },
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .padding(vertical = 8.dp),
+                    singleLine = true
+                )
+
+                Button(onClick = {
+                    val permissionCheckResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.READ_MEDIA_IMAGES
+
+                        )
+                    } else {
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.READ_EXTERNAL_STORAGE
+
+                        )
+                    }
+                    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                        fileLauncher.launch("image/*")
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            permissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
+                        } else {
+                            permissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+
+                        }
+                    }
+                },
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(horizontal = 8.dp)
+                        .wrapContentWidth()) {
+                    Icon(
+                        contentDescription = null,
+                        imageVector = Icons.Rounded.Upload
+                    )
+                }
+            }
+
+            // Fecha del evento
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(id = R.string.date),
+                    color = Color.Black,
+                    fontSize = 20.sp
+                )
+
+                Spacer(modifier = Modifier.width(50.dp))
+                OutlinedTextField(
+                    value = dateEvent?.let {
+                        SimpleDateFormat(
+                            "dd/MM/yyyy",
+                            Locale.getDefault()
+                        ).format(it)
+                    } ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    placeholder = { Text(text = stringResource(id = R.string.date)) },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { expandedDate = true }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.DateRange,
+                                contentDescription = "Icon Date"
+                            )
+                        }
+                    },
+                    modifier = Modifier.width(190.dp)
+                )
+
+                if (expandedDate) {
+                    DatePickerDialog(
+                        onDismissRequest = { expandedDate = false },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    val selectedDay = datePickerState.selectedDateMillis
+                                    if (selectedDay != null) {
+                                        // Convertir a Calendar para manipular fácilmente
+                                        val calendar = Calendar.getInstance()
+                                        calendar.timeInMillis = selectedDay
+                                        // Añadir un día
+                                        calendar.add(Calendar.DAY_OF_MONTH, 1)
+                                        // Asignar la nueva fecha
+                                        //                                    dateEvent = calendar.time
+                                        dateEvent = java.sql.Date(calendar.getTime().getTime());
+                                    }
+                                    expandedDate = false
+                                }
+                            ) {
+                                Text(text = stringResource(id = R.string.ok))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { expandedDate = false }) {
+                                Text(text = stringResource(id = R.string.cancel))
+                            }
+                        }
+                    ) {
+                        DatePicker(state = datePickerState)
+                    }
+                }
+            }
             Spacer(modifier = Modifier.height(16.dp))
 
             // Hora del evento
-            OutlinedTextField(
-                value = timeEvent?.toString() ?: "",
-                onValueChange = {},
-                readOnly = true,
-                placeholder = { Text(text = "Hora") },
-                trailingIcon = {
-                    IconButton(onClick = {
-                        // Mostrar TimePickerDialog para seleccionar la hora
-                        val timePickerDialog = TimePickerDialog(
-                            context,
-                            { _, hourOfDay, minute ->
-                                timeEvent = LocalTime.of(hourOfDay, minute)
-                            },
-                            timeEvent?.hour ?: 0, // Hora por defecto
-                            timeEvent?.minute ?: 0, // Minutos por defecto
-                            true
-                        )
-                        timePickerDialog.show()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Timer,
-                            contentDescription = "Icon Time"
-                        )
-                    }
-                },
-                modifier = Modifier.width(190.dp)
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(id = R.string.hour),
+                    color = Color.Black,
+                    fontSize = 20.sp
+                )
 
+                Spacer(modifier = Modifier.width(50.dp))
+                OutlinedTextField(
+                    value = timeEvent?.toString() ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    placeholder = { Text(text = stringResource(id = R.string.hour)) },
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            // Mostrar TimePickerDialog para seleccionar la hora
+                            val timePickerDialog = TimePickerDialog(
+                                context,
+                                { _, hourOfDay, minute ->
+                                    timeEvent = LocalTime.of(hourOfDay, minute)
+                                },
+                                timeEvent?.hour ?: 0, // Hora por defecto
+                                timeEvent?.minute ?: 0, // Minutos por defecto
+                                true
+                            )
+                            timePickerDialog.show()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Rounded.Timer,
+                                contentDescription = "Icon Time"
+                            )
+                        }
+                    },
+                    modifier = Modifier.width(190.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(50.dp))
+            Text(
+                text = stringResource(id = R.string.location),
+                color = Color.Black,
+                fontSize = 20.sp
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
             // Campo para seleccionar cuántas localidades se quieren
@@ -308,7 +488,7 @@ fun AddEvent(onBack: () -> Unit) {
 
             // Componente dinámico que se genera según el número de localidades seleccionadas
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(0.95f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 for (i in 0 until numberOfLocations) {
@@ -327,11 +507,14 @@ fun AddEvent(onBack: () -> Unit) {
 
             // Botón para guardar el evento
             Button(onClick = {
+                if (!areFieldsNotEmpty(name, address, city, description, type, poster, locationImage,   dateEvent, timeEvent)) {
+                    Toast.makeText(context, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
                 if(type.equals("Select a Value")){
                     Toast.makeText(context, "Seleccione un tipo de evento", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
-                eventViewModel.logAllEvents()
                 val eventCode = eventViewModel.generateRandomCode(6);
                 val locations = mutableListOf<Location>()
 
@@ -339,7 +522,7 @@ fun AddEvent(onBack: () -> Unit) {
                     if (locationNames[i].isNotEmpty() && locationPrices[i].isNotEmpty() && locationMaxCapacity[i].isNotEmpty()) {
                         // Agregar la localidad a la lista solo si todos los campos no están vacíos
                         val location = Location(
-                            id = eventViewModel.generateRandomCode(5), // Generar un ID único para la ubicación
+                            id = "",
                             name = locationNames[i],
                             price = locationPrices[i].toFloat(),
                             eventCode = eventCode,
@@ -351,9 +534,11 @@ fun AddEvent(onBack: () -> Unit) {
                         locations.add(location)
                     }
                 }
+                val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+                val timeString = timeEvent?.format(timeFormatter) ?: LocalTime.now().format(timeFormatter)
                 val newEvent = dateEvent?.let {
                     Event(
-                        id = eventViewModel.generateRandomId(7),
+                        id = "",
                         code = eventCode ,
                         name = name,
                         place = address,
@@ -362,9 +547,9 @@ fun AddEvent(onBack: () -> Unit) {
                         type = type,
                         poster = poster,
                         locationImage = locationImage,
-                        locations = locations.map { it.id },
+                        //locations = locations.map { it.id },
                         dateEvent = it,
-                        time = timeEvent ?: LocalTime.now(), // Hora del evento
+                        time = timeString, // Hora del evento
                         isActive = isActive
                     )
                 }
@@ -395,14 +580,17 @@ fun AddEvent(onBack: () -> Unit) {
                     locationNames.add("")
                     locationPrices.add("")
                     locationMaxCapacity.add("")
-                    eventViewModel.logAllEvents()
+                    onNavegateToHome("Admin")
+
+
+
                 } else {
                     Toast.makeText(context, "Por favor selecciona una fecha", Toast.LENGTH_SHORT).show()
                 }
             }) {
                 Text(stringResource(id = R.string.labelCreateLocation))
             }
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             // Botón para cancelar la edición
             Button(onClick = onBack, colors = ButtonDefaults.buttonColors(
@@ -415,3 +603,26 @@ fun AddEvent(onBack: () -> Unit) {
         }
     }
 }
+
+fun areFieldsNotEmpty(
+    name: String,
+    address: String,
+    city: String,
+    description: String,
+    type: String,
+    poster: String,
+    locationImage: String,
+    dateEvent: Date?,
+    timeEvent: LocalTime?
+): Boolean {
+    return name.isNotEmpty() &&
+            address.isNotEmpty() &&
+            city.isNotEmpty() &&
+            description.isNotEmpty() &&
+            type.isNotEmpty() &&
+            poster.isNotEmpty() &&
+            locationImage.isNotEmpty() &&
+            dateEvent != null &&
+            timeEvent != null
+}
+

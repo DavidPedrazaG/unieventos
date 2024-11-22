@@ -1,7 +1,8 @@
 package eam.edu.unieventos.model
 
 public data class Cart (
-    val id : String,
-    val clientId: String,
-    var items:MutableList<String> = mutableListOf()
+    var id : String = "",
+    var clientId: String = "",
+    var total: Float = 0f
+    //var items:MutableList<String> = mutableListOf()
 )

@@ -52,7 +52,7 @@ fun RegisterScreen(
     val clientViewModel: ClientsViewModel = remember { ClientsViewModel(context) }
 
     var showAlert by remember { mutableStateOf(false) }
-
+    var showSuccessDialog by remember { mutableStateOf(false) }
     var existingClient: Client? by remember { mutableStateOf(null) }
 
     Box(
@@ -141,7 +141,7 @@ fun RegisterScreen(
                             purchaseHistory = emptyList(),
                             friends = emptyList(),
                             notifications = emptyList(),
-                            cartId = null,
+                            cartId = "",
                             id = id,
                             idCard = idCard,
                             name = name,
@@ -155,6 +155,7 @@ fun RegisterScreen(
                             isValidated = isValidated
                         )
                         clientViewModel.createUser(newClient)
+                        showSuccessDialog = true
                         onNavigateToLogin()
                     }
                 },
@@ -188,8 +189,8 @@ fun RegisterScreen(
     if (showAlert && existingClient != null) {
         AlertDialog(
             onDismissRequest = { showAlert = false },
-            title = { Text("Usuario existente") },
-            text = { Text("Se ha encontrado un usuario con el mismo correo. ¿Deseas reactivar la cuenta o crear una nueva?") },
+            title = { Text(text = stringResource(id = R.string.existing_user))},
+            text = { Text(text = stringResource(id = R.string.found_user))},
             confirmButton = {
                 Button(
                     onClick = {
@@ -201,7 +202,7 @@ fun RegisterScreen(
                         onNavigateToLogin()
                     }
                 ) {
-                    Text("Reactivar")
+                    Text(text = stringResource(id = R.string.reactivate))
                 }
             },
             dismissButton = {
@@ -213,7 +214,7 @@ fun RegisterScreen(
                             purchaseHistory = emptyList(),
                             friends = emptyList(),
                             notifications = emptyList(),
-                            cartId = null,
+                            cartId = "",
                             id = id,
                             idCard = idCard,
                             name = name,
@@ -231,9 +232,26 @@ fun RegisterScreen(
                         onNavigateToLogin()
                     }
                 ) {
-                    Text("Crear nueva")
+                    Text(text = stringResource(id = R.string.create_new))
                 }
             }
+        )
+    }
+
+    if(showSuccessDialog){
+        AlertDialog(
+            onDismissRequest = {showSuccessDialog = false},
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showSuccessDialog = false
+                        onNavigateToLogin()
+                    }
+                ) {
+                    Text(text = stringResource(id = R.string.ok))
+                }
+            },
+            text = { Text(text = stringResource(id = R.string.successful_registration))}
         )
     }
 }
